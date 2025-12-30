@@ -154,11 +154,24 @@ export default function FundsPage() {
                 </div>
 
                 <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8 backdrop-blur-sm flex flex-col justify-center shadow-xl">
-                    <div className="flex items-center gap-3 text-slate-300 mb-1">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="font-mono text-sm opacity-60">
-                            {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connecting...'}
-                        </span>
+                    <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-3 text-slate-300">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="font-mono text-sm opacity-60">
+                                {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connecting...'}
+                            </span>
+                        </div>
+                        {address && (
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(address);
+                                    alert('Address copied to clipboard!');
+                                }}
+                                className="text-[10px] font-bold text-emerald-500 hover:text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md transition-colors"
+                            >
+                                COPY FULL
+                            </button>
+                        )}
                     </div>
                     <p className="text-slate-400 text-sm">Privy Secure Embedded Wallet</p>
                 </div>
