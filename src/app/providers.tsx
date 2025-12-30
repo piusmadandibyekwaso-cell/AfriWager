@@ -2,14 +2,13 @@
 
 import * as React from 'react';
 import { PrivyProvider } from '@privy-io/react-auth';
-import { WagmiProvider, createConfig, http } from 'wagmi';
+import { createConfig, http } from 'wagmi';
 import { sepolia, mainnet, polygon } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createConfig as createPrivyConfig } from '@privy-io/wagmi';
+import { WagmiProvider } from '@privy-io/wagmi';
 
 const queryClient = new QueryClient();
 
-// Wagmi config for Privy
 const wagmiConfig = createConfig({
     chains: [sepolia, mainnet, polygon],
     transports: {
@@ -26,13 +25,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <PrivyProvider
             appId={appId}
             config={{
-                // Customize Privy's appearance in your dashboard
                 appearance: {
                     theme: 'dark',
-                    accentColor: '#10b981', // emerald-500
+                    accentColor: '#10b981',
                     showWalletLoginFirst: false,
                 },
-                // Create embedded wallets for users who login with email or social
                 embeddedWallets: {
                     ethereum: {
                         createOnLogin: 'users-without-wallets',
@@ -43,11 +40,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 supportedChains: [sepolia, mainnet, polygon],
             }}
         >
-            <WagmiProvider config={wagmiConfig}>
-                <QueryClientProvider client={queryClient}>
+            <QueryClientProvider client={queryClient}>
+                <WagmiProvider config={wagmiConfig}>
                     {children}
-                </QueryClientProvider>
-            </WagmiProvider>
+                </WagmiProvider>
+            </QueryClientProvider>
         </PrivyProvider>
     );
 }
