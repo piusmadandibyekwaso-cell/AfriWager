@@ -10,9 +10,10 @@ import { CONTRACT_ADDRESSES } from '@/constants/contracts';
 import FPMMABI from '@/abis/FixedProductMarketMaker.json';
 import USDCABI from '@/abis/MockERC20.json';
 import { usePrivy } from '@privy-io/react-auth';
-import { TrendingUp, TrendingDown, Info, ShieldCheck, ArrowRight, Loader2, AlertCircle, CheckCircle2, Wallet, ExternalLink } from 'lucide-react';
+import { TrendingUp, TrendingDown, Info, ShieldCheck, ArrowRight, Loader2, AlertCircle, CheckCircle2, Wallet, ExternalLink, Activity, BarChart3, Droplets } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import PriceChart from '@/components/PriceChart';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -30,11 +31,24 @@ export default function MarketPage() {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [tradeStep, setTradeStep] = useState<'idle' | 'approving' | 'buying' | 'success' | 'failed'>('idle');
     const [lastTxHash, setLastTxHash] = useState<string | null>(null);
+    const [chartData, setChartData] = useState<any[]>([]);
 
-    // 1. Fetch Market Data from Supabase
+    // 1. Fetch Market Data & Trade History
     useEffect(() => {
         if (id) {
             marketService.getMarketById(id).then(setMarket);
+            marketService.getTradeHistory(id).then(trades => {
+                const formatted = trades.map((t: any) => ({
+                    time: new Date(t.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    price: t.outcome_index === 0 ? Number(t.usdc_amount) / Number(t.share_amount) : 1 - (Number(t.usdc_amount) / Number(t.share_amount))
+                }));
+                // If no trades, add a starting point
+                if (formatted.length === 0) {
+                    setChartData([{ time: 'Start', price: 0.5 }]);
+                } else {
+                    setChartData(formatted);
+                }
+            });
         }
     }, [id]);
 
@@ -141,14 +155,49 @@ export default function MarketPage() {
                         {/* Market Metadata Tabs */}
                         <div className="bg-zinc-900/20 border border-zinc-800/50 rounded-3xl p-8 backdrop-blur-xl">
                             <div className="flex items-center gap-6 mb-8 border-b border-zinc-800/50 pb-6 text-xs font-black tracking-widest uppercase text-zinc-500">
-                                <button className="text-emerald-500 border-b-2 border-emerald-500 pb-6 -mb-[26px]">Order Book</button>
+                                <button className="text-emerald-500 border-b-2 border-emerald-500 pb-6 -mb-[26px]">Market Odds</button>
+                                <button className="hover:text-white transition-colors">Order Book</button>
                                 <button className="hover:text-white transition-colors">Positions</button>
-                                <button className="hover:text-white transition-colors">Activity</button>
                             </div>
 
-                            <div className="py-12 text-center">
-                                <TrendingUp className="w-12 h-12 text-zinc-800 mx-auto mb-4" />
-                                <p className="text-zinc-600 font-bold uppercase tracking-widest text-[10px]">Real-time liquidity charts coming soon...</p>
+                            <div className="py-8">
+                                <div className="flex items-baseline justify-between mb-8">
+                                    <div className="flex items-center gap-2">
+                                        <Activity className="w-4 h-4 text-emerald-500" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Probability Flux</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        {['1D', '1W', '1M', 'ALL'].map(t => (
+                                            <button key={t} className="px-3 py-1 bg-zinc-900 rounded-lg text-[9px] font-black text-zinc-600 hover:text-white transition-colors">{t}</button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <PriceChart data={chartData} />
+
+                                {/* Market Stats Bar */}
+                                <div className="grid grid-cols-3 gap-6 mt-12 pt-12 border-t border-zinc-800/50">
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2 text-zinc-600">
+                                            <BarChart3 className="w-3.5 h-3.5" />
+                                            <span className="text-[9px] font-black uppercase tracking-widest">Total Volume</span>
+                                        </div>
+                                        <p className="text-xl font-black text-white italic tracking-tighter">${market.total_volume_usdc.toLocaleString()}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2 text-zinc-600">
+                                            <Droplets className="w-3.5 h-3.5" />
+                                            <span className="text-[9px] font-black uppercase tracking-widest">Liquidity</span>
+                                        </div>
+                                        <p className="text-xl font-black text-white italic tracking-tighter">$124.5K</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2 text-zinc-600">
+                                            <Info className="w-3.5 h-3.5" />
+                                            <span className="text-[9px] font-black uppercase tracking-widest">24h Change</span>
+                                        </div>
+                                        <p className="text-xl font-black text-emerald-500 italic tracking-tighter">+4.2%</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

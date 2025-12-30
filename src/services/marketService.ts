@@ -46,5 +46,21 @@ export const marketService = {
         }
 
         return data as Market;
+    },
+
+    // Fetch trade history for charts
+    async getTradeHistory(marketId: string) {
+        const { data, error } = await supabase
+            .from('trades')
+            .select('*')
+            .eq('market_id', marketId)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('Error fetching trade history:', error);
+            return [];
+        }
+
+        return data;
     }
 };
