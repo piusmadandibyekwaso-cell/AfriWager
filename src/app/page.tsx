@@ -1,8 +1,28 @@
+'use client';
 import Navbar from "@/components/Navbar";
-import MarketCard from "@/components/MarketCard";
-import { ArrowRight, TrendingUp, Shield, Globe } from "lucide-react";
+import { ArrowRight, TrendingUp, Shield, Globe, Clock, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { marketService, Market } from "@/services/marketService";
+import Link from "next/link";
 
 export default function Home() {
+  const [markets, setMarkets] = useState<Market[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchMarkets() {
+      try {
+        const data = await marketService.getMarkets();
+        setMarkets(data);
+      } catch (error) {
+        console.error("Failed to load markets", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchMarkets();
+  }, []);
+
   return (
     <div className="min-h-screen bg-black text-white selection:bg-emerald-500/30">
       <Navbar />
@@ -68,44 +88,57 @@ export default function Home() {
             </a>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <MarketCard
-              title="Will Nigeria win the next AFCON?"
-              category="Sports"
-              volume="$1.2M"
-              chance={65}
-            />
-            <MarketCard
-              title="Bitcoin to hit $100k before 2025?"
-              category="Crypto"
-              volume="$4.5M"
-              chance={32}
-            />
-            <MarketCard
-              title="Ghana GDP growth > 5% in 2024?"
-              category="Economics"
-              volume="$890K"
-              chance={45}
-            />
-            <MarketCard
-              title="Music Award: Burna Boy to win Grammy?"
-              category="Pop Culture"
-              volume="$2.1M"
-              chance={78}
-            />
-            <MarketCard
-              title="Tech: Starlink expansion to 10 more countries?"
-              category="Technology"
-              volume="$650K"
-              chance={92}
-            />
-            <MarketCard
-              title="Election: Ruling party to retain seat?"
-              category="Politics"
-              volume="$3.4M"
-              chance={50}
-            />
-          </div>
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {markets.map((market) => (
+                <div key={market.id} className="flex flex-col bg-[#111111] rounded-2xl overflow-hidden border border-gray-800 hover:border-gray-700 transition-all hover:-translate-y-1">
+                  <div className="h-48 w-full relative">
+                    <img
+                      src={market.image_url}
+                      alt={market.question}
+                      className="w-full h-full object-cover opacity-80"
+                    />
+                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium text-white border border-white/10">
+                      {market.category}
+                    </div>
+                  </div>
+                  <div className="flex-1 p-6 flex flex-col">
+                    <h3 className="text-xl font-semibold leading-7 text-white mb-2">
+                      <Link href={`/markets/${market.id}`}>
+                        <span className="absolute inset-0" />
+                        {market.question}
+                      </Link>
+                    </h3>
+                    <p className="mt-2 text-sm text-gray-400 line-clamp-2">
+                      {market.description}
+                    </p>
+                    <div className="mt-6 flex items-center gap-4 text-xs text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        <span>${market.total_volume_usdc.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        <span>Ends {new Date(market.end_date).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <div className="mt-6 grid grid-cols-2 gap-3">
+                      <button className="bg-[#1A2C2C] hover:bg-[#1f3838] text-emerald-500 py-2 rounded-lg font-medium transition-colors border border-emerald-500/10">
+                        Yes 50¢
+                      </button>
+                      <button className="bg-[#2C1A1A] hover:bg-[#381f1f] text-red-500 py-2 rounded-lg font-medium transition-colors border border-red-500/10">
+                        No 50¢
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Features Grid */}
