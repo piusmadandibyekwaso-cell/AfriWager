@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { LogOut, User } from 'lucide-react';
 import { usePrivy } from '@privy-io/react-auth';
 
@@ -19,8 +20,11 @@ export default function Navbar() {
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Markets</a>
-            <a href="#" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Activity</a>
+            <Link href="/markets" className="text-slate-300 hover:text-white transition-colors">Markets</Link>
+            {authenticated && (
+              <Link href="/funds" className="text-slate-300 hover:text-white transition-colors">Wallet</Link>
+            )}
+            <Link href="#" className="text-slate-300 hover:text-white transition-colors">Activity</Link>
             <a href="#" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Ranks</a>
             <a href="#" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Learn</a>
           </div>
