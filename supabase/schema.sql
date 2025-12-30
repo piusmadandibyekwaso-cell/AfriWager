@@ -16,6 +16,7 @@ create table public.users (
 create table public.markets (
   id uuid primary key default uuid_generate_v4(),
   condition_id text unique not null, -- On-chain ID
+  contract_address text, -- Address of the FixedProductMarketMaker
   question text not null,
   description text,
   category text not null, -- 'Politics', 'Sports', 'Crypto', 'Pop Culture'

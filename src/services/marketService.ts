@@ -8,6 +8,7 @@ export interface Market {
     description: string;
     category: string;
     outcome_tokens: string[];
+    contract_address: string;
     image_url: string;
     end_date: string;
     status: 'OPEN' | 'RESOLVED' | 'PAUSED';
