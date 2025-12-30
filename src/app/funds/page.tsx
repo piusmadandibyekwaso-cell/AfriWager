@@ -149,6 +149,15 @@ export default function FundsPage() {
         }, 3000);
     };
 
+    const resetDeposit = () => {
+        setIsDepositModalOpen(false);
+        setDepositStep('selection');
+        setCardNumber('');
+        setCardExpiry('');
+        setCardCVV('');
+        setCardName('');
+    };
+
     const handleWithdraw = (e: React.FormEvent) => {
         e.preventDefault();
         if (!withdrawAddress || !withdrawAmount) return;
