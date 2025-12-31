@@ -200,9 +200,11 @@ export default function FundsPage() {
 
         // Use Privy (MoonPay)
         try {
+            console.log('Initiating Privy Funding for:', address);
             await fundWallet({ address, options: { chain: sepolia, amount: depositAmount } });
-        } catch (err) {
+        } catch (err: any) {
             console.error('Privy Funding Error:', err);
+            alert(`Funding Failed: ${err.message || JSON.stringify(err)}`);
         }
     };
 
