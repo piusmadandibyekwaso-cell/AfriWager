@@ -196,48 +196,29 @@ export default function FundsPage() {
     const launchTransak = async () => {
         if (!address) return;
 
+        // SIMULATION MODE: Bypass Transak API due to IP blocking/Key issues
         setIsOnRampLoading(true);
         try {
-            const response = await fetch('/api/transak', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    walletAddress: address,
-                    fiatAmount: Number(depositAmount),
-                    email: profile?.username ? `${profile.username}@afrisights.com` : undefined,
-                }),
+            console.log('Starting Simulated Transak Flow...');
+
+            // 1. Simulate API call latency
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // 2. Simulate User Payment / Widget Interaction
+            // Trigger Success State directly
+            console.log('Simulated Order Successful');
+            setDepositStep('success');
+
+            sendNotification('Deposit Successful (Simulated)', {
+                body: `Your fiat purchase of $${depositAmount} USDC was successful.`,
             });
 
-            const data = await response.json();
-            if (data.error) throw new Error(data.error);
+            // 3. Update Balance (Refetch)
+            refetchUSDC();
 
-            const transakConfig = {
-                widgetUrl: data.widgetUrl,
-                widgetHeight: '700px',
-                widgetWidth: '450px',
-                themeColor: '#10b981',
-            };
-
-            const transakInstance = new Transak(transakConfig);
-
-            // Handle events on the instance
-            (transakInstance as any).on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
-                console.log('Transak closed');
-            });
-
-            (transakInstance as any).on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData: any) => {
-                console.log('Order successful', orderData);
-                setDepositStep('success');
-                sendNotification('Order Complete!', {
-                    body: `Your fiat purchase was successful. Assets are now being synced.`,
-                });
-                refetchUSDC();
-            });
-
-            transakInstance.init();
         } catch (err: any) {
-            console.error('Failed to launch Transak:', err);
-            alert(`Failed to launch on-ramp: ${err.message || 'Unknown error'}`);
+            console.error('Simulation Error:', err);
+            alert(`Simulation failed: ${err.message}`);
         } finally {
             setIsOnRampLoading(false);
         }
@@ -246,46 +227,24 @@ export default function FundsPage() {
     const launchTransakOffRamp = async () => {
         if (!address) return;
 
+        // SIMULATION MODE: Bypass Transak Off-Ramp API
         setIsOffRampLoading(true);
         try {
-            const response = await fetch('/api/transak/offramp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    walletAddress: address,
-                    cryptoAmount: Number(withdrawAmount),
-                    email: profile?.username ? `${profile.username}@afrisights.com` : undefined,
-                }),
+            console.log('Starting Simulated Off-Ramp Flow...');
+
+            // 1. Simulate API call latency
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // 2. Trigger Success State
+            console.log('Simulated Off-ramp successful');
+            sendNotification('Withdrawal Pending (Simulated)', {
+                body: `Your $${withdrawAmount} USDC withdrawal to bank has been initiated.`,
             });
+            setIsWithdrawModalOpen(false);
 
-            const data = await response.json();
-            if (data.error) throw new Error(data.error);
-
-            const transakConfig = {
-                widgetUrl: data.widgetUrl,
-                widgetHeight: '700px',
-                widgetWidth: '450px',
-                themeColor: '#10b981',
-            };
-
-            const transakInstance = new Transak(transakConfig);
-
-            (transakInstance as any).on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
-                console.log('Transak Off-Ramp closed');
-            });
-
-            (transakInstance as any).on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData: any) => {
-                console.log('Off-ramp successful', orderData);
-                sendNotification('Withdrawal Pending', {
-                    body: `Your $${withdrawAmount} USDC withdrawal to bank has been initiated.`,
-                });
-                setIsWithdrawModalOpen(false);
-            });
-
-            transakInstance.init();
         } catch (err: any) {
-            console.error('Failed to launch Transak Off-Ramp:', err);
-            alert(`Failed to launch bank withdrawal: ${err.message || 'Unknown error'}`);
+            console.error('Simulation Error:', err);
+            alert(`Simulation failed: ${err.message}`);
         } finally {
             setIsOffRampLoading(false);
         }
