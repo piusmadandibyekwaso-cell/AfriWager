@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useBalance, useReadContracts } from 'wagmi';
+import { sepolia } from 'wagmi/chains';
 import { parseUnits, formatUnits, keccak256, encodePacked } from 'viem';
 import { CONTRACT_ADDRESSES } from '@/constants/contracts';
 import MockUSDCABI from '@/abis/MockERC20.json';
@@ -47,7 +48,7 @@ interface PositionItem {
 
 export default function FundsPage() {
     const { address } = useAccount();
-    const { authenticated, login } = usePrivy();
+    const { authenticated, login, fundWallet } = usePrivy() as any;
     const { sendNotification } = useNotifications();
     const { profile, isLoading: isProfileLoading, refreshProfile } = useUserProfile();
 
@@ -193,34 +194,14 @@ export default function FundsPage() {
         }, 2000);
     };
 
-    const launchTransak = async () => {
+    const launchOnRamp = async () => {
         if (!address) return;
 
-        // SIMULATION MODE: Bypass Transak API due to IP blocking/Key issues
-        setIsOnRampLoading(true);
+        // Use Privy (MoonPay)
         try {
-            console.log('Starting Simulated Transak Flow...');
-
-            // 1. Simulate API call latency
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            // 2. Simulate User Payment / Widget Interaction
-            // Trigger Success State directly
-            console.log('Simulated Order Successful');
-            setDepositStep('success');
-
-            sendNotification('Deposit Successful (Simulated)', {
-                body: `Your fiat purchase of $${depositAmount} USDC was successful.`,
-            });
-
-            // 3. Update Balance (Refetch)
-            refetchUSDC();
-
-        } catch (err: any) {
-            console.error('Simulation Error:', err);
-            alert(`Simulation failed: ${err.message}`);
-        } finally {
-            setIsOnRampLoading(false);
+            await fundWallet(address, { chain: sepolia, amount: depositAmount });
+        } catch (err) {
+            console.error('Privy Funding Error:', err);
         }
     };
 
@@ -518,7 +499,7 @@ export default function FundsPage() {
 
                                     <div className="space-y-4">
                                         <button
-                                            onClick={launchTransak}
+                                            onClick={launchOnRamp}
                                             disabled={isOnRampLoading}
                                             className={cn(
                                                 "flex items-center justify-between p-7 w-full rounded-[2rem] border-2 border-emerald-500/50 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all outline-none group",
