@@ -62,5 +62,32 @@ export const marketService = {
         }
 
         return data;
+    },
+
+    // Global Platform Stats
+    async getPlatformStats() {
+        // 1. Total Volume (Sum of all markets)
+        const { data: markets, error: marketError } = await supabase
+            .from('markets')
+            .select('total_volume_usdc');
+
+        const totalVolume = markets?.reduce((acc, m) => acc + (m.total_volume_usdc || 0), 0) || 0;
+
+        // 2. Active Traders (Count unique users in trades)
+        // Note: In a real large-scale app, this should be an RPC or cached value.
+        // For now, we'll estimate based on trade count or fetch unique signers if efficient.
+        const { count, error: tradeError } = await supabase
+            .from('trades')
+            .select('*', { count: 'exact', head: true }); // Head=true for faster counting
+
+        // We'll use trade count as a proxy for "Active Activity" for now if unique user count is too heavy
+        // Or if we want unique users:
+        // const { data: uniqueTraders } = await supabase.rpc('count_unique_traders');
+
+        return {
+            totalVolume,
+            activeTraders: count || 0, // Using transaction count as "Active Activity" for speed, or placeholder
+            payoutSpeed: 'Instant'
+        };
     }
 };

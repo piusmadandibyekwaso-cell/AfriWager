@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Activity, ArrowDownCircle, ArrowUpCircle, ExternalLink, User, Layers, ArrowRight, Zap, Globe } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
@@ -93,12 +94,12 @@ export default function ActivityPage() {
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-16">
                         <div>
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-[9px] font-black text-emerald-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                                <a href="#feed" className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-[9px] font-black text-emerald-500 uppercase tracking-[0.2em] flex items-center gap-2 hover:bg-emerald-500/20 transition-all cursor-pointer">
                                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> Live Pulse
-                                </div>
-                                <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                                </a>
+                                <Link href="/ranks" className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 hover:bg-white/10 hover:text-white transition-all cursor-pointer">
                                     <Globe className="w-3 h-3" /> Platform Momentum
-                                </div>
+                                </Link>
                             </div>
                             <h1 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter">Global Activity</h1>
                         </div>

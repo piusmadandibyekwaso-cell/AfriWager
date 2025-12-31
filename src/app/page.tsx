@@ -1,6 +1,7 @@
 'use client';
 import Navbar from "@/components/Navbar";
 import { ArrowRight, TrendingUp, Shield, Globe, Clock, Users } from "lucide-react";
+import StatsSection from "@/components/StatsSection";
 import { useEffect, useState } from "react";
 import { marketService, Market } from "@/services/marketService";
 import Link from "next/link";
@@ -59,33 +60,13 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="mt-20 border-y border-white/5 bg-white/[0.02]">
-          <div className="mx-auto max-w-7xl px-6 py-12">
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 text-center">
-              <div>
-                <div className="text-3xl font-bold text-white mb-1">$12M+</div>
-                <div className="text-sm text-zinc-500">Total Volume</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-white mb-1">50K+</div>
-                <div className="text-sm text-zinc-500">Active Traders</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-white mb-1">Instant</div>
-                <div className="text-sm text-zinc-500">Payout Speed</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Featured Markets */}
-        <section className="mx-auto max-w-7xl px-6 py-24">
-          <div className="flex items-center justify-between mb-12">
+        {/* Trending Markets (Moved Up) */}
+        <section className="mx-auto max-w-7xl px-6 py-12">
+          <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold text-white">Trending Markets</h2>
-            <a href="#" className="text-sm font-medium text-emerald-400 hover:text-emerald-300 flex items-center gap-1">
+            <Link href="/markets" className="text-sm font-medium text-emerald-400 hover:text-emerald-300 flex items-center gap-1">
               View all <ArrowRight className="h-4 w-4" />
-            </a>
+            </Link>
           </div>
 
           {loading ? (
@@ -94,13 +75,13 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {markets.map((market) => (
-                <div key={market.id} className="flex flex-col bg-[#111111] rounded-2xl overflow-hidden border border-gray-800 hover:border-gray-700 transition-all hover:-translate-y-1">
+              {markets.slice(0, 3).map((market) => (
+                <div key={market.id} className="flex flex-col bg-[#111111] rounded-2xl overflow-hidden border border-gray-800 hover:border-gray-700 transition-all hover:-translate-y-1 group">
                   <div className="h-48 w-full relative">
                     <img
                       src={market.image_url}
                       alt={market.question}
-                      className="w-full h-full object-cover opacity-80"
+                      className="w-full h-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-105"
                     />
                     <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium text-white border border-white/10">
                       {market.category}
@@ -116,30 +97,15 @@ export default function Home() {
                     <p className="mt-2 text-sm text-gray-400 line-clamp-2">
                       {market.description}
                     </p>
-                    <div className="mt-6 flex items-center gap-4 text-xs text-gray-500">
-                      <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        <span>${market.total_volume_usdc.toLocaleString()}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>Ends {new Date(market.end_date).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                    <div className="mt-6 grid grid-cols-2 gap-3">
-                      <button className="bg-[#1A2C2C] hover:bg-[#1f3838] text-emerald-500 py-2 rounded-lg font-medium transition-colors border border-emerald-500/10">
-                        Yes 50¢
-                      </button>
-                      <button className="bg-[#2C1A1A] hover:bg-[#381f1f] text-red-500 py-2 rounded-lg font-medium transition-colors border border-red-500/10">
-                        No 50¢
-                      </button>
-                    </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
         </section>
+
+        {/* Dynamic Stats Section (Moved Down) */}
+        <StatsSection />
 
         {/* Features Grid */}
         <section className="mx-auto max-w-7xl px-6 py-24 border-t border-white/10">

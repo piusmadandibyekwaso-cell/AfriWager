@@ -52,6 +52,7 @@ export default function FundsPage() {
     const [withdrawAddress, setWithdrawAddress] = useState('');
     const [withdrawAmount, setWithdrawAmount] = useState('');
     const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
+    const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
     const [depositStep, setDepositStep] = useState<DepositStep>('selection');
     const [depositMethod, setDepositMethod] = useState<DepositMethod>('card');
     const [depositAmount, setDepositAmount] = useState('1000');
@@ -258,8 +259,10 @@ export default function FundsPage() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-16">
                 <div>
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-[9px] font-black text-emerald-500 uppercase tracking-[0.2em]">Live Portfolio</div>
-                        <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Sepolia Network</div>
+                        <a href="/activity" className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-[9px] font-black text-emerald-500 uppercase tracking-[0.2em] hover:bg-emerald-500/20 transition-colors">Live Portfolio</a>
+                        <a href="https://sepolia.etherscan.io" target="_blank" rel="noreferrer" className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] hover:bg-white/10 hover:text-white transition-colors flex items-center gap-1">
+                            Sepolia Network <ExternalLink className="w-2 h-2" />
+                        </a>
                     </div>
                     <h1 className="text-5xl font-black text-white italic tracking-tighter">Financial Center</h1>
                 </div>
@@ -305,7 +308,13 @@ export default function FundsPage() {
                                 <p className="text-slate-600 text-[9px] uppercase font-black mb-2 tracking-widest">Equity Value</p>
                                 <p className="text-3xl font-black text-emerald-500 tracking-tighter">${totalEquityValue.toFixed(2)}</p>
                             </div>
-                            <div className="lg:col-span-2 flex justify-end items-center">
+                            <div className="lg:col-span-2 flex justify-end items-center gap-4">
+                                <button
+                                    onClick={() => setIsWithdrawModalOpen(true)}
+                                    className="px-8 py-5 bg-slate-800 hover:bg-slate-700 text-white font-black rounded-3xl transition-all shadow-xl shadow-black/20 uppercase tracking-widest text-[11px] active:scale-95"
+                                >
+                                    Withdraw
+                                </button>
                                 <button
                                     onClick={() => setIsDepositModalOpen(true)}
                                     className="px-10 py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-3xl transition-all shadow-2xl shadow-indigo-600/20 uppercase tracking-widest text-[11px] active:scale-95"
@@ -595,6 +604,63 @@ export default function FundsPage() {
                 </div>
             )
             }
+            {/* WITHDRAW MODAL */}
+            {isWithdrawModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-3xl animate-in fade-in duration-300">
+                    <div className="bg-[#0c0e14] border border-white/5 w-full max-w-sm rounded-[4rem] shadow-4xl overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-10 pb-4 flex items-center justify-between border-b border-white/5">
+                            <h3 className="text-xl font-black tracking-tighter uppercase italic flex items-center gap-4">
+                                <ArrowUpCircle className="w-6 h-6 text-indigo-500" /> Withdraw
+                            </h3>
+                            <button onClick={() => setIsWithdrawModalOpen(false)} className="p-3 hover:bg-slate-900 rounded-full text-slate-600">
+                                <AlertCircle className="w-6 h-6 rotate-45" />
+                            </button>
+                        </div>
+
+                        <div className="p-12 space-y-8">
+                            <div>
+                                <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2 block">Recipient Address</label>
+                                <input
+                                    type="text"
+                                    placeholder="0x..."
+                                    value={withdrawAddress}
+                                    onChange={(e) => setWithdrawAddress(e.target.value)}
+                                    className="w-full bg-[#060709] border border-white/5 rounded-2xl p-5 text-white font-mono text-xs outline-none focus:border-indigo-500 transition-all"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2 block">Amount (USDC)</label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        placeholder="0.00"
+                                        value={withdrawAmount}
+                                        onChange={(e) => setWithdrawAmount(e.target.value)}
+                                        className="w-full bg-[#060709] border border-white/5 rounded-2xl p-5 pl-12 text-white font-black text-lg outline-none focus:border-indigo-500 transition-all"
+                                    />
+                                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => {
+                                    writeContract({
+                                        address: CONTRACT_ADDRESSES.usdc as `0x${string}`,
+                                        abi: MockUSDCABI.abi,
+                                        functionName: 'transfer',
+                                        args: [withdrawAddress as `0x${string}`, parseUnits(withdrawAmount || '0', 6)]
+                                    });
+                                    setIsWithdrawModalOpen(false);
+                                }}
+                                disabled={!withdrawAddress || !withdrawAmount}
+                                className="w-full py-6 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-3xl transition-all shadow-2xl shadow-indigo-600/20 active:scale-95 uppercase tracking-widest text-[10px] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Confirm Transfer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 }
