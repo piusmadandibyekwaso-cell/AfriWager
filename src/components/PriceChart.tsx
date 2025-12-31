@@ -38,6 +38,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export default function PriceChart({ data, color = "#10b981" }: PriceChartProps) {
+    if (!data || data.length === 0) {
+        return (
+            <div className="w-full h-[300px] mt-8 flex items-center justify-center bg-zinc-900/30 rounded-xl animate-pulse">
+                <span className="text-zinc-700 text-xs font-bold uppercase tracking-widest">Loading Chart Data...</span>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full h-[300px] mt-8">
             <ResponsiveContainer width="100%" height="100%">
@@ -54,15 +62,15 @@ export default function PriceChart({ data, color = "#10b981" }: PriceChartProps)
                         hide={true}
                     />
                     <YAxis
-                        domain={[0, 1]}
+                        domain={['auto', 'auto']}
                         hide={true}
                     />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#374151', strokeDasharray: '4 4' }} />
                     <Area
                         type="monotone"
                         dataKey="price"
                         stroke={color}
-                        strokeWidth={4}
+                        strokeWidth={3}
                         fillOpacity={1}
                         fill="url(#colorPrice)"
                         animationDuration={1500}
