@@ -1,5 +1,5 @@
 import React from 'react';
-import Avatar, { AvatarProps } from 'boring-avatars';
+import Avatar from 'boring-avatars';
 
 interface CustomAvatarProps {
     name: string;
