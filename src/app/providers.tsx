@@ -38,11 +38,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 loginMethods: ['email', 'wallet', 'google', 'passkey'],
                 defaultChain: sepolia,
                 supportedChains: [sepolia, mainnet, polygon],
-                fundingMethodConfig: {
-                    moonpay: {
-                        useSandbox: true,
-                    },
-                },
             }}
         >
             <QueryClientProvider client={queryClient}>
