@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.afrisights.com'),
   title: "Afrisights - Prediction Markets for Africa",
   description: "Trade on news, politics, sports, and culture with transparent odds.",
   manifest: "/manifest.json",
@@ -21,6 +22,14 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "default",
     title: "AfriSights",
+  },
+  openGraph: {
+    title: "Afrisights - Prediction Markets for Africa",
+    description: "Trade on news, politics, sports, and culture with transparent odds.",
+    url: 'https://www.afrisights.com',
+    siteName: 'Afrisights',
+    locale: 'en_US',
+    type: 'website',
   },
 };
 
