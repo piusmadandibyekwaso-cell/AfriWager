@@ -90,7 +90,7 @@ export default function RanksPage() {
                                 <div className="px-3 py-1 bg-yellow-500/10 border border-yellow-500/30 rounded-full text-[9px] font-black text-yellow-500 uppercase tracking-[0.2em]">Global Leaderboard</div>
                                 <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Updated Real-time</div>
                             </div>
-                            <h1 className="text-6xl font-black text-white italic tracking-tighter">Trader Ranks</h1>
+                            <h1 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter">Trader Ranks</h1>
                         </div>
 
                         <div className="flex gap-8">
@@ -107,7 +107,7 @@ export default function RanksPage() {
 
                     {/* Top 3 Spotlight */}
                     {ranks.length >= 3 && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 px-4 md:px-0">
                             {[1, 0, 2].map(idx => {
                                 const r = ranks[idx];
                                 if (!r) return null;
@@ -147,8 +147,8 @@ export default function RanksPage() {
                     )}
 
                     {/* Table View */}
-                    <div className="bg-[#0c0e12]/50 border border-zinc-800/50 rounded-[3rem] overflow-hidden shadow-3xl">
-                        <table className="w-full text-left">
+                    <div className="bg-[#0c0e12]/50 border border-zinc-800/50 rounded-[2rem] md:rounded-[3rem] overflow-x-auto shadow-3xl">
+                        <table className="w-full text-left min-w-[600px] md:min-w-0">
                             <thead className="border-b border-zinc-800/50">
                                 <tr>
                                     <th className="p-8 text-[9px] font-black text-zinc-600 uppercase tracking-[0.3em]"># Rank</th>

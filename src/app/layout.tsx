@@ -15,9 +15,17 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Afrisights - Prediction Markets for Africa",
   description: "Trade on news, politics, sports, and culture with transparent odds.",
+  manifest: "/manifest.json",
+  themeColor: "#060709",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "AfriSights",
+  },
 };
 
 import { Providers } from "./providers";
+import MobileNavbar from "@/components/MobileNavbar";
 
 export default function RootLayout({
   children,
@@ -27,9 +35,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased selection:bg-emerald-500/30`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <main className="pb-24 md:pb-0">
+            {children}
+          </main>
+          <MobileNavbar />
+        </Providers>
       </body>
     </html>
   );

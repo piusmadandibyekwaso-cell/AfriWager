@@ -100,7 +100,7 @@ export default function ActivityPage() {
                                     <Globe className="w-3 h-3" /> Platform Momentum
                                 </div>
                             </div>
-                            <h1 className="text-6xl font-black text-white italic tracking-tighter">Global Activity</h1>
+                            <h1 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter">Global Activity</h1>
                         </div>
 
                         <div className="text-right">

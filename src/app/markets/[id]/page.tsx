@@ -14,6 +14,7 @@ import { TrendingUp, TrendingDown, Info, ShieldCheck, ArrowRight, Loader2, Alert
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import PriceChart from '@/components/PriceChart';
+import { useNotifications } from '@/hooks/useNotifications';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -24,6 +25,7 @@ export default function MarketPage() {
     const id = params?.id as string;
     const { address } = useAccount();
     const { authenticated, login } = usePrivy();
+    const { sendNotification } = useNotifications();
 
     const [market, setMarket] = useState<Market | null>(null);
     const [investmentAmount, setInvestmentAmount] = useState('10');
@@ -116,6 +118,9 @@ export default function MarketPage() {
 
             setLastTxHash(buyHash);
             setTradeStep('success');
+            sendNotification('Position Opened!', {
+                body: `You successfully wagered $${investmentAmount} on ${market.outcome_tokens[selectedOutcome]}.`,
+            });
             refetchPool();
         } catch (error) {
             console.error('Trade Failed:', error);
@@ -147,8 +152,8 @@ export default function MarketPage() {
                                     <span className="px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black uppercase tracking-widest rounded-full">{market.category}</span>
                                     <span className="px-4 py-1.5 bg-white/5 border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-widest rounded-full backdrop-blur-md">Ends Dec 2024</span>
                                 </div>
-                                <h1 className="text-6xl font-black tracking-tighter leading-none mb-4 max-w-3xl">{market.question}</h1>
-                                <p className="text-white/40 text-lg font-medium max-w-2xl leading-relaxed">{market.description}</p>
+                                <h1 className="text-3xl md:text-6xl font-black tracking-tighter leading-none mb-4 max-w-3xl">{market.question}</h1>
+                                <p className="text-white/40 text-sm md:text-lg font-medium max-w-2xl leading-relaxed">{market.description}</p>
                             </div>
                         </div>
 
@@ -203,8 +208,8 @@ export default function MarketPage() {
                     </div>
 
                     {/* RIGHT: TRADING TERMINAL (4 cols) */}
-                    <div className="lg:col-span-12 xl:col-span-4">
-                        <div className="bg-[#0c0e12] border border-zinc-800/80 rounded-[3rem] p-10 shadow-3xl sticky top-32">
+                    <div className="lg:col-span-12 xl:col-span-4 mt-8 xl:mt-0">
+                        <div className="bg-[#0c0e12] border border-zinc-800/80 rounded-[3rem] p-6 md:p-10 shadow-3xl xl:sticky xl:top-32">
                             <div className="flex items-center justify-between mb-10">
                                 <h2 className="text-2xl font-black italic tracking-tighter uppercase">Terminal</h2>
                                 <div className="flex items-center gap-2 p-1.5 bg-zinc-900 rounded-lg">

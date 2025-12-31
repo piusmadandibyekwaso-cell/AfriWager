@@ -11,12 +11,18 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-yellow-400 to-emerald-500" />
-            <span className="text-xl font-bold tracking-tight text-white">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="relative h-10 w-10 overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all group-hover:scale-110 group-active:scale-95">
+              <img
+                src="/app_icon_512.png"
+                alt="AfriSights Logo"
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <span className="text-xl font-black italic tracking-tighter text-white uppercase group-hover:text-emerald-400 transition-colors">
               AFRISIGHTS
             </span>
-          </div>
+          </Link>
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center gap-8">

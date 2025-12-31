@@ -12,6 +12,8 @@ import { Wallet, ArrowDownCircle, ArrowUpCircle, RefreshCcw, ExternalLink, Credi
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { supabase } from '@/lib/supabase';
+import { Transak } from '@transak/ui-js-sdk';
+import { useNotifications } from '@/hooks/useNotifications';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -44,6 +46,7 @@ interface PositionItem {
 export default function FundsPage() {
     const { address } = useAccount();
     const { authenticated, login } = usePrivy();
+    const { sendNotification } = useNotifications();
 
     // UI State
     const [withdrawAddress, setWithdrawAddress] = useState('');
@@ -53,6 +56,7 @@ export default function FundsPage() {
     const [depositMethod, setDepositMethod] = useState<DepositMethod>('card');
     const [depositAmount, setDepositAmount] = useState('1000');
     const [activeTab, setActiveTab] = useState<'positions' | 'activity'>('positions');
+    const [isOnRampLoading, setIsOnRampLoading] = useState(false);
 
     // Form State
     const [cardNumber, setCardNumber] = useState('');
@@ -160,6 +164,9 @@ export default function FundsPage() {
         if (hash) setDepositStep('processing_chain');
         if (isSuccess) {
             setDepositStep('success');
+            sendNotification('Assets Secured!', {
+                body: `Successfully deposited $${depositAmount} USDC into your secure ledger.`,
+            });
             refetchUSDC();
             refetchETH();
         }
@@ -171,6 +178,55 @@ export default function FundsPage() {
             if (parseFloat(depositAmount) > 10000) setDepositStep('failed');
             else setDepositStep('confirm');
         }, 2000);
+    };
+
+    const launchTransak = async () => {
+        if (!address) return;
+
+        setIsOnRampLoading(true);
+        try {
+            const response = await fetch('/api/transak', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    walletAddress: address,
+                    fiatAmount: Number(depositAmount),
+                }),
+            });
+
+            const { widgetUrl, error } = await response.json();
+            if (error) throw new Error(error);
+
+            const transakConfig = {
+                widgetUrl: widgetUrl,
+                widgetHeight: '700px',
+                widgetWidth: '450px',
+                themeColor: '#10b981',
+            };
+
+            const transak = new Transak(transakConfig);
+
+            // Using static 'on' as per SDK types
+            Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
+                console.log('Transak closed');
+            });
+
+            Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData: any) => {
+                console.log('Order successful', orderData);
+                setDepositStep('success');
+                sendNotification('Order Complete!', {
+                    body: `Your fiat purchase was successful. Assets are now being synced.`,
+                });
+                refetchUSDC();
+            });
+
+            transak.init();
+        } catch (err) {
+            console.error('Failed to launch Transak:', err);
+            alert('Failed to launch on-ramp. Please try again.');
+        } finally {
+            setIsOnRampLoading(false);
+        }
     };
 
     const resetDeposit = () => {
@@ -233,11 +289,11 @@ export default function FundsPage() {
 
                     <div className="relative z-10">
                         <p className="text-slate-600 mb-4 font-black uppercase tracking-[0.3em] text-[10px]">Total Net Valuation</p>
-                        <div className="flex items-baseline gap-5 mb-12">
-                            <h2 className="text-8xl font-black text-white tracking-tighter">
+                        <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-5 mb-12">
+                            <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter">
                                 ${usdcBalance ? (Number(formatUnits(usdcBalance as bigint, 6)) + totalEquityValue).toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}
                             </h2>
-                            <span className="text-2xl font-black text-emerald-500/40 italic">USDC</span>
+                            <span className="text-xl md:text-2xl font-black text-emerald-500/40 italic">USDC</span>
                         </div>
 
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 pt-12 border-t border-white/5">
@@ -261,7 +317,7 @@ export default function FundsPage() {
                     </div>
                 </div>
 
-                <div className="bg-[#0c0e14]/80 border border-white/5 rounded-[4rem] p-12 flex flex-col justify-between backdrop-blur-3xl shadow-3xl">
+                <div className="bg-[#0c0e14]/80 border border-white/5 rounded-[3rem] md:rounded-[4rem] p-8 md:p-12 flex flex-col justify-between backdrop-blur-3xl shadow-3xl">
                     <div>
                         <div className="flex items-center justify-between mb-10">
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 italic">Secure Ledger</p>
@@ -271,12 +327,12 @@ export default function FundsPage() {
                         <div className="space-y-8">
                             <div>
                                 <p className="text-[9px] font-black text-slate-700 uppercase tracking-widest mb-3">Gateway Address</p>
-                                <p className="text-slate-200 font-mono text-sm tracking-tighter break-all line-clamp-2 leading-relaxed opacity-70">
+                                <p className="text-slate-200 font-mono text-xs md:text-sm tracking-tighter break-all line-clamp-2 leading-relaxed opacity-70">
                                     {address || 'Connecting...'}
                                 </p>
                             </div>
 
-                            <div className="flex items-center justify-between p-5 rounded-3xl bg-white/5 border border-white/5">
+                            <div className="flex items-center justify-between p-5 rounded-2xl md:rounded-3xl bg-white/5 border border-white/5">
                                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Network Gas</p>
                                 <p className="text-xs font-black text-emerald-500">{ethBalance ? Number(formatUnits(ethBalance.value, 18)).toFixed(4) : '0.00'} ETH</p>
                             </div>
@@ -285,7 +341,7 @@ export default function FundsPage() {
 
                     <button
                         onClick={() => { if (address) { navigator.clipboard.writeText(address); alert('Copied!'); } }}
-                        className="w-full py-5 bg-slate-900/50 hover:bg-slate-800 text-slate-400 text-[10px] font-black uppercase rounded-2xl transition-all border border-white/5 tracking-[0.3em] active:scale-95"
+                        className="w-full mt-8 py-5 bg-slate-900/50 hover:bg-slate-800 text-slate-400 text-[10px] font-black uppercase rounded-2xl transition-all border border-white/5 tracking-[0.3em] active:scale-95"
                     >
                         Copy Secure ID
                     </button>
@@ -348,13 +404,13 @@ export default function FundsPage() {
                             <History className="w-6 h-6 text-slate-900" />
                         </div>
 
-                        <div className="bg-[#0c0e14]/50 border border-white/5 rounded-[3rem] overflow-hidden">
-                            <table className="w-full text-left border-collapse">
+                        <div className="bg-[#0c0e14]/50 border border-white/5 rounded-[2rem] md:rounded-[3rem] overflow-x-auto">
+                            <table className="w-full text-left border-collapse min-w-[700px] md:min-w-0">
                                 <thead>
                                     <tr className="border-b border-white/5">
                                         <th className="p-8 text-[9px] font-black text-slate-700 uppercase tracking-widest">Type / Market</th>
                                         <th className="p-8 text-[9px] font-black text-slate-700 uppercase tracking-widest">Amount</th>
-                                        <th className="p-8 text-[9px] font-black text-slate-700 uppercase tracking-widest">Timestamp</th>
+                                        <th className="p-8 text-[9px] font-black text-slate-700 uppercase tracking-widest hidden md:table-cell">Timestamp</th>
                                         <th className="p-8 text-[9px] font-black text-slate-700 uppercase tracking-widest">Ledger Proof</th>
                                     </tr>
                                 </thead>
@@ -363,11 +419,11 @@ export default function FundsPage() {
                                         <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
                                             <td className="p-8">
                                                 <div className="flex items-center gap-4">
-                                                    <div className={cn("p-2.5 rounded-xl", act.type === 'TRADE' ? (act.is_buy ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500") : "bg-indigo-500/10 text-indigo-500")}>
+                                                    <div className={cn("p-2.5 rounded-xl shrink-0", act.type === 'TRADE' ? (act.is_buy ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500") : "bg-indigo-500/10 text-indigo-500")}>
                                                         {act.type === 'TRADE' ? (act.is_buy ? <ArrowDownCircle className="w-4 h-4" /> : <ArrowUpCircle className="w-4 h-4" />) : <DollarSign className="w-4 h-4" />}
                                                     </div>
-                                                    <div>
-                                                        <p className="text-xs font-black text-white uppercase tracking-tight leading-none mb-1">{act.market_question || 'Network Funding'}</p>
+                                                    <div className="min-w-0">
+                                                        <p className="text-xs font-black text-white uppercase tracking-tight leading-none mb-1 truncate max-w-[150px] md:max-w-none">{act.market_question || 'Network Funding'}</p>
                                                         <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">{act.type === 'TRADE' ? `Wager: ${act.outcome_name}` : 'Platform Deposit'}</p>
                                                     </div>
                                                 </div>
@@ -377,7 +433,7 @@ export default function FundsPage() {
                                                     {act.type === 'TRADE' ? (act.is_buy ? `-$${act.amount.toFixed(2)}` : `+$${act.amount.toFixed(2)}`) : `+$${act.amount.toFixed(2)}`}
                                                 </p>
                                             </td>
-                                            <td className="p-8 text-[10px] font-bold text-slate-600 uppercase tabular-nums">
+                                            <td className="p-8 text-[10px] font-bold text-slate-600 uppercase tabular-nums hidden md:table-cell">
                                                 {new Date(act.timestamp).toLocaleDateString()} · {new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </td>
                                             <td className="p-8">
@@ -425,18 +481,42 @@ export default function FundsPage() {
                                     </div>
 
                                     <div className="space-y-4">
-                                        {[
-                                            { id: 'card', name: 'Credit/Debit Card', icon: CreditCard },
-                                            { id: 'bank', name: 'Bank Transfer', icon: Building2 },
-                                        ].map((m) => (
-                                            <button key={m.id} onClick={() => { setDepositMethod(m.id as any); setDepositStep('details'); }} className="flex items-center justify-between p-7 rounded-[2rem] border-2 border-slate-800/50 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all outline-none">
-                                                <div className="flex items-center gap-5">
-                                                    <m.icon className="w-5 h-5 text-indigo-500/50" />
-                                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">{m.name}</span>
+                                        <button
+                                            onClick={launchTransak}
+                                            disabled={isOnRampLoading}
+                                            className={cn(
+                                                "flex items-center justify-between p-7 w-full rounded-[2rem] border-2 border-emerald-500/50 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all outline-none group",
+                                                isOnRampLoading && "opacity-50 cursor-not-allowed"
+                                            )}
+                                        >
+                                            <div className="flex items-center gap-5">
+                                                {isOnRampLoading ? (
+                                                    <Loader2 className="w-5 h-5 text-emerald-500 animate-spin" />
+                                                ) : (
+                                                    <CreditCard className="w-5 h-5 text-emerald-500" />
+                                                )}
+                                                <div className="text-left">
+                                                    <span className="text-[10px] font-black text-white uppercase tracking-widest block">
+                                                        {isOnRampLoading ? 'Initializing On-Ramp...' : 'Buy with Fiat'}
+                                                    </span>
+                                                    {!isOnRampLoading && (
+                                                        <span className="text-[8px] font-bold text-emerald-500/60 uppercase tracking-widest italic">Visa, Mastercard, Apple Pay</span>
+                                                    )}
                                                 </div>
-                                                <ChevronRight className="w-4 h-4 text-slate-700" />
-                                            </button>
-                                        ))}
+                                            </div>
+                                            {!isOnRampLoading && <ChevronRight className="w-4 h-4 text-emerald-500" />}
+                                        </button>
+
+                                        <button
+                                            onClick={() => { setDepositMethod('bank'); setDepositStep('details'); }}
+                                            className="flex items-center justify-between p-7 w-full rounded-[2rem] border-2 border-slate-800/50 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all outline-none opacity-50 grayscale hover:grayscale-0"
+                                        >
+                                            <div className="flex items-center gap-5">
+                                                <Landmark className="w-5 h-5 text-slate-500" />
+                                                <span className="text-[10px] font-black text-white uppercase tracking-widest">Sepolia Faucet (Mock)</span>
+                                            </div>
+                                            <ChevronRight className="w-4 h-4 text-slate-700" />
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -513,7 +593,8 @@ export default function FundsPage() {
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

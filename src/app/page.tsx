@@ -36,7 +36,7 @@ export default function Home() {
               The Future of Prediction Markets in Africa
             </div>
 
-            <h1 className="text-5xl font-bold tracking-tight text-white sm:text-7xl mb-8">
+            <h1 className="text-4xl md:text-7xl font-bold tracking-tight text-white mb-8">
               Predict the Future. <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-emerald-500">
                 Trade the Outcome.
