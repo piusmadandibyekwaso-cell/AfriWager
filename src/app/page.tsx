@@ -45,7 +45,7 @@ export default function Home() {
             </h1>
 
             <p className="mx-auto max-w-2xl text-lg leading-8 text-zinc-400 mb-10">
-              AFRISIGHTS is the premier decentralized prediction market for Africa.
+              AfriSights is the premier decentralized prediction market for Africa.
               Trade on news, politics, sports, and culture with transparent odds and instant payouts.
             </p>
 

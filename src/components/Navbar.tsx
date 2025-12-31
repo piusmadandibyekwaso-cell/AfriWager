@@ -19,8 +19,8 @@ export default function Navbar() {
                 className="h-full w-full object-cover"
               />
             </div>
-            <span className="text-2xl font-bold tracking-tight text-white lowercase font-sans group-hover:text-emerald-400 transition-colors">
-              afrisights
+            <span className="text-2xl font-bold tracking-tight text-white font-sans group-hover:text-emerald-400 transition-colors">
+              AfriSights
             </span>
           </Link>
 

@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.afrisights.com'),
-  title: "Afrisights - Prediction Markets for Africa",
+  title: "AfriSights - Prediction Markets for Africa",
   description: "Trade on news, politics, sports, and culture with transparent odds.",
   manifest: "/manifest.json",
   themeColor: "#060709",
@@ -24,10 +24,10 @@ export const metadata: Metadata = {
     title: "AfriSights",
   },
   openGraph: {
-    title: "Afrisights - Prediction Markets for Africa",
+    title: "AfriSights - Prediction Markets for Africa",
     description: "Trade on news, politics, sports, and culture with transparent odds.",
     url: 'https://www.afrisights.com',
-    siteName: 'Afrisights',
+    siteName: 'AfriSights',
     locale: 'en_US',
     type: 'website',
   },
