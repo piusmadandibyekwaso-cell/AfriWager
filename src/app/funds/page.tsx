@@ -218,14 +218,14 @@ export default function FundsPage() {
                 themeColor: '#10b981',
             };
 
-            const transak = new Transak(transakConfig);
+            const transakInstance = new Transak(transakConfig);
 
-            // Using static 'on' as per SDK types
-            Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
+            // Handle events on the instance
+            (transakInstance as any).on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
                 console.log('Transak closed');
             });
 
-            Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData: any) => {
+            (transakInstance as any).on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData: any) => {
                 console.log('Order successful', orderData);
                 setDepositStep('success');
                 sendNotification('Order Complete!', {
@@ -234,7 +234,7 @@ export default function FundsPage() {
                 refetchUSDC();
             });
 
-            transak.init();
+            transakInstance.init();
         } catch (err: any) {
             console.error('Failed to launch Transak:', err);
             alert(`Failed to launch on-ramp: ${err.message || 'Unknown error'}`);
@@ -268,13 +268,13 @@ export default function FundsPage() {
                 themeColor: '#10b981',
             };
 
-            const transak = new Transak(transakConfig);
+            const transakInstance = new Transak(transakConfig);
 
-            Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
+            (transakInstance as any).on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
                 console.log('Transak Off-Ramp closed');
             });
 
-            Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData: any) => {
+            (transakInstance as any).on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData: any) => {
                 console.log('Off-ramp successful', orderData);
                 sendNotification('Withdrawal Pending', {
                     body: `Your $${withdrawAmount} USDC withdrawal to bank has been initiated.`,
@@ -282,7 +282,7 @@ export default function FundsPage() {
                 setIsWithdrawModalOpen(false);
             });
 
-            transak.init();
+            transakInstance.init();
         } catch (err: any) {
             console.error('Failed to launch Transak Off-Ramp:', err);
             alert(`Failed to launch bank withdrawal: ${err.message || 'Unknown error'}`);
