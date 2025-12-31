@@ -4,6 +4,7 @@ create table profiles (
   wallet_address text primary key, -- The main identifier for now
   username text unique not null,
   avatar_seed text, -- The random string to generate the avatar
+  last_funding_address text, -- Stores the last account used for funding
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   
   -- Constraint to ensure usernames are URL safe

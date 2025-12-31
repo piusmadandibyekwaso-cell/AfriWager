@@ -14,6 +14,8 @@ import { twMerge } from 'tailwind-merge';
 import { supabase } from '@/lib/supabase';
 import { Transak } from '@transak/ui-js-sdk';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { userService } from '@/services/userService';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -47,12 +49,15 @@ export default function FundsPage() {
     const { address } = useAccount();
     const { authenticated, login } = usePrivy();
     const { sendNotification } = useNotifications();
+    const { profile, isLoading: isProfileLoading, refreshProfile } = useUserProfile();
 
     // UI State
     const [withdrawAddress, setWithdrawAddress] = useState('');
     const [withdrawAmount, setWithdrawAmount] = useState('');
+    const [withdrawMode, setWithdrawMode] = useState<'bank' | 'wallet'>('bank');
     const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
     const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+    const [isOffRampLoading, setIsOffRampLoading] = useState(false);
     const [depositStep, setDepositStep] = useState<DepositStep>('selection');
     const [depositMethod, setDepositMethod] = useState<DepositMethod>('card');
     const [depositAmount, setDepositAmount] = useState('1000');
@@ -85,9 +90,9 @@ export default function FundsPage() {
     useEffect(() => {
         if (!address) return;
         const fetchData = async () => {
-            // Get user
-            const { data: userData } = await supabase.from('users').select('id').eq('wallet_address', address).single();
-            if (!userData) return;
+            // Get user from profiles
+            const { data: profileData } = await supabase.from('profiles').select('id').eq('wallet_address', address).single();
+            if (!profileData) return;
 
             // Get Markets
             const { data: markets } = await supabase.from('markets').select('*');
@@ -97,7 +102,7 @@ export default function FundsPage() {
             const { data: trades } = await supabase
                 .from('trades')
                 .select('*')
-                .eq('user_id', userData.id)
+                .eq('user_id', profileData.id)
                 .order('created_at', { ascending: false });
 
             setUserTrades(trades || []);
@@ -168,10 +173,17 @@ export default function FundsPage() {
             sendNotification('Assets Secured!', {
                 body: `Successfully deposited $${depositAmount} USDC into your secure ledger.`,
             });
+
+            // Save last funding address if it's the first time or different
+            if (address && profile && profile.last_funding_address !== address) {
+                userService.updateProfile(address, { last_funding_address: address })
+                    .then(() => refreshProfile());
+            }
+
             refetchUSDC();
             refetchETH();
         }
-    }, [hash, isSuccess, refetchUSDC, refetchETH]);
+    }, [hash, isSuccess, refetchUSDC, refetchETH, address, profile, refreshProfile]);
 
     const handleBankValidation = () => {
         setDepositStep('processing_bank');
@@ -192,14 +204,15 @@ export default function FundsPage() {
                 body: JSON.stringify({
                     walletAddress: address,
                     fiatAmount: Number(depositAmount),
+                    email: profile?.username ? `${profile.username}@afrisights.com` : undefined,
                 }),
             });
 
-            const { widgetUrl, error } = await response.json();
-            if (error) throw new Error(error);
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
 
             const transakConfig = {
-                widgetUrl: widgetUrl,
+                widgetUrl: data.widgetUrl,
                 widgetHeight: '700px',
                 widgetWidth: '450px',
                 themeColor: '#10b981',
@@ -222,13 +235,68 @@ export default function FundsPage() {
             });
 
             transak.init();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to launch Transak:', err);
-            alert('Failed to launch on-ramp. Please try again.');
+            alert(`Failed to launch on-ramp: ${err.message || 'Unknown error'}`);
         } finally {
             setIsOnRampLoading(false);
         }
     };
+
+    const launchTransakOffRamp = async () => {
+        if (!address) return;
+
+        setIsOffRampLoading(true);
+        try {
+            const response = await fetch('/api/transak/offramp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    walletAddress: address,
+                    cryptoAmount: Number(withdrawAmount),
+                    email: profile?.username ? `${profile.username}@afrisights.com` : undefined,
+                }),
+            });
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
+
+            const transakConfig = {
+                widgetUrl: data.widgetUrl,
+                widgetHeight: '700px',
+                widgetWidth: '450px',
+                themeColor: '#10b981',
+            };
+
+            const transak = new Transak(transakConfig);
+
+            Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
+                console.log('Transak Off-Ramp closed');
+            });
+
+            Transak.on(Transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData: any) => {
+                console.log('Off-ramp successful', orderData);
+                sendNotification('Withdrawal Pending', {
+                    body: `Your $${withdrawAmount} USDC withdrawal to bank has been initiated.`,
+                });
+                setIsWithdrawModalOpen(false);
+            });
+
+            transak.init();
+        } catch (err: any) {
+            console.error('Failed to launch Transak Off-Ramp:', err);
+            alert(`Failed to launch bank withdrawal: ${err.message || 'Unknown error'}`);
+        } finally {
+            setIsOffRampLoading(false);
+        }
+    };
+
+    // Auto-fill withdrawal address when opening modal
+    useEffect(() => {
+        if (isWithdrawModalOpen && profile?.last_funding_address) {
+            setWithdrawAddress(profile.last_funding_address);
+        }
+    }, [isWithdrawModalOpen, profile?.last_funding_address]);
 
     const resetDeposit = () => {
         setIsDepositModalOpen(false);
@@ -607,10 +675,10 @@ export default function FundsPage() {
             {/* WITHDRAW MODAL */}
             {isWithdrawModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-3xl animate-in fade-in duration-300">
-                    <div className="bg-[#0c0e14] border border-white/5 w-full max-w-sm rounded-[4rem] shadow-4xl overflow-hidden animate-in zoom-in-95 duration-200">
+                    <div className="bg-[#0c0e14] border border-white/5 w-full max-w-md rounded-[4rem] shadow-4xl overflow-hidden animate-in zoom-in-95 duration-200">
                         <div className="p-10 pb-4 flex items-center justify-between border-b border-white/5">
                             <h3 className="text-xl font-black tracking-tighter uppercase italic flex items-center gap-4">
-                                <ArrowUpCircle className="w-6 h-6 text-indigo-500" /> Withdraw
+                                <ArrowUpCircle className="w-6 h-6 text-indigo-500" /> Secure Withdrawal
                             </h3>
                             <button onClick={() => setIsWithdrawModalOpen(false)} className="p-3 hover:bg-slate-900 rounded-full text-slate-600">
                                 <AlertCircle className="w-6 h-6 rotate-45" />
@@ -618,45 +686,116 @@ export default function FundsPage() {
                         </div>
 
                         <div className="p-12 space-y-8">
-                            <div>
-                                <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2 block">Recipient Address</label>
-                                <input
-                                    type="text"
-                                    placeholder="0x..."
-                                    value={withdrawAddress}
-                                    onChange={(e) => setWithdrawAddress(e.target.value)}
-                                    className="w-full bg-[#060709] border border-white/5 rounded-2xl p-5 text-white font-mono text-xs outline-none focus:border-indigo-500 transition-all"
-                                />
+                            {/* Mode Selection */}
+                            <div className="flex bg-black/50 p-1.5 rounded-2xl border border-white/5">
+                                <button
+                                    onClick={() => setWithdrawMode('bank')}
+                                    className={cn("flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2", withdrawMode === 'bank' ? "bg-white text-black" : "text-slate-500 hover:text-white")}
+                                >
+                                    <Building2 className="w-3.5 h-3.5" /> Back to Bank
+                                </button>
+                                <button
+                                    onClick={() => setWithdrawMode('wallet')}
+                                    className={cn("flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2", withdrawMode === 'wallet' ? "bg-white text-black" : "text-slate-500 hover:text-white")}
+                                >
+                                    <Wallet className="w-3.5 h-3.5" /> External Wallet
+                                </button>
                             </div>
-                            <div>
-                                <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2 block">Amount (USDC)</label>
-                                <div className="relative">
-                                    <input
-                                        type="number"
-                                        placeholder="0.00"
-                                        value={withdrawAmount}
-                                        onChange={(e) => setWithdrawAmount(e.target.value)}
-                                        className="w-full bg-[#060709] border border-white/5 rounded-2xl p-5 pl-12 text-white font-black text-lg outline-none focus:border-indigo-500 transition-all"
-                                    />
-                                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-3 block">Withdrawal Amount (USDC)</label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            placeholder="0.00"
+                                            value={withdrawAmount}
+                                            onChange={(e) => setWithdrawAmount(e.target.value)}
+                                            className="w-full bg-[#060709] border border-white/5 rounded-2xl p-6 pl-14 text-white font-black text-2xl outline-none focus:border-indigo-500 transition-all tabular-nums"
+                                        />
+                                        <div className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-slate-500 text-xl">$</div>
+                                        <div className="absolute right-6 top-1/2 -translate-y-1/2">
+                                            <button onClick={() => setWithdrawAmount(formatUnits(usdcBalance as bigint || 0n, 6))} className="px-3 py-1 bg-white/5 hover:bg-white/10 text-[8px] font-black text-slate-500 uppercase rounded-lg transition-colors leading-none">MAX</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div className="flex items-center justify-between mb-3">
+                                        <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest block">Recipient Details</label>
+                                        {profile?.last_funding_address && withdrawAddress === profile.last_funding_address && (
+                                            <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-500/10 rounded-lg">
+                                                <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                                                <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest">Verified Loop</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="relative group">
+                                        <input
+                                            type="text"
+                                            placeholder={withdrawMode === 'bank' ? "Linked Bank Account" : "0x... Destination Wallet"}
+                                            value={withdrawAddress}
+                                            onChange={(e) => setWithdrawAddress(e.target.value)}
+                                            className={cn(
+                                                "w-full bg-[#060709] border border-white/5 rounded-2xl p-5 text-white font-mono text-xs outline-none transition-all pr-12",
+                                                withdrawAddress !== profile?.last_funding_address && withdrawAddress.length > 0 && "border-amber-500/50 focus:border-amber-500"
+                                            )}
+                                        />
+                                        {withdrawMode === 'bank' && <Building2 className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-700 pointer-events-none" />}
+                                        {withdrawMode === 'wallet' && <ArrowUpCircle className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-700 pointer-events-none" />}
+                                    </div>
+
+                                    {/* AML FLAG UI */}
+                                    {withdrawAddress !== profile?.last_funding_address && withdrawAddress.length > 0 && (
+                                        <div className="mt-4 p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-4 animate-in slide-in-from-top-2">
+                                            <AlertCircle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                                            <div>
+                                                <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1">Security Flag: Address Mismatch</p>
+                                                <p className="text-[9px] font-medium text-amber-500/60 leading-relaxed">This address does not match your linked funding source. To prevent money laundering, withdrawals to unverified accounts may take up to 48 hours for manual review.</p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
                             <button
                                 onClick={() => {
-                                    writeContract({
-                                        address: CONTRACT_ADDRESSES.usdc as `0x${string}`,
-                                        abi: MockUSDCABI.abi,
-                                        functionName: 'transfer',
-                                        args: [withdrawAddress as `0x${string}`, parseUnits(withdrawAmount || '0', 6)]
-                                    });
-                                    setIsWithdrawModalOpen(false);
+                                    if (withdrawMode === 'bank') {
+                                        launchTransakOffRamp();
+                                    } else {
+                                        writeContract({
+                                            address: CONTRACT_ADDRESSES.usdc as `0x${string}`,
+                                            abi: MockUSDCABI.abi,
+                                            functionName: 'transfer',
+                                            args: [withdrawAddress as `0x${string}`, parseUnits(withdrawAmount || '0', 6)]
+                                        });
+                                        setIsWithdrawModalOpen(false);
+                                        sendNotification('Transfer Initiated', {
+                                            body: `Sent $${withdrawAmount} USDC to external wallet.`,
+                                        });
+                                    }
                                 }}
-                                disabled={!withdrawAddress || !withdrawAmount}
-                                className="w-full py-6 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-3xl transition-all shadow-2xl shadow-indigo-600/20 active:scale-95 uppercase tracking-widest text-[10px] disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={!withdrawAddress || !withdrawAmount || isOffRampLoading}
+                                className={cn(
+                                    "w-full py-7 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-3xl transition-all shadow-2xl shadow-indigo-600/20 active:scale-95 uppercase tracking-[0.2em] text-[10px] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3",
+                                    withdrawAddress !== profile?.last_funding_address && withdrawAddress.length > 0 && "bg-amber-600 hover:bg-amber-500 shadow-amber-600/20"
+                                )}
                             >
-                                Confirm Transfer
+                                {isOffRampLoading ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <>
+                                        {withdrawMode === 'bank' ? 'Initialize Bank Transfer' : 'Confirm External Transfer'}
+                                        {withdrawAddress !== profile?.last_funding_address && withdrawAddress.length > 0 && ' (Subject to Review)'}
+                                    </>
+                                )}
                             </button>
+
+                            <div className="flex items-center justify-center gap-4 py-4 border-t border-white/5">
+                                <ShieldCheck className="w-4 h-4 text-slate-700" />
+                                <p className="text-[8px] font-bold text-slate-700 uppercase tracking-widest">Secured by AfriSights Compliance Engine</p>
+                            </div>
                         </div>
                     </div>
                 </div>

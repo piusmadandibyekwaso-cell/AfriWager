@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { walletAddress, fiatAmount, email } = body;
+        const { walletAddress, cryptoAmount, email } = body;
 
         // In a real production environment, you should use environment variables
         const API_KEY = '4f8260b4-106d-472c-8059-e93897b9f71c'; // Staging Key
@@ -17,11 +17,11 @@ export async function POST(request: Request) {
             body: JSON.stringify({
                 apiKey: API_KEY,
                 walletAddress,
-                fiatAmount,
+                cryptoAmount,
                 email,
                 cryptoCurrencyCode: 'USDC',
-                network: 'sepolia', // Switched from 'ethereum' to 'sepolia'
-                productsAvailed: 'BUY',
+                network: 'sepolia',
+                productsAvailed: 'SELL',
                 themeColor: '#10b981',
                 exchangeScreenTitle: 'AfriSights Capital',
             }),
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
         const data = await response.json();
 
         if (!response.ok) {
-            console.error('Transak API Error Details:', JSON.stringify(data, null, 2));
+            console.error('Transak Off-Ramp API Error Details:', JSON.stringify(data, null, 2));
             return NextResponse.json({
                 error: data.error?.message || 'Transak API Error',
                 details: data.error
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ widgetUrl: data.response });
     } catch (error: any) {
-        console.error('Transak API Error:', error);
+        console.error('Transak Off-Ramp Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

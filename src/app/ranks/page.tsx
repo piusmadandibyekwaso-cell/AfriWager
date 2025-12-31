@@ -26,21 +26,21 @@ export default function RanksPage() {
         async function fetchRanks() {
             try {
                 // Fetch all trades and users to aggregate
-                const { data: usersData } = await supabase.from('users').select('id, wallet_address');
+                const { data: profileData } = await supabase.from('profiles').select('id, wallet_address');
                 const { data: tradesData } = await supabase.from('trades').select('user_id, usdc_amount');
 
-                if (!usersData || !tradesData) return;
+                if (!profileData || !tradesData) return;
 
                 const volumeMap = new Map<string, { volume: number; count: number; address: string }>();
 
                 tradesData.forEach(t => {
-                    const user = usersData.find(u => u.id === t.user_id);
-                    if (!user) return;
+                    const profile = profileData.find(u => u.id === t.user_id);
+                    if (!profile) return;
 
-                    const existing = volumeMap.get(user.id) || { volume: 0, count: 0, address: user.wallet_address };
+                    const existing = volumeMap.get(profile.id) || { volume: 0, count: 0, address: profile.wallet_address };
                     existing.volume += Number(t.usdc_amount);
                     existing.count += 1;
-                    volumeMap.set(user.id, existing);
+                    volumeMap.set(profile.id, existing);
                 });
 
                 const sortedRanks: TraderRank[] = Array.from(volumeMap.values())

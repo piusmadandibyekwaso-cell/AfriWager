@@ -4,6 +4,7 @@ export interface UserProfile {
     wallet_address: string;
     username: string;
     avatar_seed: string;
+    last_funding_address?: string;
     created_at?: string;
 }
 
@@ -52,6 +53,23 @@ export const userService = {
 
         if (error) {
             console.error('Error creating profile:', error);
+            throw error;
+        }
+
+        return data as UserProfile;
+    },
+
+    // Update profile (e.g. set last funding address)
+    async updateProfile(walletAddress: string, updates: Partial<UserProfile>): Promise<UserProfile | null> {
+        const { data, error } = await supabase
+            .from('profiles')
+            .update(updates)
+            .eq('wallet_address', walletAddress)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error updating profile:', error);
             throw error;
         }
 
