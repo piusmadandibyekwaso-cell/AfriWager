@@ -8,7 +8,7 @@ import { CONTRACT_ADDRESSES } from '@/constants/contracts';
 import MockUSDCABI from '@/abis/MockERC20.json';
 import FPMMABI from '@/abis/FixedProductMarketMaker.json';
 import CTABI from '@/abis/ConditionalTokens.json';
-import { usePrivy } from '@privy-io/react-auth';
+import { usePrivy, useFundWallet } from '@privy-io/react-auth';
 import { Wallet, ArrowDownCircle, ArrowUpCircle, RefreshCcw, ExternalLink, CreditCard, Building2, CheckCircle2, ChevronRight, AlertCircle, Loader2, Landmark, ShieldCheck, TrendingUp, History, PieChart, Info, DollarSign } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -48,7 +48,8 @@ interface PositionItem {
 
 export default function FundsPage() {
     const { address } = useAccount();
-    const { authenticated, login, fundWallet } = usePrivy() as any;
+    const { authenticated, login } = usePrivy();
+    const { fundWallet } = useFundWallet();
     const { sendNotification } = useNotifications();
     const { profile, isLoading: isProfileLoading, refreshProfile } = useUserProfile();
 
@@ -199,7 +200,7 @@ export default function FundsPage() {
 
         // Use Privy (MoonPay)
         try {
-            await fundWallet(address, { chain: sepolia, amount: depositAmount });
+            await fundWallet({ address, options: { chain: sepolia, amount: depositAmount } });
         } catch (err) {
             console.error('Privy Funding Error:', err);
         }
