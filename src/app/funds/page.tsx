@@ -204,7 +204,8 @@ export default function FundsPage() {
             await fundWallet({ address, options: { chain: sepolia, amount: depositAmount } });
         } catch (err: any) {
             console.error('Privy Funding Error:', err);
-            alert(`Funding Failed: ${err.message || JSON.stringify(err)}`);
+            const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
+            alert(`Funding Failed: ${err.message}\n\nCheck Privy Dashboard for App ID: ${appId}\n(Settings -> Funding must be enabled)`);
         }
     };
 
