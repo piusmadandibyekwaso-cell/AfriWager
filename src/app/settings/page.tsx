@@ -99,15 +99,13 @@ export default function SettingsPage() {
         if (!address) return;
         setIsOnRampLoading(true);
         try {
-            await fundWallet(address, {
-                chain: { id: 137, name: 'Polygon', rpcUrls: { default: { http: ['https://polygon-rpc.com'] } }, nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 } },
-                fundingMethodConfig: {
-                    moonpay: {
-                        useSandbox: false,
-                        quoteCurrencyCode: 'USDC',
-                        defaultCurrencyCode: 'USDC_POLYGON',
-                        paymentMethod: 'credit_debit_card'
-                    }
+            await fundWallet({
+                address,
+                chain: {
+                    id: 137,
+                    name: 'Polygon',
+                    rpcUrls: { default: { http: ['https://polygon-rpc.com'] } },
+                    nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 }
                 }
             });
         } catch (err: any) {

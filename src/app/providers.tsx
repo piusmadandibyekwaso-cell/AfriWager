@@ -41,6 +41,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 fundingMethodConfig: {
                     moonpay: {
                         useSandbox: false, // Production Mode
+                        paymentMethod: 'credit_debit_card',
+                        uiConfig: { accentColor: '#10b981', theme: 'dark' },
+                        quoteCurrencyCode: 'USDC',
+                        defaultCurrencyCode: 'USDC_POLYGON'
                     },
                 },
             }}
