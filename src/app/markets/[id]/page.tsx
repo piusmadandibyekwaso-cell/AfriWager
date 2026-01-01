@@ -10,7 +10,7 @@ import { CONTRACT_ADDRESSES } from '@/constants/contracts';
 import FPMMABI from '@/abis/FixedProductMarketMaker.json';
 import USDCABI from '@/abis/MockERC20.json';
 import { usePrivy } from '@privy-io/react-auth';
-import { ArrowRight, BarChart3, Info, ShieldCheck, AlertCircle, Droplets, Activity, Wallet } from "lucide-react";
+import { ArrowRight, BarChart3, Info, ShieldCheck, AlertCircle, Droplets, Activity, Wallet, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { getCandidateImage } from '@/constants/candidateImages';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
