@@ -107,6 +107,7 @@ export default function SettingsPage() {
                     rpcUrls: { default: { http: ['https://polygon-rpc.com'] } },
                     nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 }
                 },
+                asset: 'USDC',
                 config: {
                     currencyCode: 'USDC_POLYGON',
                     quoteCurrencyCode: 'USDC',
