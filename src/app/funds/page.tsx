@@ -202,6 +202,19 @@ export default function FundsPage() {
         setIsOnRampLoading(true);
         try {
             await fundWallet({ address });
+
+            // Success: Send Email Notification (Fire and Forget)
+            if (user?.email?.address) {
+                fetch('/api/emails/fund-wallet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: user.email.address,
+                        amount: depositAmount,
+                        walletAddress: address
+                    })
+                }).catch(err => console.error('Failed to send email receipt:', err));
+            }
             // 209: Success assumes the user completes the flow in the modal.
             // Success assumes the user completes the flow in the modal.
             // Actual balance refresh happens via on-chain listeners or polling.
