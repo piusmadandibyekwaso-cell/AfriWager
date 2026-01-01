@@ -1,6 +1,10 @@
-'use client';
+import { QRCodeSVG } from 'qrcode.react'; // Add import
 
-import { useState, useEffect, useMemo } from 'react';
+// ... inside component ...
+// UI State
+const [depositType, setDepositType] = useState<'fiat' | 'crypto'>('fiat'); // New State
+const [withdrawAddress, setWithdrawAddress] = useState('');
+// ...
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useBalance, useReadContracts } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 import { parseUnits, formatUnits, keccak256, encodePacked } from 'viem';
@@ -511,41 +515,54 @@ export default function FundsPage() {
                         <div className="p-12">
                             {depositStep === 'selection' && (
                                 <div className="space-y-8">
-                                    <div className="text-center py-6">
-                                        <div className="flex items-center justify-center gap-3 mb-4">
-                                            <span className="text-6xl font-black text-white tracking-tighter">${depositAmount}</span>
-                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full">USDC</span>
-                                        </div>
-                                        <input type="range" min="10" max="5000" step="10" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 mt-6" />
+                                    {/* Toggle Switch */}
+                                    <div className="flex bg-slate-900/50 p-1.5 rounded-2xl border border-white/5">
+                                        <button onClick={() => setDepositType('fiat')} className={cn("flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", depositType === 'fiat' ? "bg-white text-black" : "text-slate-500 hover:text-white")}>Buy with Card</button>
+                                        <button onClick={() => setDepositType('crypto')} className={cn("flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", depositType === 'crypto' ? "bg-white text-black" : "text-slate-500 hover:text-white")}>Direct Transfer</button>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <button
-                                            onClick={launchOnRamp}
-                                            disabled={isOnRampLoading}
-                                            className={cn(
-                                                "flex items-center justify-between p-7 w-full rounded-[2rem] border-2 border-emerald-500/50 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all outline-none group",
-                                                isOnRampLoading && "opacity-50 cursor-not-allowed"
-                                            )}
-                                        >
-                                            <div className="flex items-center gap-5">
-                                                {isOnRampLoading ? (
-                                                    <Loader2 className="w-5 h-5 text-emerald-500 animate-spin" />
-                                                ) : (
-                                                    <CreditCard className="w-5 h-5 text-emerald-500" />
-                                                )}
-                                                <div className="text-left">
-                                                    <span className="text-[10px] font-black text-white uppercase tracking-widest block">
-                                                        {isOnRampLoading ? 'Initializing Gateway...' : 'Buy with Fiat'}
-                                                    </span>
-                                                    <span className="text-[8px] font-bold text-emerald-500/60 uppercase tracking-widest italic block mt-1">
-                                                        * Real Money (Polygon)
-                                                    </span>
+                                    {depositType === 'fiat' ? (
+                                        <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-300">
+                                            <div className="text-center py-6">
+                                                <div className="flex items-center justify-center gap-3 mb-4">
+                                                    <span className="text-6xl font-black text-white tracking-tighter">${depositAmount}</span>
+                                                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full">USDC</span>
                                                 </div>
+                                                <input type="range" min="10" max="5000" step="10" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 mt-6" />
                                             </div>
-                                            {!isOnRampLoading && <ChevronRight className="w-4 h-4 text-emerald-500" />}
-                                        </button>
-                                    </div>
+
+                                            <button
+                                                onClick={launchOnRamp}
+                                                disabled={isOnRampLoading}
+                                                className={cn(
+                                                    "flex items-center justify-between p-7 w-full rounded-[2rem] border-2 border-emerald-500/50 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all outline-none group",
+                                                    isOnRampLoading && "opacity-50 cursor-not-allowed"
+                                                )}
+                                            >
+                                                <div className="flex items-center gap-5">
+                                                    {isOnRampLoading ? <Loader2 className="w-5 h-5 text-emerald-500 animate-spin" /> : <CreditCard className="w-5 h-5 text-emerald-500" />}
+                                                    <div className="text-left">
+                                                        <span className="text-[10px] font-black text-white uppercase tracking-widest block">{isOnRampLoading ? 'Initializing Gateway...' : 'Buy with Fiat'}</span>
+                                                        <span className="text-[8px] font-bold text-emerald-500/60 uppercase tracking-widest italic block mt-1">* Real Money (Polygon)</span>
+                                                    </div>
+                                                </div>
+                                                {!isOnRampLoading && <ChevronRight className="w-4 h-4 text-emerald-500" />}
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                                            <div className="bg-white p-4 rounded-xl inline-block mx-auto">
+                                                <QRCodeSVG value={address || ''} size={180} />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Scan or Copy Address</p>
+                                                <p className="text-sm font-mono text-white bg-slate-900/50 p-3 rounded-lg border border-white/10 break-all select-all">{address}</p>
+                                            </div>
+                                            <div className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
+                                                Send only <strong>USDC (Polygon Mainnet)</strong> to this address. Credits appear automatically.
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
