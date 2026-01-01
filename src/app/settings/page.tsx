@@ -99,15 +99,19 @@ export default function SettingsPage() {
         if (!address) return;
         setIsOnRampLoading(true);
         try {
-            await fundWallet({
-                address,
+            await fundWallet(address, {
                 chain: {
                     id: 137,
                     name: 'Polygon',
                     rpcUrls: { default: { http: ['https://polygon-rpc.com'] } },
                     nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 }
+                },
+                config: {
+                    currencyCode: 'USDC_POLYGON',
+                    quoteCurrencyCode: 'USDC',
+                    defaultCurrencyCode: 'USDC_POLYGON'
                 }
-            });
+            } as any);
         } catch (err: any) {
             console.error('On-Ramp Error:', err);
             alert(`Payment Gateway Error: ${err.message || "Unknown error"}`);
