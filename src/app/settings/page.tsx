@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { usePrivy, useFundWallet } from '@privy-io/react-auth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import UserAvatar from '@/components/Avatar';
@@ -12,17 +12,12 @@ import {
     Code,
     Key,
     Upload,
-    ChevronRight,
     Loader2,
     CreditCard,
     ShieldCheck,
-    CheckCircle2,
     AlertCircle,
-    RefreshCcw,
-    Building2,
     ArrowUpCircle,
-    Copy,
-    Landmark
+    Copy
 } from 'lucide-react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useBalance } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
@@ -31,22 +26,13 @@ import MockUSDCABI from '@/abis/MockERC20.json';
 import { QRCodeSVG } from 'qrcode.react';
 import { useNotifications } from '@/hooks/useNotifications';
 import { userService } from '@/services/userService';
-import { cn } from '@/lib/utils'; // Assuming you have a utils file, otherwise I'll inline clxs/twMerge
-
-// Inline utils if not valid import (safeguard)
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-function classNames(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
 
 type SettingsTab = 'Profile' | 'Account' | 'Trading' | 'Notifications' | 'Builder Codes' | 'Export Private Key';
-type DepositStep = 'selection' | 'details' | 'processing_bank' | 'confirm' | 'processing_chain' | 'success' | 'failed';
-type DepositMethod = 'card' | 'bank' | 'apple_pay';
+type DepositStep = 'selection' | 'processing_chain' | 'success' | 'failed' | 'confirm';
 
 export default function SettingsPage() {
     // Auth & Profile
-    const { user, authenticated } = usePrivy();
+    const { user } = usePrivy();
     const { profile, refreshProfile } = useUserProfile();
     const { fundWallet } = useFundWallet();
     const { sendNotification } = useNotifications();
@@ -57,7 +43,6 @@ export default function SettingsPage() {
     // --- ACCOUNT TAB STATE ---
     const [withdrawAddress, setWithdrawAddress] = useState('');
     const [withdrawAmount, setWithdrawAmount] = useState('');
-    const [withdrawMode, setWithdrawMode] = useState<'bank' | 'wallet'>('bank');
     const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
     const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
@@ -65,13 +50,6 @@ export default function SettingsPage() {
     const [depositType, setDepositType] = useState<'fiat' | 'crypto'>('fiat');
     const [depositAmount, setDepositAmount] = useState('1000');
     const [isOnRampLoading, setIsOnRampLoading] = useState(false);
-    const [isOffRampLoading, setIsOffRampLoading] = useState(false);
-
-    // Deposit Form
-    const [cardNumber, setCardNumber] = useState('');
-    const [cardExpiry, setCardExpiry] = useState('');
-    const [cardCVV, setCardCVV] = useState('');
-    const [cardName, setCardName] = useState('');
 
     // --- DATA FETCHING ---
     const { data: usdcBalance, refetch: refetchUSDC } = useReadContract({
@@ -85,8 +63,8 @@ export default function SettingsPage() {
     const { data: ethBalance, refetch: refetchETH } = useBalance({ address });
 
     // Contract Writes
-    const { writeContract, data: hash, isPending } = useWriteContract();
-    const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+    const { writeContract, data: hash } = useWriteContract();
+    const { isSuccess } = useWaitForTransactionReceipt({ hash });
 
     // --- EFFECTS ---
     useEffect(() => {
@@ -112,18 +90,9 @@ export default function SettingsPage() {
     }, [isWithdrawModalOpen, profile?.last_funding_address]);
 
     // --- HANDLERS ---
-    const handleBankValidation = () => {
-        setDepositStep('processing_bank');
-        setTimeout(() => {
-            if (parseFloat(depositAmount) > 10000) setDepositStep('failed');
-            else setDepositStep('confirm');
-        }, 2000);
-    };
-
     const resetDeposit = () => {
         setIsDepositModalOpen(false);
         setDepositStep('selection');
-        setCardNumber(''); setCardExpiry(''); setCardCVV(''); setCardName('');
     };
 
     const launchOnRamp = async () => {
@@ -131,27 +100,11 @@ export default function SettingsPage() {
         setIsOnRampLoading(true);
         try {
             await fundWallet({ address, chain: { id: 137, name: 'Polygon', rpcUrls: { default: { http: ['https://polygon-rpc.com'] } } } });
-            // Note: chain config is optional usually, ensuring defaults. Polygon is 137.
-            // If email notification needed, add fetch call here.
         } catch (err: any) {
             console.error('On-Ramp Error:', err);
             alert(`Payment Gateway Error: ${err.message || "Unknown error"}`);
         } finally {
             setIsOnRampLoading(false);
-        }
-    };
-
-    const launchTransakOffRamp = async () => {
-        if (!address) return;
-        setIsOffRampLoading(true);
-        try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            sendNotification('Withdrawal Pending', {
-                body: `Your $${withdrawAmount} USDC withdrawal to bank has been initiated.`,
-            });
-            setIsWithdrawModalOpen(false);
-        } finally {
-            setIsOffRampLoading(false);
         }
     };
 
@@ -180,8 +133,8 @@ export default function SettingsPage() {
                                 key={item.name}
                                 onClick={() => setActiveTab(item.name)}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === item.name
-                                        ? 'bg-white/10 text-white shadow-sm'
-                                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                    ? 'bg-white/10 text-white shadow-sm'
+                                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
                                     }`}
                             >
                                 <item.icon className={`w-4 h-4 ${activeTab === item.name ? 'text-emerald-400' : ''}`} />
