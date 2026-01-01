@@ -15,7 +15,7 @@ const navItems = [
     { label: 'Markets', icon: LayoutDashboard, href: '/markets' },
     { label: 'Activity', icon: Activity, href: '/activity' },
     { label: 'Ranks', icon: Trophy, href: '/ranks' },
-    { label: 'Wallet', icon: Wallet, href: '/funds' },
+    { label: 'Wallet', icon: Wallet, href: '/settings' },
 ];
 
 export default function MobileNavbar() {

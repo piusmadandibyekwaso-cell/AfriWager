@@ -19,7 +19,7 @@ const wagmiConfig = createConfig({
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {
-    const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "";
+    const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "cmjsj7rom00x8jp0ctp8v5ka6";
 
     return (
         <PrivyProvider
