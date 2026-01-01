@@ -12,7 +12,8 @@ export interface Market {
     image_url: string;
     end_date: string;
     status: 'OPEN' | 'RESOLVED' | 'PAUSED';
-    total_volume_usdc: number;
+    today_volume_usdc?: number; // Optional daily volume
+    outcomes?: { name: string; current_probability: number }[];
 }
 
 export const marketService = {
@@ -20,7 +21,7 @@ export const marketService = {
     async getMarkets(): Promise<Market[]> {
         const { data, error } = await supabase
             .from('markets')
-            .select('*')
+            .select('*, outcomes(name, current_probability)')
             .eq('status', 'OPEN')
             .neq('id', '642f1736-f050-4f1d-a7c0-181d3c363a3d') // Duplicate Old AFCON
             .neq('id', '550e8400-e29b-41d4-a716-446655440004') // Old Baraka (Grammy)

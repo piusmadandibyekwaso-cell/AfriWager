@@ -1,51 +1,84 @@
 import React from 'react';
-import { TrendingUp } from 'lucide-react';
+import { Market } from '@/services/marketService';
+import { MessageSquare, RefreshCcw } from 'lucide-react';
+import Link from 'next/link';
 
 interface MarketCardProps {
-    title: string;
-    volume: string;
-    chance: number;
-    image?: string;
-    category: string;
+    market: Market;
 }
 
-export default function MarketCard({ title, volume, chance, category }: MarketCardProps) {
+export default function MarketCard({ market }: MarketCardProps) {
+    // Helper to get probability color
+    const getProbColor = (prob: number) => {
+        if (prob >= 0.7) return 'text-emerald-500 bg-emerald-500/10';
+        if (prob <= 0.3) return 'text-red-500 bg-red-500/10';
+        return 'text-zinc-300 bg-zinc-800';
+    };
+
+    // Sort outcomes (Yes/No usually)
+    const outcomes = market.outcomes || [];
+    const yesOutcome = outcomes.find(o => o.name === 'Yes');
+    const noOutcome = outcomes.find(o => o.name === 'No');
+
+    // Default probability if missing (e.g. 50/50)
+    const yesProb = Math.round((yesOutcome?.current_probability || 0.5) * 100);
+    const noProb = Math.round((noOutcome?.current_probability || 0.5) * 100);
+
     return (
-        <div className="group relative overflow-hidden rounded-xl border border-white/10 bg-zinc-900/50 p-4 hover:border-white/20 transition-all hover:shadow-lg hover:shadow-emerald-500/10">
-            <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-medium text-emerald-400 uppercase tracking-wider">{category}</span>
+        <Link href={`/markets/${market.id}`} className="group block h-full">
+            <div className="flex flex-col h-full bg-[#1C1C1E] hover:bg-[#2C2C2E] transition-colors rounded-lg overflow-hidden border border-zinc-800 hover:border-zinc-700">
+
+                {/* Header: Icon + Question */}
+                <div className="p-4 pb-2 flex gap-3">
+                    <div className="flex-shrink-0">
+                        {/* Compact Image/Icon (44x44) */}
+                        <img
+                            src={market.image_url}
+                            alt={market.category}
+                            className="w-11 h-11 object-cover rounded-md border border-zinc-700"
+                        />
                     </div>
-                    <h3 className="text-lg font-medium text-white leading-snug group-hover:text-emerald-400 transition-colors">
-                        {title}
-                    </h3>
-                </div>
-                <div className="h-12 w-12 rounded-lg bg-zinc-800 flex-shrink-0" />
-            </div>
-
-            <div className="mt-6 flex items-end justify-between">
-                <div className="flex flex-col gap-1">
-                    <span className="text-xs text-zinc-500">Volume</span>
-                    <span className="text-sm font-medium text-zinc-300">{volume}</span>
-                </div>
-
-                <div className="flex flex-col items-end gap-1">
-                    <div className="flex items-center gap-1 text-emerald-400">
-                        <TrendingUp className="h-3 w-3" />
-                        <span className="text-xs font-medium">Yes</span>
+                    <div>
+                        <h3 className="text-[15px] font-medium text-white leading-snug line-clamp-2 md:line-clamp-3">
+                            {market.question}
+                        </h3>
                     </div>
-                    <span className="text-xl font-bold text-white">{chance}%</span>
+                </div>
+
+                {/* Body: Outcomes (Polymarket Style) */}
+                <div className="px-4 py-2 flex-grow">
+                    {/* Binary Grid */}
+                    <div className="grid grid-cols-2 gap-2 mt-1">
+                        {/* Yes Button */}
+                        <div className={`flex flex-col items-center justify-center py-2 px-1 rounded transition-colors ${yesProb > noProb ? 'bg-emerald-500/10' : 'bg-zinc-800/50 group-hover:bg-zinc-700'} `}>
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-500 mb-0.5">Yes</span>
+                            <span className={`text-lg font-bold ${yesProb > noProb ? 'text-emerald-500' : 'text-zinc-400'}`}>
+                                {yesProb}%
+                            </span>
+                        </div>
+
+                        {/* No Button */}
+                        <div className={`flex flex-col items-center justify-center py-2 px-1 rounded transition-colors ${noProb > yesProb ? 'bg-red-500/10' : 'bg-zinc-800/50 group-hover:bg-zinc-700'}`}>
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-red-500 mb-0.5">No</span>
+                            <span className={`text-lg font-bold ${noProb > yesProb ? 'text-red-500' : 'text-zinc-400'}`}>
+                                {noProb}%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer: Volume + Icons */}
+                <div className="px-4 py-3 border-t border-zinc-800/50 flex items-center justify-between text-zinc-500">
+                    <span className="text-xs font-medium">
+                        ${market.total_volume_usdc?.toLocaleString() || '0'} Vol
+                    </span>
+                    <div className="flex items-center gap-3">
+                        {/* Fake "Social" icons to match Polymarket vibe */}
+                        <MessageSquare className="w-3.5 h-3.5 hover:text-white transition-colors" />
+                        <RefreshCcw className="w-3.5 h-3.5 hover:text-white transition-colors" />
+                    </div>
                 </div>
             </div>
-
-            {/* Progress Bar */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-800">
-                <div
-                    className="h-full bg-emerald-500 transition-all duration-500"
-                    style={{ width: `${chance}%` }}
-                />
-            </div>
-        </div>
+        </Link>
     );
 }
