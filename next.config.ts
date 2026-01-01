@@ -1,4 +1,5 @@
 import withPWAInit from 'next-pwa';
+import type { NextConfig } from 'next';
 
 const withPWA = withPWAInit({
   dest: 'public',
