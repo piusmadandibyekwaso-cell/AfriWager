@@ -64,7 +64,14 @@ export default function AdminResolvePage() {
     );
 
     // 2. Security Gate (Admin Only)
-    const isAdmin = user?.wallet?.address?.toLowerCase() === ADMIN_WALLET?.toLowerCase();
+    // CRITICAL FIX: Whitelist specific user wallet + Env Var
+    const ADMIN_WALLETS = [
+        ADMIN_WALLET?.toLowerCase(),
+        "0x9f717cf22ebb3ab8fb95b68ec845ae79be434a13" // User's Privy Wallet
+    ].filter(Boolean);
+
+    const isAdmin = !!user?.wallet?.address &&
+        ADMIN_WALLETS.includes(user.wallet.address.toLowerCase());
 
     if (!isAdmin) {
         return (
