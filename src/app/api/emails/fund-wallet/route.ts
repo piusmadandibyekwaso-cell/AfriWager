@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
-// Initialize Resend with API Key from environment variables
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend with API Key from environment variables (Lazy Init)
 
 export async function POST(request: Request) {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     try {
         const body = await request.json();
         const { email, amount, txHash, walletAddress } = body;
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
         }
 
         // Send Email
-        const data = await resend.emails.send({
+        const { data: emailData, error: emailError } = await resend.emails.send({
             from: 'AfriSights <onboarding@resend.dev>', // Change this to 'noreply@afrisights.com' after domain verification
             to: [email],
             subject: 'Funds Received - AfriSights',
@@ -85,7 +85,12 @@ export async function POST(request: Request) {
       `
         });
 
-        return NextResponse.json({ success: true, id: data.id });
+        if (emailError) {
+            console.error('Email API Error:', emailError);
+            return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+        }
+
+        return NextResponse.json({ success: true, id: emailData?.id });
     } catch (error) {
         console.error('Email API Error:', error);
         return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });

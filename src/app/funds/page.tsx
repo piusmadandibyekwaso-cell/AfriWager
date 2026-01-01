@@ -1,10 +1,7 @@
-import { QRCodeSVG } from 'qrcode.react'; // Add import
+'use client';
 
-// ... inside component ...
-// UI State
-const [depositType, setDepositType] = useState<'fiat' | 'crypto'>('fiat'); // New State
-const [withdrawAddress, setWithdrawAddress] = useState('');
-// ...
+import { useState, useEffect, useMemo } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useBalance, useReadContracts } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 import { parseUnits, formatUnits, keccak256, encodePacked } from 'viem';
@@ -52,7 +49,7 @@ interface PositionItem {
 
 export default function FundsPage() {
     const { address } = useAccount();
-    const { authenticated, login } = usePrivy();
+    const { authenticated, login, user } = usePrivy();
     const { fundWallet } = useFundWallet();
     const { sendNotification } = useNotifications();
     const { profile, isLoading: isProfileLoading, refreshProfile } = useUserProfile();
@@ -65,6 +62,7 @@ export default function FundsPage() {
     const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
     const [isOffRampLoading, setIsOffRampLoading] = useState(false);
     const [depositStep, setDepositStep] = useState<DepositStep>('selection');
+    const [depositType, setDepositType] = useState<'fiat' | 'crypto'>('fiat');
     const [depositMethod, setDepositMethod] = useState<DepositMethod>('card');
     const [depositAmount, setDepositAmount] = useState('1000');
     const [activeTab, setActiveTab] = useState<'positions' | 'activity'>('positions');
