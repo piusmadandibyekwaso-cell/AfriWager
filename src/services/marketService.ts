@@ -22,6 +22,9 @@ export const marketService = {
             .from('markets')
             .select('*')
             .eq('status', 'OPEN')
+            .neq('id', '642f1736-f050-4f1d-a7c0-181d3c363a3d') // Duplicate Old AFCON
+            .neq('id', '550e8400-e29b-41d4-a716-446655440004') // Old Baraka (Grammy)
+            .neq('id', '550e8400-e29b-41d4-a716-446655440007') // Old AFCON (Wrong Image)
             .order('total_volume_usdc', { ascending: false });
 
         if (error) {

@@ -36,13 +36,50 @@ async function seed() {
             total_volume_usdc: 15420
         },
         {
-            question: "Who will win the 2025 AFCON?",
-            description: "Winner of the Africa Cup of Nations 2025.",
+            id: "550e8400-e29b-41d4-a716-446655440004",
+            question: "Will Joshua Baraka win a BET Award in 2026?",
+            description: "This market resolves to YES if Joshua Baraka wins a BET Award in any category at the 2026 ceremony. Resolution based on official BET winners list.",
+            end_date: "2026-07-01T00:00:00Z",
+            category: "Music",
+            image_url: "https://softpower.ug/wp-content/uploads/2024/05/Joshua-Baraka.jpg",
+            condition_id: "0xABC...DEF", // Placeholder
+            outcome_tokens: ["Yes", "No"],
+            status: "OPEN",
+            total_volume_usdc: 0
+        },
+        {
+            id: "550e8400-e29b-41d4-a716-446655440005",
+            question: "Will at least 3 African nations qualify for the Round of 32 in the 2026 World Cup?",
+            description: "Resolves to YES if 3 or more CAF teams advance from their groups.",
+            end_date: "2026-07-01T00:00:00Z",
             category: "Sports",
-            end_date: new Date("2026-02-14").toISOString(), // Adjusted date
-            condition_id: "0x456...def",
+            image_url: "https://images.unsplash.com/photo-1541873676947-d31229153026?auto=format&fit=crop&q=80&w=800", // Generic football
+            condition_id: "0xDEF...GHI", // Placeholder
+            outcome_tokens: ["Yes", "No"],
+            status: "OPEN",
+            total_volume_usdc: 0
+        },
+        {
+            id: "550e8400-e29b-41d4-a716-446655440006",
+            question: "Will Starlink be officially live in at least 40 African countries by Dec 31, 2026?",
+            description: "Based on official Starlink availability map and roadmap.",
+            end_date: "2026-12-31T23:59:59Z",
+            category: "Tech",
+            image_url: "https://images.unsplash.com/photo-1549488497-60a6949d21ee?auto=format&fit=crop&q=80&w=800",
+            condition_id: "0xGHI...JKL", // Placeholder
+            outcome_tokens: ["Yes", "No"],
+            status: "OPEN",
+            total_volume_usdc: 0
+        },
+        {
+            id: "550e8400-e29b-41d4-a716-446655440007",
+            question: "Who will win the AFCON Final (played Jan 18, 2026)?",
+            description: "Prediction market for the winner of the 2025/26 Africa Cup of Nations.",
+            end_date: "2026-01-19T00:00:00Z",
+            category: "Sports",
+            image_url: "https://www.cafonline.com/media/ylplke4l/itri-hd.jpg",
+            condition_id: "0x456...def", // Reusing old condition_id for AFCON
             outcome_tokens: ["Morocco", "Senegal", "Nigeria", "Other"],
-            image_url: "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&q=80&w=1000",
             status: "OPEN",
             total_volume_usdc: 85000
         },
