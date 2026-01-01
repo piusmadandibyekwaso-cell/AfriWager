@@ -326,7 +326,7 @@ export default function MarketPage() {
 
                             {tradeStep === 'approving' && (
                                 <div className="py-12 flex flex-col items-center text-center">
-                                    <Loader2 className="w-16 h-16 text-indigo-500 animate-spin mb-8" />
+                                    <Loader2 className="w-16 h-16 text-amber-500 animate-spin mb-8" />
                                     <h4 className="text-lg font-black uppercase italic tracking-widest mb-2">Stage 1: Approval</h4>
                                     <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest max-w-[200px] leading-relaxed">Authorizing Market Maker to use your USDC funds.</p>
                                 </div>

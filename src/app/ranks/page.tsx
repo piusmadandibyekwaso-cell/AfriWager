@@ -71,7 +71,7 @@ export default function RanksPage() {
     };
 
     const getTraderTier = (volume: number) => {
-        if (volume > 100000) return { label: 'Whale', color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20' };
+        if (volume > 100000) return { label: 'Whale', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' };
         if (volume > 10000) return { label: 'Sharpshooter', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' };
         return { label: 'Scout', color: 'text-zinc-500', bg: 'bg-zinc-500/5 border-zinc-500/10' };
     };
@@ -184,7 +184,7 @@ export default function RanksPage() {
                                         </td>
                                         <td className="p-8">
                                             <div className="flex items-center gap-3">
-                                                <Zap className="w-4 h-4 text-indigo-500/40" />
+                                                <Zap className="w-4 h-4 text-amber-500/40" />
                                                 <span className="text-sm font-black text-white tabular-nums">{r.trade_count}</span>
                                             </div>
                                         </td>

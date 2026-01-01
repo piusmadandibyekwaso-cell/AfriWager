@@ -349,7 +349,7 @@ export default function FundsPage() {
                                 </button>
                                 <button
                                     onClick={() => setIsDepositModalOpen(true)}
-                                    className="px-10 py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-3xl transition-all shadow-2xl shadow-indigo-600/20 uppercase tracking-widest text-[11px] active:scale-95"
+                                    className="px-10 py-5 bg-amber-600 hover:bg-amber-500 text-black font-black rounded-3xl transition-all shadow-2xl shadow-amber-600/20 uppercase tracking-widest text-[11px] active:scale-95"
                                 >
                                     Add Funds
                                 </button>
@@ -503,7 +503,7 @@ export default function FundsPage() {
                     <div className="bg-[#0c0e14] border border-white/5 w-full max-w-sm rounded-[4rem] shadow-4xl overflow-hidden animate-in zoom-in-95 duration-200">
                         <div className="p-10 pb-4 flex items-center justify-between border-b border-white/5">
                             <h3 className="text-xl font-black tracking-tighter uppercase italic flex items-center gap-4">
-                                <ShieldCheck className="w-6 h-6 text-indigo-500" /> Secure Fund
+                                <ShieldCheck className="w-6 h-6 text-amber-500" /> Secure Fund
                             </h3>
                             <button onClick={resetDeposit} className="p-3 hover:bg-slate-900 rounded-full text-slate-600">
                                 <AlertCircle className="w-6 h-6 rotate-45" />
@@ -526,7 +526,7 @@ export default function FundsPage() {
                                                     <span className="text-6xl font-black text-white tracking-tighter">${depositAmount}</span>
                                                     <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full">USDC</span>
                                                 </div>
-                                                <input type="range" min="10" max="5000" step="10" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 mt-6" />
+                                                <input type="range" min="10" max="5000" step="10" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500 mt-6" />
                                             </div>
 
                                             <button
@@ -566,22 +566,22 @@ export default function FundsPage() {
 
                             {depositStep === 'details' && (
                                 <div className="space-y-6">
-                                    <input type="text" placeholder="CARDHOLDER NAME" className="w-full bg-[#060709] border border-white/5 rounded-2xl p-5 text-white font-black text-[10px] outline-none focus:border-indigo-500 transition-all uppercase tracking-widest" value={cardName} onChange={(e) => setCardName(e.target.value)} />
+                                    <input type="text" placeholder="CARDHOLDER NAME" className="w-full bg-[#060709] border border-white/5 rounded-2xl p-5 text-white font-black text-[10px] outline-none focus:border-amber-500 transition-all uppercase tracking-widest" value={cardName} onChange={(e) => setCardName(e.target.value)} />
                                     <div className="relative">
-                                        <input type="text" placeholder="CARD NUMBER" className="w-full bg-[#060709] border border-white/5 rounded-2xl p-5 text-white font-mono text-sm outline-none focus:border-indigo-500 transition-all" value={cardNumber} onChange={(e) => setCardNumber(e.target.value)} />
+                                        <input type="text" placeholder="CARD NUMBER" className="w-full bg-[#060709] border border-white/5 rounded-2xl p-5 text-white font-mono text-sm outline-none focus:border-amber-500 transition-all" value={cardNumber} onChange={(e) => setCardNumber(e.target.value)} />
                                         <CreditCard className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-800" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <input type="text" placeholder="MM / YY" className="w-full bg-[#060709] border border-white/5 rounded-2xl p-5 text-white font-mono text-center outline-none focus:border-indigo-500 transition-all" value={cardExpiry} onChange={(e) => setCardExpiry(e.target.value)} />
-                                        <input type="password" placeholder="CVV" className="w-full bg-[#060709] border border-white/5 rounded-2xl p-5 text-white font-mono text-center outline-none focus:border-indigo-500 transition-all" value={cardCVV} onChange={(e) => setCardCVV(e.target.value)} />
+                                        <input type="text" placeholder="MM / YY" className="w-full bg-[#060709] border border-white/5 rounded-2xl p-5 text-white font-mono text-center outline-none focus:border-amber-500 transition-all" value={cardExpiry} onChange={(e) => setCardExpiry(e.target.value)} />
+                                        <input type="password" placeholder="CVV" className="w-full bg-[#060709] border border-white/5 rounded-2xl p-5 text-white font-mono text-center outline-none focus:border-amber-500 transition-all" value={cardCVV} onChange={(e) => setCardCVV(e.target.value)} />
                                     </div>
-                                    <button onClick={handleBankValidation} disabled={!cardNumber || !cardExpiry || !cardCVV} className="w-full py-6 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-3xl transition-all shadow-2xl shadow-indigo-600/20 active:scale-95 uppercase tracking-widest text-[10px]">Authorize Pay</button>
+                                    <button onClick={handleBankValidation} disabled={!cardNumber || !cardExpiry || !cardCVV} className="w-full py-6 bg-amber-600 hover:bg-amber-500 text-black font-black rounded-3xl transition-all shadow-2xl shadow-amber-600/20 active:scale-95 uppercase tracking-widest text-[10px]">Authorize Pay</button>
                                 </div>
                             )}
 
                             {depositStep === 'processing_bank' && (
                                 <div className="py-20 flex flex-col items-center text-center">
-                                    <Loader2 className="w-20 h-20 text-indigo-500 animate-spin mb-10 opacity-30" />
+                                    <Loader2 className="w-20 h-20 text-amber-500 animate-spin mb-10 opacity-30" />
                                     <h4 className="text-xl font-black text-white italic tracking-tighter uppercase mb-2">Authenticating</h4>
                                     <p className="text-slate-600 text-[9px] font-black uppercase tracking-[0.2em] animate-pulse">Contacting Banking Gateway...</p>
                                 </div>
@@ -589,7 +589,7 @@ export default function FundsPage() {
 
                             {depositStep === 'confirm' && (
                                 <div className="space-y-10 animate-in zoom-in-95">
-                                    <div className="p-10 bg-gradient-to-br from-indigo-700 to-indigo-900 rounded-[3rem] shadow-3xl text-white relative overflow-hidden">
+                                    <div className="p-10 bg-gradient-to-br from-amber-600 to-amber-900 rounded-[3rem] shadow-3xl text-white relative overflow-hidden">
                                         <Landmark className="absolute -right-10 -bottom-10 w-48 h-48 opacity-10" />
                                         <div className="relative z-10">
                                             <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-50 mb-10 italic">Allocation Review</p>
