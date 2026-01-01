@@ -79,9 +79,9 @@ export default function ProfileMenu() {
                                 name={profile?.avatar_seed || address || 'user'}
                                 size={48}
                             />
-                            <button className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-full transition-colors">
+                            <Link href="/settings" className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-full transition-colors">
                                 <Settings className="w-5 h-5" />
-                            </button>
+                            </Link>
                         </div>
                         <div className="flex items-center gap-2">
                             <h3 className="text-lg font-bold text-white">@{username}</h3>
@@ -112,25 +112,12 @@ export default function ProfileMenu() {
 
                     <div className="h-px bg-white/5 mx-4" />
 
-                    {/* Dark Mode Toggle (Visual Only) */}
-                    <div className="p-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-sm font-medium text-white">
-                            <Moon className="w-4 h-4 text-zinc-400" />
-                            Dark mode
-                        </div>
-                        <div className="w-10 h-6 bg-emerald-500 rounded-full relative cursor-pointer">
-                            <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm" />
-                        </div>
-                    </div>
-
-                    <div className="h-px bg-white/5 mx-4" />
-
                     {/* Footer Links */}
                     <div className="p-4 grid grid-cols-2 gap-y-2 text-xs text-zinc-500">
-                        <Link href="#" className="hover:text-white transition-colors">Accuracy</Link>
-                        <Link href="#" className="hover:text-white transition-colors">Support</Link>
-                        <Link href="#" className="hover:text-white transition-colors">Documentation</Link>
-                        <Link href="#" className="hover:text-white transition-colors">Terms of Use</Link>
+                        <Link href="/accuracy" className="hover:text-white transition-colors">Accuracy</Link>
+                        <Link href="/support" className="hover:text-white transition-colors">Support</Link>
+                        <Link href="/docs" className="hover:text-white transition-colors">Documentation</Link>
+                        <Link href="/terms" className="hover:text-white transition-colors">Terms of Use</Link>
                     </div>
 
                     <div className="h-px bg-white/5 mx-4" />
