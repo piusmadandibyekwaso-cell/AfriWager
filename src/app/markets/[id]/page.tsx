@@ -10,7 +10,8 @@ import { CONTRACT_ADDRESSES } from '@/constants/contracts';
 import FPMMABI from '@/abis/FixedProductMarketMaker.json';
 import USDCABI from '@/abis/MockERC20.json';
 import { usePrivy } from '@privy-io/react-auth';
-import { TrendingUp, TrendingDown, Info, ShieldCheck, ArrowRight, Loader2, AlertCircle, CheckCircle2, Wallet, ExternalLink, Activity, BarChart3, Droplets } from 'lucide-react';
+import { ArrowRight, BarChart3, Info, ShieldCheck, AlertCircle, Droplets, Activity, Wallet, User as UserIcon } from "lucide-react";
+import { getCandidateImage } from '@/constants/candidateImages';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import PriceChart from '@/components/PriceChart';
@@ -234,24 +235,71 @@ export default function MarketPage() {
                             </div>
 
                             {/* Outcome Buttons */}
-                            <div className="grid grid-cols-2 gap-4 mb-10">
-                                {market.outcome_tokens.map((outcome, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => setSelectedOutcome(index)}
-                                        className={cn(
-                                            "flex flex-col items-center justify-center p-8 rounded-3xl border-2 transition-all active:scale-95 group",
-                                            selectedOutcome === index
-                                                ? (index === 0 ? "bg-emerald-500/10 border-emerald-500/50" : "bg-rose-500/10 border-rose-500/50")
-                                                : "bg-[#060709] border-zinc-800/50 hover:border-zinc-700"
-                                        )}
-                                    >
-                                        <div className={cn("text-5xl font-black tracking-tighter mb-2", index === 0 ? "text-emerald-500" : "text-rose-500")}>
-                                            {(prices[index] * 100).toFixed(0)}¢
-                                        </div>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-white transition-colors">{outcome}</span>
-                                    </button>
-                                ))}
+                            {/* Outcome Buttons / Campaign Posters */}
+                            <div className={cn(
+                                "grid gap-4 mb-10",
+                                market.category === 'Politics' ? "grid-cols-2" : "grid-cols-2"
+                            )}>
+                                {market.outcome_tokens.map((outcome, index) => {
+                                    const candidateImage = market.category === 'Politics' ? getCandidateImage(outcome) : null;
+
+                                    return (
+                                        <button
+                                            key={index}
+                                            onClick={() => setSelectedOutcome(index)}
+                                            className={cn(
+                                                "relative overflow-hidden group transition-all duration-300 ease-out active:scale-95",
+                                                market.category === 'Politics'
+                                                    ? "h-64 rounded-[2rem] border-0" // Politics Card Style
+                                                    : "p-8 rounded-3xl border-2 flex flex-col items-center justify-center", // Default Style
+                                                selectedOutcome === index
+                                                    ? (index === 0 ? "ring-4 ring-emerald-500/50" : "ring-4 ring-rose-500/50")
+                                                    : "hover:opacity-90",
+                                                market.category !== 'Politics' && (selectedOutcome === index
+                                                    ? (index === 0 ? "bg-emerald-500/10 border-emerald-500/50" : "bg-rose-500/10 border-rose-500/50")
+                                                    : "bg-[#060709] border-zinc-800/50 hover:border-zinc-700")
+                                            )}
+                                        >
+                                            {/* CAMPAIGN POSTER IMAGE (Politics Only) */}
+                                            {candidateImage && (
+                                                <>
+                                                    <img
+                                                        src={candidateImage}
+                                                        alt={outcome}
+                                                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+
+                                                    {/* Selected Overlay */}
+                                                    {selectedOutcome === index && (
+                                                        <div className={cn(
+                                                            "absolute inset-0 border-[6px] rounded-[2rem] z-20",
+                                                            index === 0 ? "border-emerald-500" : "border-amber-500"
+                                                        )} />
+                                                    )}
+                                                </>
+                                            )}
+
+                                            {/* CONTENT */}
+                                            <div className={cn(
+                                                "relative z-10 flex flex-col items-center justify-center h-full w-full",
+                                                market.category === 'Politics' ? "justify-end pb-6" : ""
+                                            )}>
+                                                <div className={cn(
+                                                    "font-black tracking-tighter mb-1 shadow-black drop-shadow-lg",
+                                                    market.category === 'Politics' ? "text-4xl text-white" : "text-5xl",
+                                                    market.category !== 'Politics' && (index === 0 ? "text-emerald-500" : "text-amber-500")
+                                                )}>
+                                                    {(prices[index] * 100).toFixed(0)}¢
+                                                </div>
+                                                <span className={cn(
+                                                    "text-[10px] font-black uppercase tracking-widest transition-colors",
+                                                    market.category === 'Politics' ? "text-white/80 bg-black/50 px-3 py-1 rounded-full backdrop-blur-md" : "text-zinc-500 group-hover:text-white"
+                                                )}>{outcome}</span>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
                             </div>
 
                             {/* Execution Summary Preview */}
