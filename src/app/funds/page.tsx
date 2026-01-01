@@ -280,8 +280,8 @@ export default function FundsPage() {
                 <div>
                     <div className="flex items-center gap-3 mb-4">
                         <a href="/activity" className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-[9px] font-black text-emerald-500 uppercase tracking-[0.2em] hover:bg-emerald-500/20 transition-colors">Live Portfolio</a>
-                        <a href="https://sepolia.etherscan.io" target="_blank" rel="noreferrer" className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] hover:bg-white/10 hover:text-white transition-colors flex items-center gap-1">
-                            Sepolia Network <ExternalLink className="w-2 h-2" />
+                        <a href="https://polygonscan.com" target="_blank" rel="noreferrer" className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] hover:bg-white/10 hover:text-white transition-colors flex items-center gap-1">
+                            Polygon Mainnet <ExternalLink className="w-2 h-2" />
                         </a>
                     </div>
                     <h1 className="text-5xl font-black text-white italic tracking-tighter">Financial Center</h1>
@@ -363,7 +363,7 @@ export default function FundsPage() {
 
                             <div className="flex items-center justify-between p-5 rounded-2xl md:rounded-3xl bg-white/5 border border-white/5">
                                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Network Gas</p>
-                                <p className="text-xs font-black text-emerald-500">{ethBalance ? Number(formatUnits(ethBalance.value, 18)).toFixed(4) : '0.00'} ETH</p>
+                                <p className="text-xs font-black text-emerald-500">{ethBalance ? Number(formatUnits(ethBalance.value, 18)).toFixed(4) : '0.00'} MATIC</p>
                             </div>
                         </div>
                     </div>

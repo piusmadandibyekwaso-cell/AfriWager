@@ -311,7 +311,7 @@ export default function MarketPage() {
                                         </div>
                                         <div className="flex justify-between p-4 bg-zinc-900/50 rounded-2xl">
                                             <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Network Fee</span>
-                                            <span className="text-xs font-black text-emerald-500">~0.0001 ETH</span>
+                                            <span className="text-xs font-black text-emerald-500">~0.01 MATIC</span>
                                         </div>
                                     </div>
 
@@ -336,7 +336,7 @@ export default function MarketPage() {
                                 <div className="py-12 flex flex-col items-center text-center">
                                     <Loader2 className="w-16 h-16 text-emerald-500 animate-spin mb-8" />
                                     <h4 className="text-lg font-black uppercase italic tracking-widest mb-2">Stage 2: Execution</h4>
-                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest max-w-[200px] leading-relaxed">Finalizing wager on the Sepolia blockchain ledger.</p>
+                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest max-w-[200px] leading-relaxed">Finalizing wager on the Polygon Mainnet ledger.</p>
                                 </div>
                             )}
 
@@ -357,11 +357,11 @@ export default function MarketPage() {
                                         </button>
                                         {lastTxHash && (
                                             <a
-                                                href={`https://sepolia.etherscan.io/tx/${lastTxHash}`}
+                                                href={`https://polygonscan.com/tx/${lastTxHash}`}
                                                 target="_blank" rel="noreferrer"
                                                 className="flex items-center justify-center gap-2 text-zinc-500 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest"
                                             >
-                                                View on Etherscan <ExternalLink className="w-3 h-3" />
+                                                View on Polygonscan <ExternalLink className="w-3 h-3" />
                                             </a>
                                         )}
                                     </div>
@@ -372,7 +372,7 @@ export default function MarketPage() {
                                 <div className="py-12 flex flex-col items-center text-center">
                                     <AlertCircle className="w-16 h-16 text-rose-500 mb-8" />
                                     <h4 className="text-xl font-black uppercase tracking-tighter mb-4">Transaction Denied</h4>
-                                    <p className="text-zinc-500 text-xs font-bold mb-10 max-w-[240px]">The transaction was rejected or failed on-chain. Please check your gas (ETH) balance.</p>
+                                    <p className="text-zinc-500 text-xs font-bold mb-10 max-w-[240px]">The transaction was rejected or failed on-chain. Please check your gas (MATIC) balance.</p>
                                     <button onClick={() => setTradeStep('idle')} className="w-full py-5 bg-zinc-800 text-white font-black rounded-2xl uppercase tracking-widest text-[10px]">
                                         Back to Review
                                     </button>

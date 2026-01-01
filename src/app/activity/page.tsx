@@ -165,7 +165,7 @@ export default function ActivityPage() {
                                             <ArrowRight className="w-5 h-5" />
                                         </a>
                                         <a
-                                            href={`https://sepolia.etherscan.io/tx/${event.tx_hash}`}
+                                            href={`https://polygonscan.com/tx/${event.tx_hash}`}
                                             target="_blank" rel="noreferrer"
                                             className="p-3 bg-zinc-900/50 hover:bg-emerald-500/10 border border-zinc-800 rounded-xl text-zinc-600 hover:text-emerald-500 transition-all active:scale-90"
                                             title="Verify Tx"
