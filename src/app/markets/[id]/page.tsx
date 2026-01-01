@@ -63,19 +63,22 @@ export default function MarketPage() {
         query: { enabled: !!market?.contract_address }
     });
 
-    // 3. Calculate Real-time Prices
+    // 3. Calculate Real-time Prices (Generalized for N outcomes)
     const prices = useMemo(() => {
-        if (!poolBalances) return [0.5, 0.5];
-        const balances = poolBalances as bigint[];
-        const total = Number(balances[0]) + Number(balances[1]);
-        if (total === 0) return [0.5, 0.5];
+        const outcomeCount = market?.outcome_tokens?.length || 2;
+        if (!poolBalances) return Array(outcomeCount).fill(1 / outcomeCount);
 
-        // Price of Outcome i = Balance of Other / Total
-        // (Simplified constant product formula: p = y / (x+y))
-        const p0 = Number(balances[1]) / total;
-        const p1 = Number(balances[0]) / total;
-        return [p0, p1];
-    }, [poolBalances]);
+        const balances = poolBalances as bigint[];
+        if (balances.length === 0) return Array(outcomeCount).fill(1 / outcomeCount);
+
+        const total = balances.reduce((acc, b) => acc + Number(b), 0);
+        if (total === 0) return Array(outcomeCount).fill(1 / outcomeCount);
+
+        // Price of Outcome i = (Constant / Balance[i]) / Sum(Constant / Balance[j])
+        // Simplified for FPMM: Price is proportional to shares in pool
+        // However, for display, we often use the simplified reciprocal or direct balance ratio:
+        return balances.map(b => (1 - (Number(b) / total)) / (outcomeCount - 1));
+    }, [poolBalances, market?.outcome_tokens]);
 
     // 4. Estimate Shares to Receive
     const estimatedShares = useMemo(() => {
