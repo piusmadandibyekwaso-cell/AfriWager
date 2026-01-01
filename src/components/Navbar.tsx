@@ -1,5 +1,8 @@
 import { userService, UserProfile } from '@/services/userService';
 import ProfileMenu from './ProfileMenu';
+import Link from 'next/link';
+import { usePrivy } from '@privy-io/react-auth';
+import OnboardingModal from './OnboardingModal';
 
 export default function Navbar() {
   const { login, authenticated } = usePrivy();
