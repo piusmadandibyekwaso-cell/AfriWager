@@ -12,7 +12,7 @@ export default function MarketsNavBar({ searchQuery, setSearchQuery }: MarketsNa
     ];
 
     const tags = [
-        "All", "Trump", "CFB Playoffs", "Venezuela", "Ukraine", "Minnesota Fraud", "Epstein", "Lighter", "Ukraine Peace Deal", "Fed"
+        "All", "Museveni", "Ruto", "AFCON", "Bitcoin", "Nigeria", "Inflation", "Kenya", "South Africa", "Ethereum"
     ];
 
     return (
@@ -33,7 +33,10 @@ export default function MarketsNavBar({ searchQuery, setSearchQuery }: MarketsNa
                 <div className="relative group">
                     <div className="flex items-center h-12 gap-6 overflow-x-auto no-scrollbar text-sm font-semibold border-b border-zinc-800/50 pr-8">
                         <div className="flex items-center gap-6 flex-shrink-0 text-zinc-400">
-                            <button className="flex items-center gap-1.5 text-white hover:text-emerald-400 transition-colors">
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className={`flex items-center gap-1.5 transition-colors ${searchQuery === '' ? 'text-emerald-400' : 'text-white hover:text-emerald-400'}`}
+                            >
                                 <TrendingUp className="w-4 h-4" />
                                 <span>Trending</span>
                             </button>
@@ -45,7 +48,11 @@ export default function MarketsNavBar({ searchQuery, setSearchQuery }: MarketsNa
 
                         <div className="flex items-center gap-6 flex-shrink-0 text-zinc-400">
                             {categories.map(cat => (
-                                <button key={cat} className="hover:text-white transition-colors whitespace-nowrap">
+                                <button
+                                    key={cat}
+                                    onClick={() => setSearchQuery(cat)}
+                                    className={`transition-colors whitespace-nowrap ${searchQuery === cat ? 'text-emerald-400' : 'hover:text-white'}`}
+                                >
                                     {cat}
                                 </button>
                             ))}
@@ -83,14 +90,21 @@ export default function MarketsNavBar({ searchQuery, setSearchQuery }: MarketsNa
 
                         {/* Tags */}
                         <div className="flex items-center gap-2 flex-shrink-0 text-sm font-medium">
-                            <button className="px-3 py-1.5 bg-[#2C2C2E] text-emerald-400 rounded-md whitespace-nowrap">
-                                All
-                            </button>
-                            {tags.slice(1).map(tag => (
-                                <button key={tag} className="px-3 py-1.5 text-zinc-400 hover:text-white hover:bg-[#2C2C2E] rounded-md transition-colors whitespace-nowrap">
-                                    {tag}
-                                </button>
-                            ))}
+                            {tags.map(tag => {
+                                const isActive = tag === "All" ? searchQuery === "" : searchQuery === tag;
+                                return (
+                                    <button
+                                        key={tag}
+                                        onClick={() => setSearchQuery(tag === "All" ? "" : tag)}
+                                        className={`px-3 py-1.5 rounded-md whitespace-nowrap transition-colors ${isActive
+                                                ? 'bg-[#2C2C2E] text-emerald-400'
+                                                : 'text-zinc-400 hover:text-white hover:bg-[#2C2C2E]'
+                                            }`}
+                                    >
+                                        {tag}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                     {/* Right Fade & Arrow */}
