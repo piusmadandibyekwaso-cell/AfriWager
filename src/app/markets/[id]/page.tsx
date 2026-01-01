@@ -265,23 +265,23 @@ export default function MarketPage() {
                                         >
                                             {/* CAMPAIGN POSTER IMAGE (Politics Only) */}
                                             {candidateImage && (
-                                                <>
+                                                <div className="absolute inset-0 bg-zinc-800 animate-pulse">
                                                     <img
                                                         src={candidateImage}
                                                         alt={outcome}
                                                         referrerPolicy="no-referrer"
                                                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                     />
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/10" />
+                                                </div>
+                                            )}
 
-                                                    {/* Selected Overlay */}
-                                                    {selectedOutcome === index && (
-                                                        <div className={cn(
-                                                            "absolute inset-0 border-[6px] rounded-[2rem] z-20",
-                                                            index === 0 ? "border-emerald-500" : "border-amber-500"
-                                                        )} />
-                                                    )}
-                                                </>
+                                            {/* Selected Overlay */}
+                                            {selectedOutcome === index && (
+                                                <div className={cn(
+                                                    "absolute inset-0 border-[6px] rounded-[2rem] z-20",
+                                                    index === 0 ? "border-emerald-500" : "border-amber-500"
+                                                )} />
                                             )}
 
                                             {/* CONTENT */}
