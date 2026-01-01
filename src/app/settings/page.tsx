@@ -20,6 +20,7 @@ import {
     Copy
 } from 'lucide-react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useBalance } from 'wagmi';
+import { polygon } from 'wagmi/chains';
 import { parseUnits, formatUnits } from 'viem';
 import { CONTRACT_ADDRESSES } from '@/constants/contracts';
 import MockUSDCABI from '@/abis/MockERC20.json';
@@ -101,12 +102,7 @@ export default function SettingsPage() {
         try {
             await fundWallet({
                 address,
-                chain: {
-                    id: 137,
-                    name: 'Polygon',
-                    rpcUrls: { default: { http: ['https://polygon-rpc.com'] } },
-                    nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 }
-                },
+                chain: polygon,
                 asset: 'USDC',
                 config: {
                     currencyCode: 'USDC_POLYGON',
