@@ -1,4 +1,10 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import MarketCard from '@/components/MarketCard';
+import Navbar from '@/components/Navbar';
+import MarketsNavBar from '@/components/MarketsNavBar';
+import { marketService, Market } from '@/services/marketService';
 
 export default function MarketsPage() {
     const [markets, setMarkets] = useState<Market[]>([]);
@@ -28,40 +34,13 @@ export default function MarketsPage() {
         <div className="min-h-screen bg-black text-white selection:bg-emerald-500/30">
             <Navbar />
 
-            <main className="pt-32 pb-24 container mx-auto px-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-8">
-                    <div>
-                        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-white mb-2">
-                            Markets
-                        </h1>
+            {/* Header / Sub-Nav */}
+            <div className="pt-20"> {/* Offset for main navbar */}
+                <MarketsNavBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+            </div>
 
-                        {/* Categories (Fake nav for visual) */}
-                        <div className="flex gap-4 text-sm font-medium text-zinc-400 overflow-x-auto pb-2 scrollbar-hide">
-                            <button className="text-white border-b-2 border-white pb-1">All</button>
-                            <button className="hover:text-white transition-colors">Politics</button>
-                            <button className="hover:text-white transition-colors">Sports</button>
-                            <button className="hover:text-white transition-colors">Crypto</button>
-                            <button className="hover:text-white transition-colors">Pop Culture</button>
-                        </div>
-                    </div>
-
-                    {/* Search & Filter */}
-                    <div className="flex gap-3 w-full md:w-auto">
-                        <div className="relative flex-grow md:flex-grow-0">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                            <input
-                                type="text"
-                                placeholder="Search markets..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full md:w-64 bg-[#1C1C1E] border border-zinc-800 rounded-lg pl-9 pr-4 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500/50 transition-colors"
-                            />
-                        </div>
-                        <button className="p-2 bg-[#1C1C1E] border border-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors">
-                            <Filter className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
+            <main className="py-8 container mx-auto px-4 md:px-6">
+                {/* Removed Old Header */}
 
                 {loading ? (
                     <div className="flex justify-center py-40">
