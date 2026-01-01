@@ -12,6 +12,7 @@ export interface Market {
     image_url: string;
     end_date: string;
     status: 'OPEN' | 'RESOLVED' | 'PAUSED';
+    total_volume_usdc: number;
     today_volume_usdc?: number; // Optional daily volume
     outcomes?: { name: string; current_probability: number }[];
 }
