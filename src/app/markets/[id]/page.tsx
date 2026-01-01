@@ -117,7 +117,7 @@ export default function MarketPage() {
                 address: market.contract_address as `0x${string}`,
                 abi: FPMMABI.abi,
                 functionName: 'buy',
-                args: [amountInWei, selectedOutcome, 0n], // 0n = min shares (slippage protection)
+                args: [market.id, amountInWei, selectedOutcome, 0n], // 0n = min shares (slippage protection)
             });
 
             setLastTxHash(buyHash);

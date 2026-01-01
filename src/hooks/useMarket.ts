@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { createClient } from '@supabase/supabase-js';
 import { parseUnits } from 'viem';
 import { CONTRACT_ADDRESSES } from '@/constants/contracts';
 import MarketMakerABI from '@/abis/FixedProductMarketMaker.json';
@@ -21,8 +22,9 @@ const ERC20_ABI = [
 
 export function useMarket() {
     const { writeContractAsync } = useWriteContract();
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
-    const buy = useCallback(async (outcomeIndex: number, amount: string) => {
+    const buy = useCallback(async (marketId: string, outcomeIndex: number, amount: string) => {
         try {
             const amountInWei = parseUnits(amount, 6); // USDC has 6 decimals
 
@@ -43,8 +45,19 @@ export function useMarket() {
                 address: CONTRACT_ADDRESSES.marketMaker as `0x${string}`,
                 abi: MarketMakerABI.abi,
                 functionName: 'buy',
-                args: [BigInt(amountInWei), outcomeIndex, BigInt(0)], // 0 = min tokens (slippage protection omitted for PoC)
+                args: [marketId, outcomeIndex, parseUnits(amount, 6)],
             });
+
+            // Optimistic Volume Update (User must enable RPC function via SQL)
+            try {
+                const { error } = await supabase.rpc('increment_market_volume', {
+                    market_id: marketId,
+                    amount_usdc: parseFloat(amount)
+                });
+                if (error) console.warn('Volume update failed (RPC missing?):', error.message);
+            } catch (err) {
+                console.warn('Volume update check failed:', err);
+            }
 
             console.log('Buy Tx:', buyTx);
             return buyTx;
