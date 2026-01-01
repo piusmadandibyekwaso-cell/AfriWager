@@ -17,12 +17,12 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white">
-      {/* Pulsing Logo Only */}
-      <div className="relative h-32 w-32 md:h-40 md:w-40 animate-pulse">
+      {/* Pulsing Logo Only - Cropped via CSS */}
+      <div className="relative h-24 w-24 md:h-32 md:w-32 animate-pulse overflow-hidden rounded-[2.5rem]">
         <img
           src="/app_icon_512.png"
           alt="AfriSights Logo"
-          className="h-full w-full object-contain"
+          className="h-full w-full object-cover scale-125"
         />
       </div>
     </div>
