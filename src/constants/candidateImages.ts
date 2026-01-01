@@ -1,9 +1,9 @@
 export const CANDIDATE_IMAGES: Record<string, string> = {
     // Uganda 2026 Candidates
-    "Yoweri Museveni": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Yoweri_Museveni.jpg/800px-Yoweri_Museveni.jpg",
-    "Bobi Wine": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Kyagulanyi_Ssentamu_Robert_%28Bobi_Wine%29.jpg/800px-Kyagulanyi_Ssentamu_Robert_%28Bobi_Wine%29.jpg",
-    "Mugisha Muntu": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Mugisha_Muntu.jpg/800px-Mugisha_Muntu.jpg",
-    "Others": "https://images.unsplash.com/photo-1541873676947-d31229153026?auto=format&fit=crop&q=80&w=800",
+    "Yoweri Museveni": "https://upload.wikimedia.org/wikipedia/commons/7/75/Yoweri_Museveni.jpg",
+    "Bobi Wine": "https://upload.wikimedia.org/wikipedia/commons/7/7b/Bobi_Wine_2024.png",
+    "Mugisha Muntu": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Mugisha_Muntu_2020.jpg",
+    "Others": "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&q=80&w=800", // Stable group/debate image
 
     // Future placeholders
     "William Ruto": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/William_Ruto_at_Chatham_House_2019_%28cropped%29.jpg/800px-William_Ruto_at_Chatham_House_2019_%28cropped%29.jpg",
