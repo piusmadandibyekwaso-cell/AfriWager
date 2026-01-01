@@ -201,11 +201,8 @@ export default function FundsPage() {
         // PRODUCTION: Real Money Mode (MoonPay)
         setIsOnRampLoading(true);
         try {
-            await fundWallet({
-                address,
-                chain: polygon,
-                amount: depositAmount // Pre-fill amount
-            });
+            await fundWallet({ address });
+            // 209: Success assumes the user completes the flow in the modal.
             // Success assumes the user completes the flow in the modal.
             // Actual balance refresh happens via on-chain listeners or polling.
         } catch (err: any) {
