@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, TrendingUp, SlidersHorizontal, ChevronRight, Menu } from 'lucide-react';
+import { Search, TrendingUp, SlidersHorizontal, ChevronRight } from 'lucide-react';
 
 interface MarketsNavBarProps {
     searchQuery: string;
