@@ -10,7 +10,11 @@ import MockUSDCABI from '@/abis/MockERC20.json';
 import FPMMABI from '@/abis/FixedProductMarketMaker.json';
 import CTABI from '@/abis/ConditionalTokens.json';
 import { usePrivy, useFundWallet } from '@privy-io/react-auth';
-import { Wallet, ArrowDownCircle, ArrowUpCircle, RefreshCcw, ExternalLink, CreditCard, Building2, CheckCircle2, ChevronRight, AlertCircle, Loader2, Landmark, ShieldCheck, TrendingUp, History, PieChart, Info, DollarSign } from 'lucide-react';
+import {
+    Wallet, ArrowDownCircle, ArrowUpCircle, RefreshCcw, ExternalLink, CreditCard,
+    Building2, CheckCircle2, ChevronRight, AlertCircle, Loader2, Landmark,
+    ShieldCheck, TrendingUp, History as HistoryIcon, PieChart, Info, DollarSign, Copy, Globe, Map as MapIcon
+} from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { supabase } from '@/lib/supabase';
@@ -67,6 +71,7 @@ export default function FundsPage() {
     const [depositAmount, setDepositAmount] = useState('1000');
     const [activeTab, setActiveTab] = useState<'positions' | 'activity'>('positions');
     const [isOnRampLoading, setIsOnRampLoading] = useState(false);
+    const [depositRegion, setDepositRegion] = useState<'global' | 'africa' | null>(null);
 
     // Form State
     const [cardNumber, setCardNumber] = useState('');
@@ -137,7 +142,7 @@ export default function FundsPage() {
 
     // This is a placeholder for actual ConditionalToken balance fetching which requires positionId calculation
     // For MVP Phase 10, we'll estimate based on trade history + mock price
-    const positions = useMemo(() => {
+    const positions = useMemo<PositionItem[]>(() => {
         const posMap = new Map<string, PositionItem>();
         userTrades.forEach(t => {
             const market = allMarkets.find(m => m.id === t.market_id);
@@ -164,7 +169,7 @@ export default function FundsPage() {
         return Array.from(posMap.values()).filter(p => p.shares > 0.01);
     }, [userTrades, allMarkets]);
 
-    const totalEquityValue = useMemo(() => positions.reduce((sum, p) => sum + p.value, 0), [positions]);
+    const totalEquityValue = useMemo<number>(() => positions.reduce((sum, p) => sum + p.value, 0), [positions]);
 
     // 4. Contract Logic
     const { writeContract, data: hash, isPending } = useWriteContract();
@@ -265,6 +270,7 @@ export default function FundsPage() {
     const resetDeposit = () => {
         setIsDepositModalOpen(false);
         setDepositStep('selection');
+        setDepositRegion(null);
         setCardNumber(''); setCardExpiry(''); setCardCVV(''); setCardName('');
     };
 
@@ -310,7 +316,7 @@ export default function FundsPage() {
                         onClick={() => setActiveTab('activity')}
                         className={cn("px-6 py-3 rounded-xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all", activeTab === 'activity' ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/20" : "text-slate-500 hover:text-white")}
                     >
-                        <History className="w-3.5 h-3.5" /> Activity
+                        <HistoryIcon className="w-3.5 h-3.5" /> Activity
                     </button>
                 </div>
             </div>
@@ -442,7 +448,7 @@ export default function FundsPage() {
                     <div className="space-y-6">
                         <div className="flex items-center justify-between mb-8">
                             <h3 className="text-2xl font-black italic tracking-tighter uppercase text-white/40">Transactional Ledger</h3>
-                            <History className="w-6 h-6 text-slate-900" />
+                            <HistoryIcon className="w-6 h-6 text-slate-900" />
                         </div>
 
                         <div className="bg-[#0c0e14]/50 border border-white/5 rounded-[2rem] md:rounded-[3rem] overflow-x-auto">
@@ -520,32 +526,91 @@ export default function FundsPage() {
                                     </div>
 
                                     {depositType === 'fiat' ? (
-                                        <div className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-300">
-                                            <div className="text-center py-6">
-                                                <div className="flex items-center justify-center gap-3 mb-4">
-                                                    <span className="text-6xl font-black text-white tracking-tighter">${depositAmount}</span>
-                                                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full">USDC</span>
-                                                </div>
-                                                <input type="range" min="10" max="5000" step="10" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500 mt-6" />
-                                            </div>
+                                        <div className="space-y-6">
+                                            {!depositRegion ? (
+                                                <div className="space-y-6">
+                                                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em] text-center mb-4 italic">Select Your Region</p>
+                                                    <button
+                                                        onClick={() => setDepositRegion('global')}
+                                                        className="w-full p-8 bg-white/5 border border-white/5 rounded-[2rem] hover:bg-white/10 transition-all text-left flex items-center gap-6 group"
+                                                    >
+                                                        <div className="p-4 bg-emerald-500/10 rounded-2xl group-hover:bg-emerald-500/20 transition-colors">
+                                                            <Globe className="w-6 h-6 text-emerald-500" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-lg font-black text-white italic tracking-tighter uppercase">Rest of World</p>
+                                                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Direct Card / Apple Pay</p>
+                                                        </div>
+                                                    </button>
 
-                                            <button
-                                                onClick={launchOnRamp}
-                                                disabled={isOnRampLoading}
-                                                className={cn(
-                                                    "flex items-center justify-between p-7 w-full rounded-[2rem] border-2 border-emerald-500/50 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all outline-none group",
-                                                    isOnRampLoading && "opacity-50 cursor-not-allowed"
-                                                )}
-                                            >
-                                                <div className="flex items-center gap-5">
-                                                    {isOnRampLoading ? <Loader2 className="w-5 h-5 text-emerald-500 animate-spin" /> : <CreditCard className="w-5 h-5 text-emerald-500" />}
-                                                    <div className="text-left">
-                                                        <span className="text-[10px] font-black text-white uppercase tracking-widest block">{isOnRampLoading ? 'Initializing Gateway...' : 'Buy with Fiat'}</span>
-                                                        <span className="text-[8px] font-bold text-emerald-500/60 uppercase tracking-widest italic block mt-1">* Real Money (Polygon)</span>
+                                                    <button
+                                                        onClick={() => setDepositRegion('africa')}
+                                                        className="w-full p-8 bg-white/5 border border-white/5 rounded-[2rem] hover:bg-white/10 transition-all text-left flex items-center gap-6 group"
+                                                    >
+                                                        <div className="p-4 bg-amber-500/10 rounded-2xl group-hover:bg-amber-500/20 transition-colors">
+                                                            <MapIcon className="w-6 h-6 text-amber-500" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="flex items-center gap-3">
+                                                                <p className="text-lg font-black text-white italic tracking-tighter uppercase">Africa Local</p>
+                                                                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-500 text-[8px] font-black rounded-lg uppercase tracking-widest">Optimized</span>
+                                                            </div>
+                                                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Mobile Money (MTN, M-Pesa, Airtel)</p>
+                                                        </div>
+                                                    </button>
+                                                </div>
+                                            ) : depositRegion === 'global' ? (
+                                                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                                                    <button onClick={() => setDepositRegion(null)} className="text-[10px] font-black text-slate-500 hover:text-white flex items-center gap-2 mb-4 uppercase tracking-widest">← Change Region</button>
+                                                    <div className="text-center py-6">
+                                                        <div className="flex items-center justify-center gap-3 mb-4">
+                                                            <span className="text-6xl font-black text-white tracking-tighter">${depositAmount}</span>
+                                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full">USDC</span>
+                                                        </div>
+                                                        <input type="range" min="10" max="5000" step="10" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500 mt-6" />
+                                                    </div>
+
+                                                    <button
+                                                        onClick={launchOnRamp}
+                                                        disabled={isOnRampLoading}
+                                                        className={cn(
+                                                            "flex items-center justify-between p-7 w-full rounded-[2rem] border-2 border-emerald-500/50 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all outline-none group",
+                                                            isOnRampLoading && "opacity-50 cursor-not-allowed"
+                                                        )}
+                                                    >
+                                                        <div className="flex items-center gap-5">
+                                                            {isOnRampLoading ? <Loader2 className="w-5 h-5 text-emerald-500 animate-spin" /> : <CreditCard className="w-5 h-5 text-emerald-500" />}
+                                                            <div className="text-left">
+                                                                <span className="text-[10px] font-black text-white uppercase tracking-widest block">{isOnRampLoading ? 'Initializing Gateway...' : 'Buy with Fiat'}</span>
+                                                                <span className="text-[8px] font-bold text-emerald-500/60 uppercase tracking-widest italic block mt-1">* Real Money (Polygon)</span>
+                                                            </div>
+                                                        </div>
+                                                        {!isOnRampLoading && <ChevronRight className="w-4 h-4 text-emerald-500" />}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                                                    <button onClick={() => setDepositRegion(null)} className="text-[10px] font-black text-slate-500 hover:text-white flex items-center gap-2 mb-4 uppercase tracking-widest">← Change Region</button>
+                                                    <div className="p-10 bg-amber-500/5 border border-amber-500/20 rounded-[3rem] text-center space-y-6">
+                                                        <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto">
+                                                            <ShieldCheck className="w-10 h-10 text-amber-500" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-xl font-black text-white uppercase italic tracking-tighter">Yellow Card Africa</p>
+                                                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2 leading-relaxed">Direct support for Mobile Money & Local Cards across the continent.</p>
+                                                        </div>
+                                                        <a
+                                                            href="https://web.yellowcard.io/"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="block w-full py-6 bg-amber-500 hover:bg-amber-400 text-black font-black rounded-2xl transition-all uppercase tracking-widest text-[11px] shadow-2xl shadow-amber-500/20"
+                                                        >
+                                                            Open Africa Gateway
+                                                        </a>
+                                                        <p className="text-[9px] font-bold text-slate-700 uppercase tracking-widest leading-relaxed">Ensure you send to your Polygon address: <br /><span className="text-slate-400 select-all font-mono">{address?.slice(0, 10)}...{address?.slice(-8)}</span></p>
                                                     </div>
                                                 </div>
-                                                {!isOnRampLoading && <ChevronRight className="w-4 h-4 text-emerald-500" />}
-                                            </button>
+                                            )}
                                         </div>
                                     ) : (
                                         <div className="text-center space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">

@@ -5,9 +5,11 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { walletAddress, fiatAmount, email } = body;
 
-        // In a real production environment, you should use environment variables
-        const API_KEY = '4f8260b4-106d-472c-8059-e93897b9f71c'; // Staging Key
-        const API_URL = 'https://api-stg.transak.com/api/v2/widget/create-url';
+        // PRODUCTION: Use Mainnet for real funds
+        const API_KEY = process.env.TRANSAK_API_KEY || '4f8260b4-106d-472c-8059-e93897b9f71c'; // Default to staging if not set
+        const API_URL = process.env.NODE_ENV === 'production'
+            ? 'https://api.transak.com/api/v2/widget/create-url'
+            : 'https://api-stg.transak.com/api/v2/widget/create-url';
 
         const response = await fetch(API_URL, {
             method: 'POST',
@@ -20,7 +22,7 @@ export async function POST(request: Request) {
                 fiatAmount,
                 email,
                 cryptoCurrencyCode: 'USDC',
-                network: 'sepolia', // Switched from 'ethereum' to 'sepolia'
+                network: 'polygon', // Switch to Polygon Mainnet
                 productsAvailed: 'BUY',
                 themeColor: '#10b981',
                 exchangeScreenTitle: 'AfriSights Capital',

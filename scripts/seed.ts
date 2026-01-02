@@ -33,7 +33,7 @@ async function seed() {
             outcome_tokens: ["Yes", "No"],
             image_url: "https://images.unsplash.com/photo-1526304640152-d4619684e484?auto=format&fit=crop&q=80&w=1000",
             status: "OPEN",
-            total_volume_usdc: 15420
+            total_volume_usdc: 0
         },
         {
             id: "550e8400-e29b-41d4-a716-446655440004",
@@ -81,7 +81,7 @@ async function seed() {
             condition_id: "0x456...def", // Reusing old condition_id for AFCON
             outcome_tokens: ["Morocco", "Senegal", "Nigeria", "Other"],
             status: "OPEN",
-            total_volume_usdc: 85000
+            total_volume_usdc: 0
         },
         {
             question: "Will Bitcoin hit $150k before December 2025?",
@@ -92,7 +92,7 @@ async function seed() {
             outcome_tokens: ["Yes", "No"],
             image_url: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?auto=format&fit=crop&q=80&w=1000",
             status: "OPEN",
-            total_volume_usdc: 230500
+            total_volume_usdc: 0
         }
     ];
 
