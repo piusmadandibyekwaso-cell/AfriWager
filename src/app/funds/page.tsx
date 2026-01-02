@@ -222,13 +222,54 @@ export default function FundsPage() {
                     })
                 }).catch(err => console.error('Failed to send email receipt:', err));
             }
-            // 209: Success assumes the user completes the flow in the modal.
-            // Success assumes the user completes the flow in the modal.
-            // Actual balance refresh happens via on-chain listeners or polling.
         } catch (err: any) {
             console.error('On-Ramp Error:', err);
-            // We alert the user if the modal fails to open (e.g. Dashboard not configured)
             alert(`Payment Gateway Error: ${err.message || "Unknown error"}`);
+        } finally {
+            setIsOnRampLoading(false);
+        }
+    };
+
+    const launchTransakDirect = async () => {
+        if (!address) return;
+        setIsOnRampLoading(true);
+        try {
+            const transak = new (Transak as any)({
+                apiKey: '4f8260b4-106d-472c-8059-e93897b9f71c', // Staging for now
+                environment: 'STAGING',
+                walletAddress: address,
+                hostURL: window.location.origin,
+                widgetHeight: '700px',
+                widgetWidth: '500px',
+                cryptoCurrencyCode: 'USDC',
+                network: 'polygon',
+                defaultCryptoCurrency: 'USDC',
+                cryptoCurrencyList: 'USDC',
+                fiatAmount: Number(depositAmount),
+                email: user?.email?.address || '',
+                themeColor: '#f59e0b',
+                exchangeScreenTitle: 'AfriSights Africa Gateway',
+            });
+
+            transak.init();
+
+            transak.on(transak.EVENTS.TRANSAK_WIDGET_CLOSE, () => {
+                transak.cleanup();
+            });
+
+            transak.on(transak.EVENTS.TRANSAK_ORDER_SUCCESSFUL, (orderData: any) => {
+                console.log('Order successful!', orderData);
+                transak.cleanup();
+                setDepositStep('success');
+                sendNotification('Assets Secured!', {
+                    body: "Your mobile money deposit is being processed.",
+                });
+                refetchUSDC();
+            });
+
+        } catch (err: any) {
+            console.error('Transak Error:', err);
+            alert(`Gateway Error: ${err.message}`);
         } finally {
             setIsOnRampLoading(false);
         }
@@ -241,17 +282,12 @@ export default function FundsPage() {
         setIsOffRampLoading(true);
         try {
             console.log('Starting Simulated Off-Ramp Flow...');
-
-            // 1. Simulate API call latency
             await new Promise(resolve => setTimeout(resolve, 2000));
-
-            // 2. Trigger Success State
             console.log('Simulated Off-ramp successful');
             sendNotification('Withdrawal Pending (Simulated)', {
                 body: `Your $${withdrawAmount} USDC withdrawal to bank has been initiated.`,
             });
             setIsWithdrawModalOpen(false);
-
         } catch (err: any) {
             console.error('Simulation Error:', err);
             alert(`Simulation failed: ${err.message}`);
@@ -553,9 +589,10 @@ export default function FundsPage() {
                                                         <div>
                                                             <div className="flex items-center gap-3">
                                                                 <p className="text-lg font-black text-white italic tracking-tighter uppercase">Africa Local</p>
-                                                                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-500 text-[8px] font-black rounded-lg uppercase tracking-widest">Optimized</span>
+                                                                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-500 text-[8px] font-black rounded-lg uppercase tracking-widest">No App Required</span>
                                                             </div>
                                                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Mobile Money (MTN, M-Pesa, Airtel)</p>
+                                                            <p className="text-[8px] font-bold text-amber-500 uppercase tracking-[0.2em] mt-2 italic">Powered by Transak</p>
                                                         </div>
                                                     </button>
                                                 </div>
@@ -591,23 +628,42 @@ export default function FundsPage() {
                                             ) : (
                                                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                                                     <button onClick={() => setDepositRegion(null)} className="text-[10px] font-black text-slate-500 hover:text-white flex items-center gap-2 mb-4 uppercase tracking-widest">← Change Region</button>
-                                                    <div className="p-10 bg-amber-500/5 border border-amber-500/20 rounded-[3rem] text-center space-y-6">
-                                                        <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto">
-                                                            <ShieldCheck className="w-10 h-10 text-amber-500" />
+
+                                                    {/* Amount Selector */}
+                                                    <div className="text-center py-6">
+                                                        <div className="flex items-center justify-center gap-3 mb-4">
+                                                            <span className="text-6xl font-black text-white tracking-tighter">${depositAmount}</span>
+                                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full">USDC</span>
                                                         </div>
-                                                        <div>
-                                                            <p className="text-xl font-black text-white uppercase italic tracking-tighter">Yellow Card Africa</p>
-                                                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2 leading-relaxed">Direct support for Mobile Money & Local Cards across the continent.</p>
+                                                        <input type="range" min="10" max="5000" step="10" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500 mt-6" />
+                                                    </div>
+
+                                                    <div className="p-8 bg-amber-500/5 border border-amber-500/10 rounded-[2.5rem] space-y-6">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="p-3 bg-amber-500/10 rounded-2xl">
+                                                                <MapIcon className="w-6 h-6 text-amber-500" />
+                                                            </div>
+                                                            <div className="text-left">
+                                                                <p className="text-xs font-black text-white uppercase tracking-tight">Africa Gateway</p>
+                                                                <p className="text-[10px] font-bold text-amber-500/60 uppercase tracking-widest">Mobile Money Support</p>
+                                                            </div>
                                                         </div>
-                                                        <a
-                                                            href="https://web.yellowcard.io/"
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="block w-full py-6 bg-amber-500 hover:bg-amber-400 text-black font-black rounded-2xl transition-all uppercase tracking-widest text-[11px] shadow-2xl shadow-amber-500/20"
+
+                                                        <button
+                                                            onClick={launchTransakDirect}
+                                                            disabled={isOnRampLoading}
+                                                            className={cn(
+                                                                "w-full py-6 bg-amber-500 hover:bg-amber-400 text-black font-black rounded-2xl transition-all uppercase tracking-widest text-xs shadow-2xl shadow-amber-500/20 flex items-center justify-center gap-3",
+                                                                isOnRampLoading && "opacity-50 cursor-not-allowed"
+                                                            )}
                                                         >
-                                                            Open Africa Gateway
-                                                        </a>
-                                                        <p className="text-[9px] font-bold text-slate-700 uppercase tracking-widest leading-relaxed">Ensure you send to your Polygon address: <br /><span className="text-slate-400 select-all font-mono">{address?.slice(0, 10)}...{address?.slice(-8)}</span></p>
+                                                            {isOnRampLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
+                                                            {isOnRampLoading ? 'Initializing...' : 'Deposit via Mobile Money'}
+                                                        </button>
+
+                                                        <p className="text-[8px] font-bold text-slate-700 uppercase tracking-widest leading-relaxed text-center">
+                                                            Powered by Transak. Supports MTN, Airtel, and M-Pesa.
+                                                        </p>
                                                     </div>
                                                 </div>
                                             )}
@@ -833,6 +889,6 @@ export default function FundsPage() {
                     </div>
                 )
             }
-        </div >
+        </div>
     );
 }
