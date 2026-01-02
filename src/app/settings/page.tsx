@@ -103,10 +103,11 @@ export default function SettingsPage() {
             await fundWallet({
                 address,
                 chain: polygon,
-                asset: 'USDC',
+                asset: 'USDC_POLYGON',
+                currencyCode: 'USDC_POLYGON',
                 config: {
                     currencyCode: 'USDC_POLYGON',
-                    quoteCurrencyCode: 'USDC',
+                    quoteCurrencyCode: 'USDC_POLYGON',
                     defaultCurrencyCode: 'USDC_POLYGON',
                     paymentMethod: 'credit_debit_card'
                 }
