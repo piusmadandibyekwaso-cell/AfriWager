@@ -7,7 +7,9 @@ export async function POST(request: Request) {
 
         // PRODUCTION: Use Mainnet for real funds
         const API_KEY = process.env.TRANSAK_API_KEY || '4f8260b4-106d-472c-8059-e93897b9f71c'; // Default to staging if not set
-        const API_URL = process.env.NODE_ENV === 'production'
+        const IS_STAGING_KEY = API_KEY === '4f8260b4-106d-472c-8059-e93897b9f71c';
+
+        const API_URL = (process.env.NODE_ENV === 'production' && !IS_STAGING_KEY)
             ? 'https://api.transak.com/api/v2/widget/create-url'
             : 'https://api-stg.transak.com/api/v2/widget/create-url';
 

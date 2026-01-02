@@ -234,19 +234,23 @@ export default function FundsPage() {
         if (!address) return;
         setIsOnRampLoading(true);
         try {
+            const res = await fetch('/api/transak', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    walletAddress: address,
+                    fiatAmount: Number(depositAmount),
+                    email: user?.email?.address || ''
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Failed to initialize gateway');
+
             const transak = new (Transak as any)({
-                apiKey: '4f8260b4-106d-472c-8059-e93897b9f71c', // Staging for now
-                environment: 'STAGING',
-                walletAddress: address,
-                hostURL: window.location.origin,
+                widgetUrl: data.widgetUrl,
                 widgetHeight: '700px',
                 widgetWidth: '500px',
-                cryptoCurrencyCode: 'USDC',
-                network: 'polygon',
-                defaultCryptoCurrency: 'USDC',
-                cryptoCurrencyList: 'USDC',
-                fiatAmount: Number(depositAmount),
-                email: user?.email?.address || '',
                 themeColor: '#f59e0b',
                 exchangeScreenTitle: 'AfriSights Africa Gateway',
             });
