@@ -102,13 +102,13 @@ export default function SettingsPage() {
         try {
             await fundWallet({
                 address,
-                asset: 'USDC_POLYGON',
-                config: {
-                    currencyCode: 'USDC_POLYGON',
-                    quoteCurrencyCode: 'USDC_POLYGON',
-                    defaultCurrencyCode: 'USDC_POLYGON',
-                    paymentMethod: 'credit_debit_card'
-                }
+                chain: {
+                    id: 137,
+                    name: 'Polygon',
+                    rpcUrls: { default: { http: ['https://polygon-rpc.com'] } },
+                    nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 }
+                },
+                asset: 'USDC'
             } as any);
         } catch (err: any) {
             console.error('On-Ramp Error:', err);
