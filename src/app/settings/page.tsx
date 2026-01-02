@@ -101,14 +101,23 @@ export default function SettingsPage() {
         setIsOnRampLoading(true);
         try {
             await fundWallet({
-                address,
-                chain: {
-                    id: 137,
-                    name: 'Polygon',
-                    rpcUrls: { default: { http: ['https://polygon-rpc.com'] } },
-                    nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 }
-                },
-                asset: 'USDC'
+                address: address as string,
+                options: {
+                    chain: polygon,
+                    asset: 'USDC',
+                    amount: depositAmount,
+                    fundingMethodConfig: {
+                        moonpay: {
+                            useSandbox: false,
+                            currencyCode: 'USDC_POLYGON',
+                            quoteCurrencyCode: 'USDC',
+                            defaultCurrencyCode: 'USDC_POLYGON',
+                            paymentMethod: 'credit_debit_card',
+                            uiConfig: { accentColor: '#10b981', theme: 'dark' },
+                            quoteCurrencyAmount: Number(depositAmount)
+                        }
+                    }
+                }
             } as any);
         } catch (err: any) {
             console.error('On-Ramp Error:', err);
