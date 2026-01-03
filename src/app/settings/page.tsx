@@ -139,23 +139,19 @@ export default function SettingsPage() {
         if (!address) return;
         setIsOnRampLoading(true);
         try {
-            const res = await fetch('/api/transak', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    walletAddress: address,
-                    fiatAmount: Number(depositAmount),
-                    email: user?.email?.address || ''
-                })
-            });
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Failed to initialize gateway');
-
             const transak = new (Transak as any)({
-                widgetUrl: data.widgetUrl,
+                apiKey: '4f8260b4-106d-472c-8059-e93897b9f71c', // Staging Key
+                environment: 'STAGING',
+                walletAddress: address,
+                hostURL: window.location.origin,
                 widgetHeight: '700px',
                 widgetWidth: '500px',
+                cryptoCurrencyCode: 'USDC',
+                network: 'polygon',
+                defaultCryptoCurrency: 'USDC',
+                cryptoCurrencyList: 'USDC',
+                fiatAmount: Number(depositAmount),
+                email: user?.email?.address || '',
                 themeColor: '#f59e0b', // Amber for Africa
                 exchangeScreenTitle: 'AfriSights Mobile Money',
             });
