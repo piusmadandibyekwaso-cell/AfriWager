@@ -21,7 +21,7 @@ export default function Home() {
       <div className="relative h-24 w-24 md:h-32 md:w-32 animate-pulse overflow-hidden rounded-[2.5rem]">
         <img
           src="/app_icon_512.png"
-          alt="AfriSights Logo"
+          alt="AfriWager Logo"
           className="h-full w-full object-cover scale-125"
         />
       </div>

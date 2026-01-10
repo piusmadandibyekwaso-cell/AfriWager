@@ -19,9 +19,9 @@ export async function POST(request: Request) {
 
         // Send Email
         const { data: emailData, error: emailError } = await resend.emails.send({
-            from: 'AfriSights <onboarding@resend.dev>', // Change this to 'noreply@afrisights.com' after domain verification
+            from: 'AfriWager <onboarding@resend.dev>', // Change this to 'noreply@afriwager.com' after domain verification
             to: [email],
-            subject: 'Funds Received - AfriSights',
+            subject: 'Funds Received - AfriWager',
             html: `
         <!DOCTYPE html>
         <html>
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         <body>
             <div class="container">
                 <div class="header">
-                    <a href="https://afrisights.com" class="logo">AfriSights</a>
+                    <a href="https://afriwager.com" class="logo">AfriWager</a>
                 </div>
                 
                 <div class="card">
@@ -73,11 +73,11 @@ export async function POST(request: Request) {
                         </div>
                     </div>
 
-                    <a href="https://afrisights.com/funds" class="button">View Balance</a>
+                    <a href="https://afriwager.com/funds" class="button">View Balance</a>
                 </div>
 
                 <div class="footer">
-                    <p>&copy; ${new Date().getFullYear()} AfriSights. All rights reserved.</p>
+                    <p>&copy; ${new Date().getFullYear()} AfriWager. All rights reserved.</p>
                 </div>
             </div>
         </body>

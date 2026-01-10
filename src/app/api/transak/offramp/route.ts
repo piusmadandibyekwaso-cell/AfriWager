@@ -23,7 +23,7 @@ export async function POST(request: Request) {
                 network: 'sepolia',
                 productsAvailed: 'SELL',
                 themeColor: '#10b981',
-                exchangeScreenTitle: 'AfriSights Capital',
+                exchangeScreenTitle: 'AfriWager Capital',
             }),
         });
 

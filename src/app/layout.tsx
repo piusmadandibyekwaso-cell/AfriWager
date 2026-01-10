@@ -13,21 +13,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.afrisights.com'),
-  title: "AfriSights - Prediction Markets for Africa",
+  metadataBase: new URL('https://www.afriwager.com'),
+  title: "AfriWager - Prediction Markets for Africa",
   description: "Trade on news, politics, sports, and culture with transparent odds.",
   manifest: "/manifest.json",
   themeColor: "#060709",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "AfriSights",
+    title: "AfriWager",
   },
   openGraph: {
-    title: "AfriSights - Prediction Markets for Africa",
+    title: "AfriWager - Prediction Markets for Africa",
     description: "Trade on news, politics, sports, and culture with transparent odds.",
-    url: 'https://www.afrisights.com',
-    siteName: 'AfriSights',
+    url: 'https://www.afriwager.com',
+    siteName: 'AfriWager',
     locale: 'en_US',
     type: 'website',
   },

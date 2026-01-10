@@ -153,7 +153,7 @@ export default function SettingsPage() {
                 fiatAmount: Number(depositAmount),
                 email: user?.email?.address || '',
                 themeColor: '#f59e0b', // Amber for Africa
-                exchangeScreenTitle: 'AfriSights Mobile Money',
+                exchangeScreenTitle: 'AfriWager Mobile Money',
             });
 
             transak.init();

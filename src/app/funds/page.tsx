@@ -248,7 +248,7 @@ export default function FundsPage() {
                 fiatAmount: Number(depositAmount),
                 email: user?.email?.address || '',
                 themeColor: '#f59e0b',
-                exchangeScreenTitle: 'AfriSights Africa Gateway',
+                exchangeScreenTitle: 'AfriWager Africa Gateway',
             });
 
             transak.init();

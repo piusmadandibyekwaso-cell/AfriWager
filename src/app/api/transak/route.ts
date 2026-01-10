@@ -27,7 +27,7 @@ export async function POST(request: Request) {
                 network: 'polygon', // Switch to Polygon Mainnet
                 productsAvailed: 'BUY',
                 themeColor: '#10b981',
-                exchangeScreenTitle: 'AfriSights Capital',
+                exchangeScreenTitle: 'AfriWager Capital',
             }),
         });
 

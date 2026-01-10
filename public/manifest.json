@@ -1,6 +1,6 @@
 {
-    "name": "AfriSights",
-    "short_name": "AfriSights",
+    "name": "AfriWager",
+    "short_name": "AfriWager",
     "description": "Premium Prediction Market for Africa and Beyond",
     "start_url": "/",
     "display": "standalone",
