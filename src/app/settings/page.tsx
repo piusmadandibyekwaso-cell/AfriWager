@@ -140,8 +140,8 @@ export default function SettingsPage() {
         setIsOnRampLoading(true);
         try {
             const transak = new (Transak as any)({
-                apiKey: '4f8260b4-106d-472c-8059-e93897b9f71c', // Staging Key
-                environment: 'STAGING',
+                apiKey: process.env.NEXT_PUBLIC_TRANSAK_API_KEY || '4f8260b4-106d-472c-8059-e93897b9f71c',
+                environment: (process.env.NEXT_PUBLIC_TRANSAK_ENVIRONMENT as any) || 'STAGING',
                 walletAddress: address,
                 hostURL: window.location.origin,
                 widgetHeight: '700px',
