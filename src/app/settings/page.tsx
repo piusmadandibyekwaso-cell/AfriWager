@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 // import { usePrivy, useFundWallet } from '@privy-io/react-auth';
+import { useAuth } from '@/context/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import UserAvatar from '@/components/Avatar';
 import {
