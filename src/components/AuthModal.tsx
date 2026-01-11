@@ -1,9 +1,7 @@
-'use client';
-
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, Check, AlertCircle } from 'lucide-react';
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -20,10 +18,28 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
     const { signInWithEmail } = useAuth();
 
+    // Password Validation Logic
+    const validation = useMemo(() => {
+        return {
+            length: password.length >= 8,
+            uppercase: /[A-Z]/.test(password),
+            symbol: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+    }, [password]);
+
+    const isPasswordValid = validation.length && validation.uppercase && validation.symbol;
+
     if (!isOpen) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Block signup if password isn't strong enough
+        if (!isLogin && !isPasswordValid) {
+            setError('Please meet all password requirements');
+            return;
+        }
+
         setLoading(true);
         setError(null);
         setMessage(null);
@@ -42,6 +58,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 const { error } = await supabase.auth.signUp({
                     email,
                     password,
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/`,
+                    },
                 });
                 if (error) throw error;
                 setMessage('Check your email for the confirmation link!');
@@ -69,14 +88,22 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                 <div className="mb-6 flex rounded-lg bg-white/5 p-1">
                     <button
-                        onClick={() => setIsLogin(true)}
+                        onClick={() => {
+                            setIsLogin(true);
+                            setError(null);
+                            setMessage(null);
+                        }}
                         className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${isLogin ? 'bg-[#10b981] text-white shadow-lg' : 'text-gray-400 hover:text-white'
                             }`}
                     >
                         Log In
                     </button>
                     <button
-                        onClick={() => setIsLogin(false)}
+                        onClick={() => {
+                            setIsLogin(false);
+                            setError(null);
+                            setMessage(null);
+                        }}
                         className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${!isLogin ? 'bg-[#10b981] text-white shadow-lg' : 'text-gray-400 hover:text-white'
                             }`}
                     >
@@ -105,26 +132,38 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                             className="w-full rounded-lg bg-white/5 px-4 py-3 text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#10b981]"
                             placeholder="••••••••"
                             required
-                            minLength={6}
                         />
+
+                        {!isLogin && (
+                            <div className="mt-3 space-y-2 rounded-lg bg-white/5 p-3">
+                                <p className="text-xs font-medium text-gray-400 mb-2">Password Requirements:</p>
+                                <div className="grid grid-cols-1 gap-1">
+                                    <Requirement met={validation.length} label="8+ characters" />
+                                    <Requirement met={validation.uppercase} label="At least one uppercase" />
+                                    <Requirement met={validation.symbol} label="At least one symbol" />
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {error && (
-                        <div className="rounded-lg bg-red-500/10 p-3 text-sm text-red-500">
+                        <div className="flex items-center gap-2 rounded-lg bg-red-500/10 p-3 text-sm text-red-500">
+                            <AlertCircle className="h-4 w-4 shrink-0" />
                             {error}
                         </div>
                     )}
 
                     {message && (
-                        <div className="rounded-lg bg-green-500/10 p-3 text-sm text-green-500">
+                        <div className="flex items-center gap-2 rounded-lg bg-green-500/10 p-3 text-sm text-green-500">
+                            <Check className="h-4 w-4 shrink-0" />
                             {message}
                         </div>
                     )}
 
                     <button
                         type="submit"
-                        disabled={loading}
-                        className="w-full rounded-lg bg-[#10b981] py-3 font-semibold text-white transition-all hover:bg-[#059669] disabled:opacity-50"
+                        disabled={loading || (!isLogin && !isPasswordValid)}
+                        className="w-full rounded-lg bg-[#10b981] py-3 font-semibold text-white transition-all hover:bg-[#059669] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? (
                             <Loader2 className="mx-auto h-5 w-5 animate-spin" />
@@ -138,6 +177,15 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     By continuing, you agree to our Terms of Service and Privacy Policy.
                 </p>
             </div>
+        </div>
+    );
+}
+
+function Requirement({ met, label }: { met: boolean; label: string }) {
+    return (
+        <div className={`flex items-center gap-2 text-xs transition-colors ${met ? 'text-[#10b981]' : 'text-gray-500'}`}>
+            <div className={`h-1 w-1 rounded-full ${met ? 'bg-[#10b981]' : 'bg-gray-500'}`} />
+            {label}
         </div>
     );
 }
