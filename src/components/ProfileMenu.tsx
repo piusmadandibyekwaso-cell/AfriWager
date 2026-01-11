@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { usePrivy } from '@privy-io/react-auth';
+import { useAuth } from '@/context/AuthContext';
+import { useAccount } from 'wagmi';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import UserAvatar from './Avatar';
 import {
@@ -19,12 +20,12 @@ import {
 } from 'lucide-react';
 
 export default function ProfileMenu() {
-    const { logout, user } = usePrivy();
+    const { signOut } = useAuth();
+    const { address } = useAccount();
     const { profile } = useUserProfile();
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    const address = user?.wallet?.address;
     const shortAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : '';
     const username = profile?.username || 'User';
 
@@ -125,7 +126,7 @@ export default function ProfileMenu() {
                     {/* Logout */}
                     <div className="p-2">
                         <button
-                            onClick={logout}
+                            onClick={() => signOut()}
                             className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
                         >
                             <LogOut className="w-4 h-4" />

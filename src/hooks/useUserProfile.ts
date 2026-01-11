@@ -1,24 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
-import { usePrivy } from '@privy-io/react-auth';
+import { useAccount } from 'wagmi';
 import { userService, UserProfile } from '@/services/userService';
 
 export function useUserProfile() {
-    const { user, authenticated, ready } = usePrivy();
+    const { address, isConnected } = useAccount();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     // Define fetch function outside useEffect to allow manual refreshing
     const fetchProfile = useCallback(async () => {
-        if (!ready) return;
-
-        if (authenticated && user?.wallet?.address) {
-            // Don't set loading to true here to avoid UI flickering if we're just refreshing
-            // But for initial load, it's fine.
+        if (isConnected && address) {
             try {
-                const data = await userService.getProfile(user.wallet.address);
+                const data = await userService.getProfile(address);
                 setProfile(data);
             } catch (err) {
                 console.error('Error fetching profile:', err);
+                // Don't clear profile on error, just stop loading
             } finally {
                 setIsLoading(false);
             }
@@ -26,7 +23,7 @@ export function useUserProfile() {
             setProfile(null);
             setIsLoading(false);
         }
-    }, [ready, authenticated, user?.wallet?.address]);
+    }, [isConnected, address]);
 
     // Initial Fetch
     useEffect(() => {
@@ -41,7 +38,7 @@ export function useUserProfile() {
 
     return {
         profile,
-        isLoading: isLoading && authenticated, // Only considered loading if we are supposedly authenticated
+        isLoading: isLoading && isConnected, // Only considered loading if we are connected
         fetchProfile,
         refreshProfile
     };

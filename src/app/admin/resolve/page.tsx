@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePrivy } from '@privy-io/react-auth';
+import { useAuth } from '@/context/AuthContext';
 import { useAccount, useWriteContract, useReadContract } from 'wagmi';
 import Navbar from '@/components/Navbar';
 import { marketService, Market } from '@/services/marketService';
@@ -13,7 +13,7 @@ import { CONTRACT_ADDRESSES } from '@/constants/contracts';
 const ADMIN_WALLET = process.env.NEXT_PUBLIC_ADMIN_WALLET;
 
 export default function AdminResolvePage() {
-    const { ready, authenticated, user, login } = usePrivy();
+    const { user: authUser, openAuthModal } = useAuth();
     const { address } = useAccount();
     const [markets, setMarkets] = useState<Market[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -57,7 +57,7 @@ export default function AdminResolvePage() {
     };
 
     // 1. Loading State
-    if (!ready || isLoading) return (
+    if (isLoading) return (
         <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
             <Loader2 className="w-12 h-12 text-amber-500 animate-spin" />
         </div>
@@ -67,11 +67,11 @@ export default function AdminResolvePage() {
     // CRITICAL FIX: Whitelist specific user wallet + Env Var
     const ADMIN_WALLETS = [
         ADMIN_WALLET?.toLowerCase(),
-        "0x9f717cf22ebb3ab8fb95b68ec845ae79be434a13" // User's Privy Wallet
+        "0x9f717cf22ebb3ab8fb95b68ec845ae79be434a13" // User's Privy Wallet (Now just User's Wallet)
     ].filter(Boolean);
 
-    const isAdmin = !!user?.wallet?.address &&
-        ADMIN_WALLETS.includes(user.wallet.address.toLowerCase());
+    const isAdmin = !!address &&
+        ADMIN_WALLETS.includes(address.toLowerCase());
 
     if (!isAdmin) {
         return (
@@ -80,14 +80,14 @@ export default function AdminResolvePage() {
                 <h1 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">Restricted Access</h1>
                 <p className="text-zinc-500 max-w-md mb-8">This frequency is encrypted. Only the designated Oracle can access this terminal.</p>
 
-                {!authenticated ? (
-                    <button onClick={login} className="px-8 py-3 bg-white text-black font-black rounded-full uppercase tracking-widest text-xs hover:bg-zinc-200 transition-colors">
+                {!authUser ? (
+                    <button onClick={openAuthModal} className="px-8 py-3 bg-white text-black font-black rounded-full uppercase tracking-widest text-xs hover:bg-zinc-200 transition-colors">
                         Authenticate
                     </button>
                 ) : (
                     <div className="p-4 bg-zinc-900 rounded-xl border border-zinc-800">
                         <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">Your Wallet</p>
-                        <p className="font-mono text-rose-400">{user?.wallet?.address}</p>
+                        <p className="font-mono text-rose-400">{address}</p>
                     </div>
                 )}
             </div>

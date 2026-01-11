@@ -1,15 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { usePrivy } from '@privy-io/react-auth';
 import { userService } from '@/services/userService';
 import UserAvatar from './Avatar';
-import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useAuth } from '@/context/AuthContext';
+import { useAccount } from 'wagmi';
 
 export default function OnboardingModal() {
-    const { ready, authenticated, user } = usePrivy();
+    const { user } = useAuth(); // for session
+    const { address } = useAccount(); // for wallet
     const { profile, isLoading, refreshProfile } = useUserProfile();
 
     const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +21,10 @@ export default function OnboardingModal() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
+
+    // Show if we have a wallet connected AND we're not loading AND we have no profile
+    const ready = !isLoading && !!address;
+    const authenticated = !!user; // or just checking address? profile requires address.
 
     // Check if user has a profile when they log in
     useEffect(() => {
@@ -55,19 +61,20 @@ export default function OnboardingModal() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!user?.wallet?.address || !isAvailable) return;
+        if (!address || !isAvailable) return;
 
         setIsSubmitting(true);
         setError('');
 
         try {
-            await userService.createProfile(user.wallet.address, username);
+            await userService.createProfile(address, username);
             await refreshProfile(); // Update the global profile state
             setIsOpen(false);
             // router.refresh(); // No longer needed as state updates instantly
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error('Error creating profile:', error);
             setError('Failed to create profile. Please try again.');
+            // Show error toast
         } finally {
             setIsSubmitting(false);
         }

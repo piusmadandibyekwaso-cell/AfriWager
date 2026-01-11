@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePrivy, useFundWallet } from '@privy-io/react-auth';
+// import { usePrivy, useFundWallet } from '@privy-io/react-auth';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import UserAvatar from '@/components/Avatar';
 import {
@@ -39,9 +39,9 @@ type DepositStep = 'selection' | 'processing_chain' | 'success' | 'failed' | 'co
 
 export default function SettingsPage() {
     // Auth & Profile
-    const { user } = usePrivy();
+    const { user: authUser } = useAuth();
     const { profile, refreshProfile } = useUserProfile();
-    const { fundWallet } = useFundWallet();
+    // const { fundWallet } = useFundWallet(); // Removed
     const { sendNotification } = useNotifications();
     const { address } = useAccount();
 
@@ -106,33 +106,11 @@ export default function SettingsPage() {
 
     const launchOnRamp = async () => {
         if (!address) return;
-        setIsOnRampLoading(true);
-        try {
-            await fundWallet({
-                address: address as string,
-                options: {
-                    chain: polygon,
-                    asset: 'USDC',
-                    amount: depositAmount,
-                    fundingMethodConfig: {
-                        moonpay: {
-                            useSandbox: false,
-                            currencyCode: 'USDC_POLYGON',
-                            quoteCurrencyCode: 'USDC',
-                            defaultCurrencyCode: 'USDC_POLYGON',
-                            paymentMethod: 'credit_debit_card',
-                            uiConfig: { accentColor: '#10b981', theme: 'dark' },
-                            quoteCurrencyAmount: Number(depositAmount)
-                        }
-                    }
-                }
-            } as any);
-        } catch (err: any) {
-            console.error('On-Ramp Error:', err);
-            alert(`Payment Gateway Error: ${err.message || "Unknown error"}`);
-        } finally {
-            setIsOnRampLoading(false);
-        }
+        // setIsOnRampLoading(true);
+        // try {
+        //     await fundWallet({...});
+        // } ...
+        alert("Global Card payments are temporarily handled via Africa Gateway/Transak. Please use the 'Africa / Mobile Money' option or Transak.");
     };
 
     const launchTransakDirect = async () => {
@@ -151,7 +129,7 @@ export default function SettingsPage() {
                 defaultCryptoCurrency: 'USDC',
                 cryptoCurrencyList: 'USDC',
                 fiatAmount: Number(depositAmount),
-                email: user?.email?.address || '',
+                email: authUser?.email || '',
                 themeColor: '#f59e0b', // Amber for Africa
                 exchangeScreenTitle: 'AfriWager Mobile Money',
             });
@@ -191,7 +169,7 @@ export default function SettingsPage() {
     ];
 
     const displayUsername = profile?.username || 'User';
-    const displayEmail = user?.email?.address || 'madandipiusb@gmail.com';
+    const displayEmail = authUser?.email || 'madandipiusb@gmail.com';
 
     return (
         <div className="min-h-screen bg-black text-white pt-20 pb-12">

@@ -9,7 +9,7 @@ import { CONTRACT_ADDRESSES } from '@/constants/contracts';
 import MockUSDCABI from '@/abis/MockERC20.json';
 import FPMMABI from '@/abis/FixedProductMarketMaker.json';
 import CTABI from '@/abis/ConditionalTokens.json';
-import { usePrivy, useFundWallet } from '@privy-io/react-auth';
+import { useAuth } from '@/context/AuthContext';
 import {
     Wallet, ArrowDownCircle, ArrowUpCircle, RefreshCcw, ExternalLink, CreditCard,
     Building2, CheckCircle2, ChevronRight, AlertCircle, Loader2, Landmark,
@@ -53,8 +53,8 @@ interface PositionItem {
 
 export default function FundsPage() {
     const { address } = useAccount();
-    const { authenticated, login, user } = usePrivy();
-    const { fundWallet } = useFundWallet();
+    const { user: authUser, openAuthModal } = useAuth();
+    // const { fundWallet } = useFundWallet(); // Removed Privy On-Ramp
     const { sendNotification } = useNotifications();
     const { profile, isLoading: isProfileLoading, refreshProfile } = useUserProfile();
 
@@ -205,29 +205,27 @@ export default function FundsPage() {
     const launchOnRamp = async () => {
         if (!address) return;
 
-        // PRODUCTION: Real Money Mode (MoonPay)
-        setIsOnRampLoading(true);
-        try {
-            await fundWallet({ address });
+        // PRODUCTION: Real Money Mode (MoonPay removed, using Alert or Transak override)
+        // setIsOnRampLoading(true);
+        // try {
+        //     await fundWallet({ address });
+        // } ...
+        alert("Global Card payments are temporarily handled via Africa Gateway/Transak. Please use the 'Direct Transfer' or 'Africa Local' option.");
 
-            // Success: Send Email Notification (Fire and Forget)
-            if (user?.email?.address) {
-                fetch('/api/emails/fund-wallet', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: user.email.address,
-                        amount: depositAmount,
-                        walletAddress: address
-                    })
-                }).catch(err => console.error('Failed to send email receipt:', err));
-            }
-        } catch (err: any) {
-            console.error('On-Ramp Error:', err);
-            alert(`Payment Gateway Error: ${err.message || "Unknown error"}`);
-        } finally {
-            setIsOnRampLoading(false);
+        /* 
+        // Success: Send Email Notification (Fire and Forget)
+        if (authUser?.email) {
+            fetch('/api/emails/fund-wallet', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: authUser.email,
+                    amount: depositAmount,
+                    walletAddress: address
+                })
+            }).catch(err => console.error('Failed to send email receipt:', err));
         }
+        */
     };
 
     const launchTransakDirect = async () => {
@@ -246,7 +244,7 @@ export default function FundsPage() {
                 defaultCryptoCurrency: 'USDC',
                 cryptoCurrencyList: 'USDC',
                 fiatAmount: Number(depositAmount),
-                email: user?.email?.address || '',
+                email: authUser?.email || '',
                 themeColor: '#f59e0b',
                 exchangeScreenTitle: 'AfriWager Africa Gateway',
             });
@@ -310,7 +308,7 @@ export default function FundsPage() {
         setCardNumber(''); setCardExpiry(''); setCardCVV(''); setCardName('');
     };
 
-    if (!authenticated) {
+    if (!authUser) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4">
                 <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-8 border border-emerald-500/20 shadow-2xl shadow-emerald-500/10">
@@ -319,7 +317,7 @@ export default function FundsPage() {
                 <h1 className="text-4xl font-black text-white mb-4 italic tracking-tighter uppercase">Capital Secure</h1>
                 <p className="text-slate-500 max-w-sm mb-10 font-medium leading-relaxed">Please authenticate via your secure gateway to view your portfolio and transaction ledger.</p>
                 <button
-                    onClick={login}
+                    onClick={openAuthModal}
                     className="px-12 py-5 bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-3xl transition-all shadow-3xl shadow-emerald-500/20 active:scale-95 uppercase tracking-widest text-xs"
                 >
                     Authenticate Session

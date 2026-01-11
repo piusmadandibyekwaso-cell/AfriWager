@@ -1,60 +1,40 @@
 'use client';
 
 import * as React from 'react';
-import { PrivyProvider } from '@privy-io/react-auth';
-import { createConfig, http } from 'wagmi';
-import { sepolia, mainnet, polygon } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider } from '@privy-io/wagmi';
+import { WagmiProvider } from 'wagmi';
+import {
+    mainnet,
+    polygon,
+    sepolia,
+} from 'wagmi/chains';
+import { getDefaultConfig, RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
+import '@rainbow-me/rainbowkit/styles.css';
+import { AuthProvider } from '@/context/AuthContext';
+
+const config = getDefaultConfig({
+    appName: 'AfriWager',
+    projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'YOUR_PROJECT_ID', // Reusing ID if available or fallback
+    chains: [polygon, mainnet, sepolia],
+    ssr: true, // If your dApp uses server side rendering (SSR)
+});
 
 const queryClient = new QueryClient();
 
-const wagmiConfig = createConfig({
-    chains: [sepolia, mainnet, polygon],
-    transports: {
-        [sepolia.id]: http(),
-        [mainnet.id]: http(),
-        [polygon.id]: http(),
-    },
-});
-
 export function Providers({ children }: { children: React.ReactNode }) {
-    const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "cmjsj7rom00x8jp0ctp8v5ka6";
-
     return (
-        <PrivyProvider
-            appId={appId}
-            config={{
-                appearance: {
-                    theme: 'dark',
-                    accentColor: '#10b981',
-                    showWalletLoginFirst: false,
-                },
-                embeddedWallets: {
-                    ethereum: {
-                        createOnLogin: 'users-without-wallets',
-                    },
-                },
-                loginMethods: ['email', 'wallet', 'google', 'passkey'],
-                defaultChain: polygon,
-                supportedChains: [sepolia, mainnet, polygon],
-                fundingMethodConfig: {
-                    moonpay: {
-                        useSandbox: false, // Production Mode
-                        paymentMethod: 'credit_debit_card',
-                        uiConfig: { accentColor: '#10b981', theme: 'dark' },
-                        quoteCurrencyCode: 'USDC',
-                        defaultCurrencyCode: 'USDC_POLYGON',
-                        currencyCode: 'USDC_POLYGON'
-                    },
-                },
-            }}
-        >
+        <WagmiProvider config={config}>
             <QueryClientProvider client={queryClient}>
-                <WagmiProvider config={wagmiConfig}>
-                    {children}
-                </WagmiProvider>
+                <RainbowKitProvider theme={darkTheme({
+                    accentColor: '#10b981',
+                    accentColorForeground: 'white',
+                    borderRadius: 'medium',
+                })}>
+                    <AuthProvider>
+                        {children}
+                    </AuthProvider>
+                </RainbowKitProvider>
             </QueryClientProvider>
-        </PrivyProvider>
+        </WagmiProvider>
     );
 }

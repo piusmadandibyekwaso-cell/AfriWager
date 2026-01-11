@@ -1,15 +1,19 @@
-import { userService, UserProfile } from '@/services/userService';
-import ProfileMenu from './ProfileMenu';
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
-import { usePrivy } from '@privy-io/react-auth';
-import OnboardingModal from './OnboardingModal';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useAuth } from '@/context/AuthContext';
+import ProfileMenu from './ProfileMenu';
+import AuthModal from './AuthModal';
 
 export default function Navbar() {
-  const { login, authenticated } = usePrivy();
+  const { user, isAuthModalOpen, closeAuthModal, openAuthModal } = useAuth();
+  // const [isAuthModalOpen, setIsAuthModalOpen] = useState(false); // Removed local state
 
   return (
     <>
-      <OnboardingModal />
+      <AuthModal isOpen={isAuthModalOpen} onClose={closeAuthModal} />
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/50 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex h-16 items-center justify-between">
@@ -32,14 +36,17 @@ export default function Navbar() {
               <Link href="/markets" className="text-slate-300 hover:text-white transition-colors font-medium">Markets</Link>
               <Link href="/activity" className="text-slate-300 hover:text-white transition-colors font-medium">Activity</Link>
               <Link href="/ranks" className="text-slate-300 hover:text-white transition-colors font-medium">Ranks</Link>
-              {/* Wallet link removed in favor of Menu */}
             </div>
 
             {/* Actions */}
             <div className="flex items-center gap-4">
-              {!authenticated ? (
+              <div className="hidden md:block">
+                <ConnectButton showBalance={false} chainStatus="icon" accountStatus="avatar" />
+              </div>
+
+              {!user ? (
                 <button
-                  onClick={login}
+                  onClick={openAuthModal}
                   className="rounded-full bg-emerald-500 px-6 py-2 text-sm font-bold text-black hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20"
                 >
                   Sign In

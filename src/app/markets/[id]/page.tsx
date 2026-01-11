@@ -9,7 +9,7 @@ import { marketService, Market } from '@/services/marketService';
 import { CONTRACT_ADDRESSES } from '@/constants/contracts';
 import FPMMABI from '@/abis/FixedProductMarketMaker.json';
 import USDCABI from '@/abis/MockERC20.json';
-import { usePrivy } from '@privy-io/react-auth';
+import { useAuth } from '@/context/AuthContext';
 import { ArrowRight, BarChart3, Info, ShieldCheck, AlertCircle, Droplets, Activity, Wallet, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { getCandidateImage } from '@/constants/candidateImages';
 import { clsx, type ClassValue } from 'clsx';
@@ -25,7 +25,7 @@ export default function MarketPage() {
     const params = useParams();
     const id = params?.id as string;
     const { address } = useAccount();
-    const { authenticated, login } = usePrivy();
+    const { user: authUser, openAuthModal } = useAuth();
     const { sendNotification } = useNotifications();
 
     const [market, setMarket] = useState<Market | null>(null);
@@ -321,11 +321,11 @@ export default function MarketPage() {
                             )}
 
                             <button
-                                onClick={() => authenticated ? setIsConfirmModalOpen(true) : login()}
+                                onClick={() => authUser ? setIsConfirmModalOpen(true) : openAuthModal()}
                                 disabled={selectedOutcome === null || !investmentAmount}
                                 className="w-full py-6 bg-white hover:bg-zinc-200 disabled:opacity-5 text-black font-black rounded-[1.5rem] transition-all uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 shadow-2xl active:scale-95"
                             >
-                                {authenticated ? "Prepare Wager" : "Sign in to Trade"}
+                                {authUser ? "Prepare Wager" : "Sign in to Trade"}
                                 <ArrowRight className="w-4 h-4" />
                             </button>
                         </div>
