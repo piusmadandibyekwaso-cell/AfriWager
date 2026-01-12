@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.afriwager.com'),
-  title: "AfriWager - Prediction Markets for Africa",
-  description: "Trade on news, politics, sports, and culture with transparent odds.",
+  title: "AfriWager – The African Event Exchange | Peer-to-Peer Prediction Markets",
+  description: "Africa’s premier marketplace for event-contingent contracts. Trade on economic, political, and cultural outcomes with market-driven pricing and transparent settlement.",
+  keywords: ["Derivatives", "Market Pricing", "Event Contracts", "FinTech", "Prediction Market", "Africa", "Exchange"],
   manifest: "/manifest.json",
   themeColor: "#060709",
   appleWebApp: {
@@ -24,8 +25,8 @@ export const metadata: Metadata = {
     title: "AfriWager",
   },
   openGraph: {
-    title: "AfriWager - Prediction Markets for Africa",
-    description: "Trade on news, politics, sports, and culture with transparent odds.",
+    title: "AfriWager – The African Event Exchange",
+    description: "Africa’s premier marketplace for event-contingent contracts. Market-driven pricing and transparent settlement.",
     url: 'https://www.afriwager.com',
     siteName: 'AfriWager',
     locale: 'en_US',
@@ -39,6 +40,7 @@ export const metadata: Metadata = {
 
 import { Providers } from "./providers";
 import MobileNavbar from "@/components/MobileNavbar";
+import Footer from "@/components/Footer";
 
 export default function RootLayout({
   children,
@@ -54,6 +56,7 @@ export default function RootLayout({
           <main className="pb-24 md:pb-0">
             {children}
           </main>
+          <Footer />
           <MobileNavbar />
         </Providers>
       </body>

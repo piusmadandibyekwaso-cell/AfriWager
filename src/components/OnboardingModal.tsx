@@ -20,6 +20,14 @@ export default function OnboardingModal() {
     const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
+
+    // CMA Compliance State
+    const [isOfAge, setIsOfAge] = useState(false);
+    const [understandsRisk, setUnderstandsRisk] = useState(false);
+    const [agreesToTerms, setAgreesToTerms] = useState(false);
+    const [nin, setNin] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+
     const router = useRouter();
 
     // Show if we have a wallet connected AND we're not loading AND we have no profile
@@ -61,12 +69,13 @@ export default function OnboardingModal() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!address || !isAvailable) return;
+        if (!address || !isAvailable || !isOfAge || !understandsRisk || !agreesToTerms) return;
 
         setIsSubmitting(true);
         setError('');
 
         try {
+            // Note: In a real implementation, we would also save the KYC data (NIN, Phone) to the backend here.
             await userService.createProfile(address, username);
             await refreshProfile(); // Update the global profile state
             setIsOpen(false);
@@ -137,12 +146,62 @@ export default function OnboardingModal() {
 
                         {error && <p className="text-red-500 text-sm">{error}</p>}
 
+                        <div className="space-y-4 pt-4 border-t border-white/10">
+                            <h3 className="text-sm font-bold text-white">KYC Verification (Sandbox)</h3>
+                            <input
+                                type="text"
+                                value={nin}
+                                onChange={(e) => setNin(e.target.value)}
+                                placeholder="National ID (NIN) / Passport No."
+                                className="w-full bg-zinc-900/50 border border-white/10 rounded-xl py-3 px-4 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium text-sm"
+                                required
+                            />
+                            <input
+                                type="tel"
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                placeholder="Mobile Money Registered Name"
+                                className="w-full bg-zinc-900/50 border border-white/10 rounded-xl py-3 px-4 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium text-sm"
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-3 pt-4 border-t border-white/10">
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    checked={isOfAge}
+                                    onChange={(e) => setIsOfAge(e.target.checked)}
+                                    className="mt-1 w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                                />
+                                <span className="text-xs text-zinc-400 group-hover:text-zinc-300">I confirm that I am 18 years of age or older.</span>
+                            </label>
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    checked={understandsRisk}
+                                    onChange={(e) => setUnderstandsRisk(e.target.checked)}
+                                    className="mt-1 w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                                />
+                                <span className="text-xs text-zinc-400 group-hover:text-zinc-300">I understand that trading event contracts involves financial risk and possible loss of capital.</span>
+                            </label>
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <input
+                                    type="checkbox"
+                                    checked={agreesToTerms}
+                                    onChange={(e) => setAgreesToTerms(e.target.checked)}
+                                    className="mt-1 w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                                />
+                                <span className="text-xs text-zinc-400 group-hover:text-zinc-300">I agree to the AfriWager Terms of Use and Risk Disclosure.</span>
+                            </label>
+                        </div>
+
                         <button
                             type="submit"
-                            disabled={!isAvailable || isSubmitting || username.length < 3}
+                            disabled={!isAvailable || isSubmitting || username.length < 3 || !isOfAge || !understandsRisk || !agreesToTerms || !nin || !phoneNumber}
                             className="w-full bg-white text-black font-bold rounded-xl py-3 hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-white/5"
                         >
-                            {isSubmitting ? 'Creating Identity...' : 'Complete Profile'}
+                            {isSubmitting ? 'Verifying...' : 'Complete Registration'}
                         </button>
                     </form>
                 </div>

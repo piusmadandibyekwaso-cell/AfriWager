@@ -123,7 +123,7 @@ export default function MarketPage() {
             setLastTxHash(buyHash);
             setTradeStep('success');
             sendNotification('Position Opened!', {
-                body: `You successfully wagered $${investmentAmount} on ${market.outcome_tokens[selectedOutcome]}.`,
+                body: `You successfully invested $${investmentAmount} on ${market.outcome_tokens[selectedOutcome]}.`,
             });
             refetchPool();
         } catch (error) {
@@ -158,13 +158,17 @@ export default function MarketPage() {
                                 </div>
                                 <h1 className="text-3xl md:text-6xl font-black tracking-tighter leading-none mb-4 max-w-3xl">{market.question}</h1>
                                 <p className="text-white/40 text-sm md:text-lg font-medium max-w-2xl leading-relaxed">{market.description}</p>
+                                <div className="mt-6 flex items-center gap-2 text-xs text-zinc-500">
+                                    <span className="font-bold uppercase tracking-widest text-[#10b981]">Oracle Source:</span>
+                                    <span>Reuters / Bloomberg / URA Official Reports</span>
+                                </div>
                             </div>
                         </div>
 
                         {/* Market Metadata Tabs */}
                         <div className="bg-zinc-900/20 border border-zinc-800/50 rounded-3xl p-8 backdrop-blur-xl">
                             <div className="flex items-center gap-6 mb-8 border-b border-zinc-800/50 pb-6 text-xs font-black tracking-widest uppercase text-zinc-500">
-                                <button className="text-emerald-500 border-b-2 border-emerald-500 pb-6 -mb-[26px]">Market Odds</button>
+                                <button className="text-emerald-500 border-b-2 border-emerald-500 pb-6 -mb-[26px]">Market Prices</button>
                                 <button className="hover:text-white transition-colors">Order Book</button>
                                 <button className="hover:text-white transition-colors">Positions</button>
                             </div>
@@ -325,7 +329,7 @@ export default function MarketPage() {
                                 disabled={selectedOutcome === null || !investmentAmount}
                                 className="w-full py-6 bg-white hover:bg-zinc-200 disabled:opacity-5 text-black font-black rounded-[1.5rem] transition-all uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 shadow-2xl active:scale-95"
                             >
-                                {authUser ? "Prepare Wager" : "Sign in to Trade"}
+                                {authUser ? "Prepare Trade" : "Sign in to Trade"}
                                 <ArrowRight className="w-4 h-4" />
                             </button>
                         </div>
@@ -388,7 +392,7 @@ export default function MarketPage() {
                                 <div className="py-12 flex flex-col items-center text-center">
                                     <Loader2 className="w-16 h-16 text-emerald-500 animate-spin mb-8" />
                                     <h4 className="text-lg font-black uppercase italic tracking-widest mb-2">Stage 2: Execution</h4>
-                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest max-w-[200px] leading-relaxed">Finalizing wager on the Polygon Mainnet ledger.</p>
+                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest max-w-[200px] leading-relaxed">Finalizing trade on the Polygon Mainnet ledger.</p>
                                 </div>
                             )}
 

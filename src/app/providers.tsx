@@ -11,6 +11,7 @@ import {
 import { getDefaultConfig, RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { AuthProvider } from '@/context/AuthContext';
+import { CurrencyProvider } from '@/context/CurrencyContext';
 
 const config = getDefaultConfig({
     appName: 'AfriWager',
@@ -30,9 +31,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
                     accentColorForeground: 'white',
                     borderRadius: 'medium',
                 })}>
-                    <AuthProvider>
-                        {children}
-                    </AuthProvider>
+                    <CurrencyProvider>
+                        <AuthProvider>
+                            {children}
+                        </AuthProvider>
+                    </CurrencyProvider>
                 </RainbowKitProvider>
             </QueryClientProvider>
         </WagmiProvider>

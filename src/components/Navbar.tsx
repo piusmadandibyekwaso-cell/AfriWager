@@ -4,11 +4,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAuth } from '@/context/AuthContext';
+import { useCurrency } from '@/context/CurrencyContext';
 import ProfileMenu from './ProfileMenu';
 import AuthModal from './AuthModal';
 
 export default function Navbar() {
   const { user, isAuthModalOpen, closeAuthModal, openAuthModal } = useAuth();
+  const { currency, setCurrency } = useCurrency();
   // const [isAuthModalOpen, setIsAuthModalOpen] = useState(false); // Removed local state
 
   return (
@@ -40,6 +42,16 @@ export default function Navbar() {
 
             {/* Actions */}
             <div className="flex items-center gap-4">
+              {/* Currency Toggle */}
+              <button
+                onClick={() => setCurrency(currency === 'USD' ? 'UGX' : 'USD')}
+                className="hidden md:flex items-center gap-2 rounded-lg bg-white/5 py-1.5 px-3 text-xs font-bold text-zinc-400 hover:text-white hover:bg-white/10 transition-all border border-white/5"
+              >
+                <span className={currency === 'USD' ? 'text-emerald-500' : ''}>USD</span>
+                <span className="text-zinc-600">/</span>
+                <span className={currency === 'UGX' ? 'text-emerald-500' : ''}>UGX</span>
+              </button>
+
               <div className="hidden md:block">
                 <ConnectButton showBalance={false} chainStatus="icon" accountStatus="avatar" />
               </div>

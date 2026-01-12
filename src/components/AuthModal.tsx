@@ -175,6 +175,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                 <p className="mt-6 text-center text-xs text-gray-500">
                     By continuing, you agree to our Terms of Service and Privacy Policy.
+                    Trading on AfriWager involves risk of loss. Ensure you understand the market before participating.
                 </p>
             </div>
         </div>
