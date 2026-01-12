@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -32,6 +32,12 @@ export async function POST(request: Request) {
 
         // Mock Mobile Money Delay
         // await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Yellow Card Sandbox Simulation Logic
+        if (phoneNumber.includes('0000000000')) {
+            return NextResponse.json({ error: 'Yellow Card Error: Transaction Failed (Mock)' }, { status: 400 });
+        }
+        // If it includes 1111111111, or any other number, we proceed as Success (Standard Sandbox behavior)
 
         // Get current balance
         const { data: balanceData } = await supabase
@@ -64,8 +70,8 @@ export async function POST(request: Request) {
                 type: type === 'DEPOSIT' ? 'deposit' : 'withdrawal',
                 amount_usdc: type === 'DEPOSIT' ? amountUSD : -amountUSD,
                 status: 'completed',
-                reference_id: `MOCK_MM_${Date.now()}`,
-                metadata: { phoneNumber, provider: 'MTN_MOMO' }
+                reference_id: `YC_SANDBOX_${Date.now()}`,
+                metadata: { phoneNumber, provider: 'YELLOW_CARD', status: 'completed' }
             });
 
         return NextResponse.json({ success: true, newBalance });

@@ -130,16 +130,30 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                             type="submit"
                             disabled={isSubmitting}
                             className={`w-full py-4 font-black rounded-xl uppercase tracking-widest text-xs transition-all shadow-lg flex items-center justify-center gap-2 ${activeTab === 'deposit'
-                                ? 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-emerald-500/20'
+                                ? 'bg-[#F7C325] hover:bg-[#E5B214] text-black shadow-amber-500/20'
                                 : 'bg-white hover:bg-zinc-200 text-black'
                                 }`}
                         >
-                            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (activeTab === 'deposit' ? 'Confirm Deposit' : 'Request Withdrawal')}
+                            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (activeTab === 'deposit' ? 'Pay with Yellow Card' : 'Withdraw via Yellow Card')}
                         </button>
 
-                        <div className="flex items-center justify-center gap-2 text-[10px] text-zinc-600 font-medium">
-                            <ShieldCheck className="w-3 h-3" />
-                            Secure Mobile Money Transaction (MTN/Airtel)
+                        <div className="text-center space-y-4">
+                            <div className="flex items-center justify-center gap-2 text-[10px] text-zinc-500 font-medium">
+                                <span className="w-2 h-2 rounded-full bg-[#F7C325]"></span>
+                                Powered by <strong>Yellow Card</strong> Sandbox
+                            </div>
+
+                            <div className="p-3 bg-zinc-900/50 rounded-xl border border-dashed border-zinc-800 text-[10px] text-zinc-600 text-left">
+                                <p className="font-bold text-zinc-500 mb-2 uppercase tracking-widest">🧪 Sandbox Test Credentials:</p>
+                                <div className="space-y-1 font-mono">
+                                    <div className="flex justify-between">
+                                        <span>Success:</span> <span className="text-emerald-500">+256 111 111 1111</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Failure:</span> <span className="text-rose-500">+256 000 000 0000</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
