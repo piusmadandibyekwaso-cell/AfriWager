@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             return {
                 ...currentUser,
-                profile: profile, // Type might mismatch, but we extend it at runtime
+                profile: profile || undefined, // Type might mismatch, but we extend it at runtime
                 balance: balanceData?.balance_usdc || 0,
             };
         } catch (e) {
