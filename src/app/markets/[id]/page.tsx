@@ -55,7 +55,10 @@ export default function MarketPage() {
         }
     }, [id]);
 
-    // 2. Fetch Real-time Pool Balances from AMM
+    // 2. Fetch Real-time Pool Balances (Legacy / Reference Only)
+    // In Full AfriVault, we would fetch pool state from DB. 
+    // For V1 Hybrid, we can keep reading on-chain for "Oracle" price if the contract updates, 
+    // OR just mock it. Let's keep reading but note it's reference.
     const { data: poolBalances, refetch: refetchPool } = useReadContract({
         address: market?.contract_address as `0x${string}`,
         abi: FPMMABI.abi,
@@ -92,40 +95,46 @@ export default function MarketPage() {
         return amount / outcomePrice;
     }, [investmentAmount, poolBalances, selectedOutcome, prices]);
 
-    // 5. Contract Interaction (Approval & Buy)
-    const { writeContractAsync } = useWriteContract();
-
+    // 5. Off-Chain Trade Execution (AfriVault Ledger)
     const handleExecuteTrade = async () => {
-        if (!market || selectedOutcome === null || !investmentAmount) return;
+        if (!market || selectedOutcome === null || !investmentAmount || !authUser) return;
 
         try {
-            const amountInWei = parseUnits(investmentAmount, 6);
+            const amountUSD = parseFloat(investmentAmount);
+            if (authUser.balance !== undefined && authUser.balance < amountUSD) {
+                alert("Insufficient AfriVault Balance. Please Deposit funds."); // Replace with better UI later
+                return;
+            }
 
-            // Step 1: Approve
-            setTradeStep('approving');
-            const approveHash = await writeContractAsync({
-                address: CONTRACT_ADDRESSES.usdc as `0x${string}`,
-                abi: USDCABI.abi,
-                functionName: 'approve',
-                args: [market.contract_address as `0x${string}`, amountInWei],
-            });
-            console.log('Approved:', approveHash);
-
-            // Step 2: Buy
             setTradeStep('buying');
-            const buyHash = await writeContractAsync({
-                address: market.contract_address as `0x${string}`,
-                abi: FPMMABI.abi,
-                functionName: 'buy',
-                args: [market.id, amountInWei, selectedOutcome, 0n], // 0n = min shares (slippage protection)
+
+            // Call AfriVault API
+            const response = await fetch('/api/trade', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    marketId: market.id,
+                    outcomeIndex: selectedOutcome,
+                    amountUSD: amountUSD,
+                    type: 'EXECUTE'
+                })
             });
 
-            setLastTxHash(buyHash);
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Trade Failed');
+            }
+
+            // Success Execution
+            setLastTxHash(null); // No on-chain hash
             setTradeStep('success');
+
             sendNotification('Position Opened!', {
                 body: `You successfully invested $${investmentAmount} on ${market.outcome_tokens[selectedOutcome]}.`,
             });
-            refetchPool();
+            // trigger balance update? AuthContext usually polls or we can trigger re-fetch manually if exposed.
+            // For now, simple success state.
         } catch (error) {
             console.error('Trade Failed:', error);
             setTradeStep('failed');
@@ -366,8 +375,8 @@ export default function MarketPage() {
                                             <span className="text-xs font-black text-white">{prices[selectedOutcome!].toFixed(2)} USDC</span>
                                         </div>
                                         <div className="flex justify-between p-4 bg-zinc-900/50 rounded-2xl">
-                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Network Fee</span>
-                                            <span className="text-xs font-black text-emerald-500">~0.01 MATIC</span>
+                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">AfriVault Fee</span>
+                                            <span className="text-xs font-black text-emerald-500">$0.00 (Free)</span>
                                         </div>
                                     </div>
 
@@ -380,19 +389,11 @@ export default function MarketPage() {
                                 </div>
                             )}
 
-                            {tradeStep === 'approving' && (
-                                <div className="py-12 flex flex-col items-center text-center">
-                                    <Loader2 className="w-16 h-16 text-amber-500 animate-spin mb-8" />
-                                    <h4 className="text-lg font-black uppercase italic tracking-widest mb-2">Stage 1: Approval</h4>
-                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest max-w-[200px] leading-relaxed">Authorizing Market Maker to use your USDC funds.</p>
-                                </div>
-                            )}
-
                             {tradeStep === 'buying' && (
                                 <div className="py-12 flex flex-col items-center text-center">
                                     <Loader2 className="w-16 h-16 text-emerald-500 animate-spin mb-8" />
-                                    <h4 className="text-lg font-black uppercase italic tracking-widest mb-2">Stage 2: Execution</h4>
-                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest max-w-[200px] leading-relaxed">Finalizing trade on the Polygon Mainnet ledger.</p>
+                                    <h4 className="text-lg font-black uppercase italic tracking-widest mb-2">Processing Trade</h4>
+                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest max-w-[200px] leading-relaxed">Updating AfriVault Ledger...</p>
                                 </div>
                             )}
 
@@ -402,7 +403,7 @@ export default function MarketPage() {
                                         <CheckCircle2 className="w-10 h-10 text-emerald-500" />
                                     </div>
                                     <h4 className="text-2xl font-black italic tracking-tighter uppercase mb-2">Position Open</h4>
-                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-10">Your shares have been minted.</p>
+                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-10">Your shares are now recorded in AfriVault.</p>
 
                                     <div className="grid grid-cols-1 gap-3 w-full">
                                         <button
@@ -427,8 +428,8 @@ export default function MarketPage() {
                             {tradeStep === 'failed' && (
                                 <div className="py-12 flex flex-col items-center text-center">
                                     <AlertCircle className="w-16 h-16 text-rose-500 mb-8" />
-                                    <h4 className="text-xl font-black uppercase tracking-tighter mb-4">Transaction Denied</h4>
-                                    <p className="text-zinc-500 text-xs font-bold mb-10 max-w-[240px]">The transaction was rejected or failed on-chain. Please check your gas (MATIC) balance.</p>
+                                    <h4 className="text-xl font-black uppercase tracking-tighter mb-4">Trade Failed</h4>
+                                    <p className="text-zinc-500 text-xs font-bold mb-10 max-w-[240px]">The transaction could not be processed. Please check your AfriVault balance.</p>
                                     <button onClick={() => setTradeStep('idle')} className="w-full py-5 bg-zinc-800 text-white font-black rounded-2xl uppercase tracking-widest text-[10px]">
                                         Back to Review
                                     </button>

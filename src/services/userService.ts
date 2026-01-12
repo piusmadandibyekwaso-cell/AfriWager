@@ -5,6 +5,11 @@ export interface UserProfile {
     username: string;
     avatar_seed: string;
     last_funding_address?: string;
+    kyc_status?: 'unverified' | 'pending' | 'verified';
+    phone_number?: string;
+    nin?: string;
+    district?: string;
+    country_code?: string;
     created_at?: string;
 }
 
@@ -40,13 +45,28 @@ export const userService = {
     },
 
     // Create a new profile
-    async createProfile(walletAddress: string, username: string): Promise<UserProfile | null> {
+    async createProfile(
+        walletAddress: string,
+        username: string,
+        kycData?: { phone?: string; nin?: string; district?: string }
+    ): Promise<UserProfile | null> {
         const avatar_seed = username; // Default seed is the username itself
 
         const { data, error } = await supabase
             .from('profiles')
             .insert([
-                { wallet_address: walletAddress, username, avatar_seed }
+                {
+                    wallet_address: walletAddress,
+                    username,
+                    avatar_seed,
+                    // Save KYC data if provided, default status to 'pending'
+                    ...(kycData && {
+                        phone_number: kycData.phone,
+                        nin: kycData.nin,
+                        district: kycData.district,
+                        kyc_status: 'pending' // Auto-set to pending for sandbox
+                    })
+                }
             ])
             .select()
             .single();

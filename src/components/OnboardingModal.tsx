@@ -75,15 +75,18 @@ export default function OnboardingModal() {
         setError('');
 
         try {
-            // Note: In a real implementation, we would also save the KYC data (NIN, Phone) to the backend here.
-            await userService.createProfile(address, username);
+            // Pass KYC data to createProfile
+            await userService.createProfile(address, username, {
+                phone: phoneNumber,
+                nin: nin,
+                // district: district // Add this field if added to UI
+            });
+
             await refreshProfile(); // Update the global profile state
             setIsOpen(false);
-            // router.refresh(); // No longer needed as state updates instantly
         } catch (error) {
             console.error('Error creating profile:', error);
             setError('Failed to create profile. Please try again.');
-            // Show error toast
         } finally {
             setIsSubmitting(false);
         }

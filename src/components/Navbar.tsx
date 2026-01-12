@@ -7,15 +7,18 @@ import { useAuth } from '@/context/AuthContext';
 import { useCurrency } from '@/context/CurrencyContext';
 import ProfileMenu from './ProfileMenu';
 import AuthModal from './AuthModal';
+import WalletModal from './WalletModal';
 
 export default function Navbar() {
   const { user, isAuthModalOpen, closeAuthModal, openAuthModal } = useAuth();
   const { currency, setCurrency } = useCurrency();
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   // const [isAuthModalOpen, setIsAuthModalOpen] = useState(false); // Removed local state
 
   return (
     <>
       <AuthModal isOpen={isAuthModalOpen} onClose={closeAuthModal} />
+      <WalletModal isOpen={isWalletModalOpen} onClose={() => setIsWalletModalOpen(false)} />
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/50 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex h-16 items-center justify-between">
@@ -53,7 +56,20 @@ export default function Navbar() {
               </button>
 
               <div className="hidden md:block">
-                <ConnectButton showBalance={false} chainStatus="icon" accountStatus="avatar" />
+                {/* Replaced ConnectButton with AfriVault Wallet Button */}
+                {user ? (
+                  <button
+                    onClick={() => setIsWalletModalOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-white/10 rounded-full hover:bg-zinc-800 transition-all group"
+                  >
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-xs font-black text-white tracking-widest group-hover:text-emerald-400">
+                      ${user.balance?.toFixed(2) || '0.00'}
+                    </span>
+                  </button>
+                ) : (
+                  <ConnectButton showBalance={false} chainStatus="icon" accountStatus="avatar" />
+                )}
               </div>
 
               {!user ? (
