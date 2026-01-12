@@ -49,29 +49,53 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Insufficient funds' }, { status: 402 });
         }
 
-        // 3. Simple AMM Logic (Fixed Price for Sandbox V1 - 50/50 probability simulation)
-        // In real V2: fetch market pool state and calc slippage.
-        // For V1 Demo: Assume fixed price of $0.50 per share (2x payout).
-        const pricePerShare = 0.50;
-        const sharesToBuy = amountUSD / pricePerShare;
-        const potentialReturn = sharesToBuy * 1.00; // $1.00 payout per share
+        // 2a. KILL SWITCH CHECK (Audit Requirement)
+        const { data: marketControl } = await supabase
+            .from('market_controls')
+            .select('is_halted')
+            .eq('market_id', marketId)
+            .single();
+
+        if (marketControl?.is_halted) {
+            return NextResponse.json({ error: 'Market is currently HALTED by Administrator.' }, { status: 503 });
+        }
+
+        // 3. Simple AMM Logic (Fixed Price for Sandbox V1)
+        // Audit Requirement: 2% Hidden Fee
+        // Logic: Price is $0.50. User pays $0.50. 
+        // Real Allocation: $0.49 to Pool, $0.01 to Revenue (2%).
+        // OR: Fee is additive? "Price $0.50 + Fee". 
+        // User Preference: "Hidden 2%". This implies Price correlates to Probability, Fee is skimmed.
+        // Implementation: We deduct 2% from the Principal *Amount* before converting to shares? 
+        // No, that changes the "Price". 
+        // Better: We take 2% PRE-trade or POST-trade?
+        // Let's do: Total Deducted = amountUSD.
+        // Revenue = amountUSD * 0.02.
+        // Effective Invested = amountUSD * 0.98.
+        // Shares calculated on Effective Invested.
+
+        const feePercentage = 0.02;
+        const revenueShare = amountUSD * feePercentage;
+        const netInvested = amountUSD - revenueShare;
+
+        const pricePerShare = 0.50; // Fixed for V1
+        const sharesToBuy = netInvested / pricePerShare;
+        const potentialReturn = sharesToBuy * 1.00; // $1.00 payout
 
         if (type === 'CHECK') {
             return NextResponse.json({
                 price: pricePerShare,
                 shares: sharesToBuy,
                 return: potentialReturn,
-                fee: 0,
+                fee: revenueShare,
                 canTrade: true
             });
         }
 
         // 4. EXECUTE TRADE (Atomic Database Transaction)
-        // Note: Supabase JS direct client doesn't support complex SQL Transactions easily without RPC.
-        // For Sandbox V1, we will do sequential updates (Risk of race condition, but acceptable for demo).
-        // A better way is to call a Postgres Function `execute_trade(...)`.
+        const traceId = crypto.randomUUID(); // Black Box Trace ID
 
-        // A. Debit Balance
+        // A. Debit Balance (Full Amount)
         const { error: debitError } = await supabase
             .from('user_balances')
             .update({ balance_usdc: currentBalance - amountUSD })
@@ -79,8 +103,8 @@ export async function POST(request: Request) {
 
         if (debitError) throw new Error('Debit failed');
 
-        // B. Credit Position (Upsert)
-        // First check existing
+        // B. Credit Position
+        // First check existing...
         const { data: existingPos } = await supabase
             .from('positions')
             .select('*')
@@ -90,9 +114,8 @@ export async function POST(request: Request) {
             .single();
 
         const currentShares = existingPos ? Number(existingPos.shares_owned) : 0;
-        const newShares = currentShares + sharesToBuy;
+        const newShares = currentShares + sharesToBuy; // Buying fewer shares due to fee
 
-        // Upsert Position
         const { error: posError } = await supabase
             .from('positions')
             .upsert({
@@ -100,24 +123,38 @@ export async function POST(request: Request) {
                 market_id: marketId,
                 outcome_index: outcomeIndex,
                 shares_owned: newShares,
-                average_price: pricePerShare // Simplified avg price logic
+                average_price: pricePerShare
             }, { onConflict: 'user_id, market_id, outcome_index' });
 
         if (posError) throw new Error('Position update failed');
 
-        // C. Record Transaction
-        const { error: txError } = await supabase
+        // C. Record Transaction (Audit Trace)
+        const { data: txData, error: txError } = await supabase
             .from('transactions')
             .insert({
                 user_id: user.id,
                 type: 'trade_buy',
                 amount_usdc: -amountUSD,
-                fee_usdc: 0,
+                fee_usdc: revenueShare, // Recording the hidden fee
+                trace_id: traceId,
                 metadata: { marketId, outcomeIndex, shares: sharesToBuy, price: pricePerShare },
                 status: 'completed'
-            });
+            })
+            .select()
+            .single();
 
-        return NextResponse.json({ success: true, shares: sharesToBuy, newBalance: currentBalance - amountUSD });
+        // D. Revenue Vault Credit (Audit Requirement)
+        if (txData) {
+            await supabase
+                .from('revenue_ledger')
+                .insert({
+                    amount_usdc: revenueShare,
+                    source_transaction_id: txData.id,
+                    market_category: 'GENERAL' // Could be passed in body
+                });
+        }
+
+        return NextResponse.json({ success: true, shares: sharesToBuy, newBalance: currentBalance - amountUSD, traceId });
 
     } catch (e: any) {
         console.error('Trade execution error:', e);

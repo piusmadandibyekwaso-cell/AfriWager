@@ -87,3 +87,31 @@ CREATE TRIGGER on_auth_user_created_balance
 -- 6. INDEXES for Performance
 CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON public.transactions(user_id);
 CREATE INDEX IF NOT EXISTS idx_positions_user_market ON public.positions(user_id, market_id);
+
+-- 7. AUDIT & COMPLIANCE (LDC Mandate)
+-- 7.1 "Black Box" Traceability
+ALTER TABLE public.transactions 
+ADD COLUMN IF NOT EXISTS trace_id uuid DEFAULT gen_random_uuid();
+
+-- 7.2 Revenue Vault (The 2% Fee)
+CREATE TABLE IF NOT EXISTS public.revenue_ledger (
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+    amount_usdc numeric(20, 6) NOT NULL, -- Positive Value
+    source_transaction_id uuid REFERENCES public.transactions(id),
+    market_category text DEFAULT 'GENERAL', -- Politics, Sports, etc.
+    created_at timestamptz DEFAULT now()
+);
+
+-- 7.3 The Kill Switch (Market Control)
+CREATE TABLE IF NOT EXISTS public.market_controls (
+    market_id text PRIMARY KEY,
+    is_halted boolean DEFAULT false,
+    halt_reason text,
+    updated_at timestamptz DEFAULT now(),
+    updated_by uuid REFERENCES auth.users(id)
+);
+
+-- 7.4 Identity Integrity
+-- Ensure phone numbers are unique to prevent "Smurfing"
+ALTER TABLE public.profiles
+ADD CONSTRAINT unique_phone_number UNIQUE (phone_number);
