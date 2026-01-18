@@ -301,6 +301,11 @@ export default function FundsPage() {
         }
     }, [isWithdrawModalOpen, profile?.last_funding_address]);
 
+    // - [x] Resolve `@supabase/ssr` build errors.
+    // - [x] Patch `WalletModal.tsx` UI (Slider -> Input).
+    // - [x] Resolve Turbopack/Webpack build conflict (Disabled PWA).
+    // - [x] Push fixes to Live Site (`afriwager.com`).
+    // - [x] Create Balance Repair API for Audit.
     const resetDeposit = () => {
         setIsDepositModalOpen(false);
         setDepositStep('selection');

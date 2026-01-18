@@ -46,18 +46,21 @@ export default function Navbar() {
             {/* Actions */}
             <div className="flex items-center gap-4">
               {/* Currency Toggle */}
-              <button
-                onClick={() => setCurrency(currency === 'USD' ? 'UGX' : 'USD')}
-                className="hidden md:flex items-center gap-2 rounded-lg bg-white/5 py-1.5 px-3 text-xs font-bold text-zinc-400 hover:text-white hover:bg-white/10 transition-all border border-white/5"
-              >
-                <span className={currency === 'USD' ? 'text-emerald-500' : ''}>USD</span>
-                <span className="text-zinc-600">/</span>
-                <span className={currency === 'UGX' ? 'text-emerald-500' : ''}>UGX</span>
-              </button>
+              {/* Currency Toggle - Only visible when logged in */}
+              {user && (
+                <button
+                  onClick={() => setCurrency(currency === 'USD' ? 'UGX' : 'USD')}
+                  className="hidden md:flex items-center gap-2 rounded-lg bg-white/5 py-1.5 px-3 text-xs font-bold text-zinc-400 hover:text-white hover:bg-white/10 transition-all border border-white/5"
+                >
+                  <span className={currency === 'USD' ? 'text-emerald-500' : ''}>USD</span>
+                  <span className="text-zinc-600">/</span>
+                  <span className={currency === 'UGX' ? 'text-emerald-500' : ''}>UGX</span>
+                </button>
+              )}
 
               <div className="hidden md:block">
-                {/* Replaced ConnectButton with AfriVault Wallet Button */}
-                {user ? (
+                {/* AfriVault Wallet Button - Only visible when logged in */}
+                {user && (
                   <button
                     onClick={() => setIsWalletModalOpen(true)}
                     className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-white/10 rounded-full hover:bg-zinc-800 transition-all group"
@@ -67,18 +70,18 @@ export default function Navbar() {
                       ${user.balance?.toFixed(2) || '0.00'}
                     </span>
                   </button>
-                ) : (
-                  <ConnectButton showBalance={false} chainStatus="icon" accountStatus="avatar" />
                 )}
               </div>
 
               {!user ? (
-                <button
-                  onClick={openAuthModal}
-                  className="rounded-full bg-emerald-500 px-6 py-2 text-sm font-bold text-black hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20"
-                >
-                  Sign In
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={openAuthModal}
+                    className="rounded-full bg-emerald-500 px-6 py-2 text-sm font-bold text-black hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20"
+                  >
+                    Sign In
+                  </button>
+                </div>
               ) : (
                 <ProfileMenu />
               )}
