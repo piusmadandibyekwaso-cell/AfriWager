@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.afriwager.com'),
-  title: "AfriWager – The African Event Exchange | Peer-to-Peer Prediction Markets",
-  description: "Africa’s premier marketplace for event-contingent contracts. Trade on economic, political, and cultural outcomes with market-driven pricing and transparent settlement.",
+  title: "AfriWager - Africa's Largest Prediction Market | Trade on Real World Events",
+  description: "AfriWager is Africa's premier prediction market where you can trade on the outcome of real-world events. Buy and sell Event Contracts on politics, economics, and culture.",
   keywords: ["Derivatives", "Market Pricing", "Event Contracts", "FinTech", "Prediction Market", "Africa", "Exchange"],
   manifest: "/manifest.json",
   themeColor: "#060709",
@@ -25,8 +25,8 @@ export const metadata: Metadata = {
     title: "AfriWager",
   },
   openGraph: {
-    title: "AfriWager – The African Event Exchange",
-    description: "Africa’s premier marketplace for event-contingent contracts. Market-driven pricing and transparent settlement.",
+    title: "AfriWager - Africa's Largest Prediction Market",
+    description: "AfriWager is Africa's premier prediction market where you can trade on the outcome of real-world events.",
     url: 'https://www.afriwager.com',
     siteName: 'AfriWager',
     locale: 'en_US',
