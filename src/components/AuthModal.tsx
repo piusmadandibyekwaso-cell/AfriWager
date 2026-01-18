@@ -73,20 +73,21 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-            <div className="relative w-full max-w-md rounded-2xl bg-[#1C1C1C] p-6 shadow-2xl border border-white/10">
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="relative w-full max-w-sm rounded-2xl bg-[#1C1C1C] p-5 shadow-2xl border border-white/10">
                 <button
                     onClick={onClose}
                     className="absolute right-4 top-4 text-gray-400 hover:text-white"
                 >
-                    <X className="h-6 w-6" />
+                    <X className="h-5 w-5" />
                 </button>
 
-                <h2 className="mb-6 text-center text-2xl font-bold text-white">
+                <h2 className="mb-4 text-center text-xl font-bold text-white">
                     {isLogin ? 'Welcome Back' : 'Create Account'}
                 </h2>
 
-                <div className="mb-6 space-y-3">
+                <div className="mb-4 space-y-2">
                     <button
                         onClick={async () => {
                             try {
@@ -101,9 +102,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                 setError(err.message);
                             }
                         }}
-                        className="flex w-full items-center justify-center gap-3 rounded-lg bg-white px-4 py-3 font-semibold text-black transition-all hover:bg-gray-100"
+                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black transition-all hover:bg-gray-100"
                     >
-                        <svg className="h-5 w-5" viewBox="0 0 24 24">
+                        <svg className="h-4 w-4" viewBox="0 0 24 24">
                             <path
                                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                                 fill="#4285F4"
@@ -124,21 +125,21 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                         Continue with Google
                     </button>
 
-                    <div className="relative flex items-center py-2">
+                    <div className="relative flex items-center py-1">
                         <div className="flex-grow border-t border-white/10"></div>
-                        <span className="mx-4 flex-shrink-0 text-xs text-gray-500">OR</span>
+                        <span className="mx-2 flex-shrink-0 text-[10px] text-gray-500">OR</span>
                         <div className="flex-grow border-t border-white/10"></div>
                     </div>
                 </div>
 
-                <div className="mb-6 flex rounded-lg bg-white/5 p-1">
+                <div className="mb-4 flex rounded-lg bg-white/5 p-1">
                     <button
                         onClick={() => {
                             setIsLogin(true);
                             setError(null);
                             setMessage(null);
                         }}
-                        className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${isLogin ? 'bg-[#10b981] text-white shadow-lg' : 'text-gray-400 hover:text-white'
+                        className={`flex-1 rounded-md py-1.5 text-xs font-medium transition-all ${isLogin ? 'bg-[#10b981] text-white shadow-lg' : 'text-gray-400 hover:text-white'
                             }`}
                     >
                         Log In
@@ -149,58 +150,58 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                             setError(null);
                             setMessage(null);
                         }}
-                        className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${!isLogin ? 'bg-[#10b981] text-white shadow-lg' : 'text-gray-400 hover:text-white'
+                        className={`flex-1 rounded-md py-1.5 text-xs font-medium transition-all ${!isLogin ? 'bg-[#10b981] text-white shadow-lg' : 'text-gray-400 hover:text-white'
                             }`}
                     >
                         Sign Up
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-3">
                     <div>
-                        <label className="mb-2 block text-sm text-gray-400">Email Address</label>
+                        <label className="mb-1.5 block text-xs text-gray-400">Email Address</label>
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full rounded-lg bg-white/5 px-4 py-3 text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#10b981]"
+                            className="w-full rounded-lg bg-white/5 px-3 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#10b981]"
                             placeholder="you@example.com"
                             required
                         />
                     </div>
                     <div>
-                        <label className="mb-2 block text-sm text-gray-400">Password</label>
+                        <label className="mb-1.5 block text-xs text-gray-400">Password</label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full rounded-lg bg-white/5 px-4 py-3 text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#10b981]"
+                            className="w-full rounded-lg bg-white/5 px-3 py-2.5 text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-[#10b981]"
                             placeholder="••••••••"
                             required
                         />
 
-                        {!isLogin && (
-                            <div className="mt-3 space-y-2 rounded-lg bg-white/5 p-3">
-                                <p className="text-xs font-medium text-gray-400 mb-2">Password Requirements:</p>
-                                <div className="grid grid-cols-1 gap-1">
-                                    <Requirement met={validation.length} label="8+ characters" />
-                                    <Requirement met={validation.uppercase} label="At least one uppercase" />
-                                    <Requirement met={validation.symbol} label="At least one symbol" />
+                        {!isLogin && password.length > 0 && (
+                            <div className="mt-2 space-y-1 rounded-lg bg-white/5 p-2">
+                                <p className="text-[10px] font-medium text-gray-400 mb-1">Password Requirements:</p>
+                                <div className="grid grid-cols-1 gap-0.5">
+                                    <Requirement met={validation.length} label="8+ chars" />
+                                    <Requirement met={validation.uppercase} label="Uppercase" />
+                                    <Requirement met={validation.symbol} label="Symbol" />
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {error && (
-                        <div className="flex items-center gap-2 rounded-lg bg-red-500/10 p-3 text-sm text-red-500">
-                            <AlertCircle className="h-4 w-4 shrink-0" />
+                        <div className="flex items-center gap-2 rounded-lg bg-red-500/10 p-2 text-xs text-red-500">
+                            <AlertCircle className="h-3 w-3 shrink-0" />
                             {error}
                         </div>
                     )}
 
                     {message && (
-                        <div className="flex items-center gap-2 rounded-lg bg-green-500/10 p-3 text-sm text-green-500">
-                            <Check className="h-4 w-4 shrink-0" />
+                        <div className="flex items-center gap-2 rounded-lg bg-green-500/10 p-2 text-xs text-green-500">
+                            <Check className="h-3 w-3 shrink-0" />
                             {message}
                         </div>
                     )}
@@ -208,19 +209,18 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     <button
                         type="submit"
                         disabled={loading || (!isLogin && !isPasswordValid)}
-                        className="w-full rounded-lg bg-[#10b981] py-3 font-semibold text-white transition-all hover:bg-[#059669] disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full rounded-lg bg-[#10b981] py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#059669] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {loading ? (
-                            <Loader2 className="mx-auto h-5 w-5 animate-spin" />
+                            <Loader2 className="mx-auto h-4 w-4 animate-spin" />
                         ) : (
                             isLogin ? 'Log In' : 'Create Account'
                         )}
                     </button>
                 </form>
 
-                <p className="mt-6 text-center text-xs text-gray-500">
-                    By continuing, you agree to our Terms of Service and Privacy Policy.
-                    Trading on AfriWager involves risk of loss. Ensure you understand the market before participating.
+                <p className="mt-4 text-center text-[10px] text-gray-500 leading-tight px-4">
+                    By continuing, you agree to our Terms and Privacy Policy.
                 </p>
             </div>
         </div>
