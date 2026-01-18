@@ -243,14 +243,14 @@ export default function SettingsPage() {
                                     <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mb-2">Total Net Valuation</p>
                                     <div className="flex items-baseline gap-2 mb-8">
                                         <h2 className="text-5xl font-black text-white tracking-tighter">
-                                            ${usdcBalance ? Number(formatUnits(usdcBalance as bigint, 6)).toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}
+                                            ${authUser?.balance !== undefined ? authUser.balance.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}
                                         </h2>
                                         <span className="text-xl font-bold text-zinc-600">USDC</span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-8 pt-8 border-t border-white/5">
                                         <div>
                                             <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-widest mb-1">Available Cash</p>
-                                            <p className="text-2xl font-bold text-white">${usdcBalance ? Number(formatUnits(usdcBalance as bigint, 6)).toLocaleString() : '0.00'}</p>
+                                            <p className="text-2xl font-bold text-white">${authUser?.balance !== undefined ? authUser.balance.toLocaleString() : '0.00'}</p>
                                         </div>
                                         <div>
                                             <p className="text-zinc-500 text-[10px] uppercase font-bold tracking-widest mb-1">Network Gas</p>
@@ -366,8 +366,15 @@ export default function SettingsPage() {
                                                 <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                                                     <button onClick={() => setDepositRegion(null)} className="text-[10px] font-bold text-zinc-500 hover:text-white flex items-center gap-1 mb-2">← Change Region</button>
                                                     <div className="text-center">
-                                                        <p className="text-4xl font-black text-white mb-2">${depositAmount}</p>
-                                                        <input type="range" min="10" max="5000" step="10" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
+                                                        <div className="flex items-center justify-center gap-2 mb-4">
+                                                            <span className="text-2xl font-bold text-white">$</span>
+                                                            <input
+                                                                type="number"
+                                                                value={depositAmount}
+                                                                onChange={(e) => setDepositAmount(e.target.value)}
+                                                                className="text-4xl font-black text-white bg-transparent border-b border-emerald-500/50 outline-none w-32 text-center"
+                                                            />
+                                                        </div>
                                                     </div>
                                                     <button onClick={launchOnRamp} disabled={isOnRampLoading} className="w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl flex items-center justify-center gap-2 transition-all">
                                                         {isOnRampLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
@@ -379,8 +386,15 @@ export default function SettingsPage() {
                                                     <button onClick={() => setDepositRegion(null)} className="text-[10px] font-bold text-zinc-500 hover:text-white flex items-center gap-1 mb-2">← Change Region</button>
 
                                                     <div className="text-center">
-                                                        <p className="text-4xl font-black text-white mb-2">${depositAmount}</p>
-                                                        <input type="range" min="10" max="5000" step="10" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-500" />
+                                                        <div className="flex items-center justify-center gap-2 mb-4">
+                                                            <span className="text-2xl font-bold text-white">$</span>
+                                                            <input
+                                                                type="number"
+                                                                value={depositAmount}
+                                                                onChange={(e) => setDepositAmount(e.target.value)}
+                                                                className="text-4xl font-black text-white bg-transparent border-b border-amber-500/50 outline-none w-32 text-center"
+                                                            />
+                                                        </div>
                                                     </div>
 
                                                     <div className="p-6 bg-amber-500/5 border border-amber-500/10 rounded-2xl text-center space-y-4">

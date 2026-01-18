@@ -366,7 +366,7 @@ export default function FundsPage() {
                         <p className="text-slate-600 mb-4 font-black uppercase tracking-[0.3em] text-[10px]">Total Net Valuation</p>
                         <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-5 mb-12">
                             <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter">
-                                ${usdcBalance ? (Number(formatUnits(usdcBalance as bigint, 6)) + totalEquityValue).toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00'}
+                                ${(authUser?.balance !== undefined ? (authUser.balance + totalEquityValue) : totalEquityValue).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </h2>
                             <span className="text-xl md:text-2xl font-black text-emerald-500/40 italic">USDC</span>
                         </div>
@@ -374,7 +374,7 @@ export default function FundsPage() {
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 pt-12 border-t border-white/5">
                             <div>
                                 <p className="text-slate-600 text-[9px] uppercase font-black mb-2 tracking-widest">Available Cash</p>
-                                <p className="text-3xl font-black text-white tracking-tighter">${usdcBalance ? Number(formatUnits(usdcBalance as bigint, 6)).toLocaleString() : '0.00'}</p>
+                                <p className="text-3xl font-black text-white tracking-tighter">${authUser?.balance !== undefined ? authUser.balance.toLocaleString() : '0.00'}</p>
                             </div>
                             <div>
                                 <p className="text-slate-600 text-[9px] uppercase font-black mb-2 tracking-widest">Equity Value</p>
@@ -598,11 +598,15 @@ export default function FundsPage() {
                                                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                                                     <button onClick={() => setDepositRegion(null)} className="text-[10px] font-black text-slate-500 hover:text-white flex items-center gap-2 mb-4 uppercase tracking-widest">← Change Region</button>
                                                     <div className="text-center py-6">
-                                                        <div className="flex items-center justify-center gap-3 mb-4">
-                                                            <span className="text-6xl font-black text-white tracking-tighter">${depositAmount}</span>
-                                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full">USDC</span>
+                                                        <div className="flex items-center justify-center gap-2 mb-4">
+                                                            <span className="text-2xl font-bold text-white">$</span>
+                                                            <input
+                                                                type="number"
+                                                                value={depositAmount}
+                                                                onChange={(e) => setDepositAmount(e.target.value)}
+                                                                className="text-6xl font-black text-white bg-transparent border-b border-amber-500/50 outline-none w-48 text-center tracking-tighter"
+                                                            />
                                                         </div>
-                                                        <input type="range" min="10" max="5000" step="10" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500 mt-6" />
                                                     </div>
 
                                                     <button
@@ -630,10 +634,14 @@ export default function FundsPage() {
                                                     {/* Amount Selector */}
                                                     <div className="text-center py-6">
                                                         <div className="flex items-center justify-center gap-3 mb-4">
-                                                            <span className="text-6xl font-black text-white tracking-tighter">${depositAmount}</span>
-                                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full">USDC</span>
+                                                            <span className="text-2xl font-bold text-white">$</span>
+                                                            <input
+                                                                type="number"
+                                                                value={depositAmount}
+                                                                onChange={(e) => setDepositAmount(e.target.value)}
+                                                                className="text-6xl font-black text-white bg-transparent border-b border-amber-500/50 outline-none w-48 text-center tracking-tighter"
+                                                            />
                                                         </div>
-                                                        <input type="range" min="10" max="5000" step="10" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500 mt-6" />
                                                     </div>
 
                                                     <div className="p-8 bg-amber-500/5 border border-amber-500/10 rounded-[2.5rem] space-y-6">
