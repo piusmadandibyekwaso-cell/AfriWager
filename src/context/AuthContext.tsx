@@ -39,38 +39,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Helper to fetch extended profile + balance
     const fetchUserData = async (currentUser: User) => {
         try {
+            console.log("Fetching data for user:", currentUser.id);
+
             // 1. Fetch Profile (KYC)
-            const { data: profile } = await supabase
+            const { data: profile, error: profileError } = await supabase
                 .from('profiles')
                 .select('username, kyc_status, phone_number, nin, district, country_code')
-                .eq('wallet_address', currentUser.id) // Assuming wallet_auth uses ID, or link via email? 
-                // Correction: Supabase Auth ID is usually linked to 'id' in profiles if one-to-one, 
-                // OR 'wallet_address' if we are storing the wallet address there.
-                // In afrivault_schema.sql, `user_balances` is keyed by `user_id` (auth.uid).
-                // Let's assume we can fetch by `id` if profiles is linked to auth.users. 
-                // For now, looking at userService it uses `wallet_address`.
-                // Let's assume for EMAIL AUTH pivot, we might need to query by user ID.
-                // But let's stick to what's likely safe: query by `id` if RLS allows, or check current implementation.
-                // Re-reading userService: it queries `profiles` by `wallet_address`.
-                // BUT, if we use Supabase Auth (Email), currentUser.id is the UUID. 
-                // Does 'profiles' have a user_id column? Standard starters usually do `id references auth.users`.
-                // Checking afrivault_schema: `user_id uuid REFERENCES auth.users(id)` for balances. 
-                // We should probably check if profiles has `id`.
-                // Logic: Fetch balance by auth.uid. Fetch profile by auth.uid (if possible)?
-                // Let's assume `wallet_address` MIGHT be the Auth ID in the new flow, or we query balances directly by ID.
-                // PIVOT: For now, I will just fetch balance by `user_id` (current user ID).
+                .eq('wallet_address', currentUser.id) // Migration: Check if this maps correctly
                 .maybeSingle();
 
+            if (profileError) console.error("Profile fetch error:", profileError);
+
             // 2. Fetch Balance (AfriVault Ledger)
-            const { data: balanceData } = await supabase
+            const { data: balanceData, error: balanceError } = await supabase
                 .from('user_balances')
                 .select('balance_usdc')
                 .eq('user_id', currentUser.id)
                 .maybeSingle();
 
+            if (balanceError) console.error("Balance fetch error:", balanceError);
+            console.log("Balance Data Found:", balanceData);
+
             return {
                 ...currentUser,
-                profile: profile || undefined, // Type might mismatch, but we extend it at runtime
+                profile: profile || undefined,
                 balance: balanceData?.balance_usdc || 0,
             };
         } catch (e) {
