@@ -74,7 +74,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     };
 
     return (
-    return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
             <div className="relative w-full max-w-sm rounded-2xl bg-[#1C1C1C] p-5 shadow-2xl border border-white/10">
                 <button
