@@ -167,36 +167,49 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                         />
                     </div>
 
-                    {/* Progressive Disclosure Section for Password */}
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showPasswordInput && !forgotPasswordMode ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                        <div className="relative">
-                            <input
-                                type={showPassword ? "text" : "password"}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full rounded-lg bg-white/5 px-4 py-3 text-sm text-white placeholder-gray-500 outline-none transition-all focus:bg-white/10 focus:ring-1 focus:ring-white/20"
-                                placeholder="Password"
-                                required={!forgotPasswordMode && showPasswordInput}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
-                            >
-                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </button>
-                        </div>
-
-                        {!isLogin && password.length > 0 && (
-                            <div className="mt-3 space-y-2 rounded-lg bg-white/5 p-3">
-                                <p className="text-[10px] font-medium text-gray-400">Password Requirements:</p>
-                                <div className="grid grid-cols-1 gap-1">
-                                    <Requirement met={validation.length} label="8+ chars" />
-                                    <Requirement met={validation.uppercase} label="Uppercase letter" />
-                                    <Requirement met={validation.symbol} label="Symbol or number" />
-                                </div>
+                    <div className={`overflow-hidden transition-all duration-500 ease-in-out ${showPasswordInput && !forgotPasswordMode ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                        <div className="space-y-4 pt-1">
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full rounded-lg bg-white/5 px-4 py-3 text-sm text-white placeholder-gray-500 outline-none transition-all focus:bg-white/10 focus:ring-1 focus:ring-white/20"
+                                    placeholder="Password"
+                                    required={!forgotPasswordMode && showPasswordInput}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                                >
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
                             </div>
-                        )}
+
+                            {!forgotPasswordMode && isLogin && (
+                                <div className="flex justify-end px-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setForgotPasswordMode(true)}
+                                        className="text-[11px] text-gray-400 hover:text-white transition-colors"
+                                    >
+                                        Forgot password?
+                                    </button>
+                                </div>
+                            )}
+
+                            {!isLogin && password.length > 0 && (
+                                <div className="space-y-2 rounded-lg bg-white/5 p-3">
+                                    <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Password Requirements</p>
+                                    <div className="grid grid-cols-1 gap-1.5">
+                                        <Requirement met={validation.length} label="8+ characters" />
+                                        <Requirement met={validation.uppercase} label="Uppercase letter" />
+                                        <Requirement met={validation.symbol} label="Special symbol or number" />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Error & Success Messages */}
@@ -230,26 +243,15 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 </form>
 
                 {/* Footer Actions */}
-                <div className="mt-6 text-center space-y-3">
-                    {!forgotPasswordMode && isLogin && showPasswordInput && (
-                        <button
-                            onClick={() => setForgotPasswordMode(true)}
-                            className="text-xs text-gray-400 hover:text-white transition-colors"
-                        >
-                            Forgot password?
-                        </button>
-                    )}
-
-                    {forgotPasswordMode && (
+                <div className="mt-6 text-center">
+                    {forgotPasswordMode ? (
                         <button
                             onClick={() => setForgotPasswordMode(false)}
                             className="text-xs text-gray-400 hover:text-white transition-colors"
                         >
                             Back to Log In
                         </button>
-                    )}
-
-                    {!forgotPasswordMode && (
+                    ) : (
                         <div className="text-xs text-gray-500">
                             {isLogin ? "Don't have an account? " : "Already have an account? "}
                             <button
@@ -259,7 +261,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                     setMessage(null);
                                     setPassword('');
                                 }}
-                                className="font-semibold text-white hover:underline"
+                                className="font-semibold text-white hover:underline decoration-[#10b981] underline-offset-4"
                             >
                                 {isLogin ? 'Sign up' : 'Log in'}
                             </button>
