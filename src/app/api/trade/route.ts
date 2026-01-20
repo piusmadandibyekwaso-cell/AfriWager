@@ -25,11 +25,17 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
+        console.error("Missing SUPABASE_SERVICE_ROLE_KEY env var");
+        return NextResponse.json({ error: 'Server Misconfiguration: Missing Admin Key' }, { status: 500 });
+    }
+
     // Admin Client for Privileged Operations (Bypassing RLS for Balance/Pool updates)
     const { createClient } = require('@supabase/supabase-js');
     const adminSupabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        serviceRoleKey,
         {
             auth: {
                 autoRefreshToken: false,
