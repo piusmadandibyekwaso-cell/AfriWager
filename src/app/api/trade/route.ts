@@ -60,15 +60,21 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
         }
 
-        // 2. Fetch Market Pools & User Balance
-        // We can use the User Client for 'Select' if RLS allows, or Admin for robustness.
+        // 2. Fetch Market Pools & User Balance (Using Admin Client to bypass RLS for lookups)
         const [balanceResult, marketResult] = await Promise.all([
-            supabase.from('user_balances').select('balance_usdc').eq('user_id', user.id).single(),
-            supabase.from('markets').select('yes_pool, no_pool, is_halted').eq('id', marketId).single()
+            adminSupabase.from('user_balances').select('balance_usdc').eq('user_id', user.id).single(),
+            adminSupabase.from('markets').select('yes_pool, no_pool, is_halted').eq('id', marketId).single()
         ]);
 
-        if (balanceResult.error || !balanceResult.data) return NextResponse.json({ error: 'Balance not found' }, { status: 404 });
-        if (marketResult.error || !marketResult.data) return NextResponse.json({ error: 'Market not found' }, { status: 404 });
+        if (balanceResult.error || !balanceResult.data) {
+            console.error("Balance Lookup Failed for ID:", user.id, "Error:", balanceResult.error?.message);
+            return NextResponse.json({ error: 'Balance record not found' }, { status: 404 });
+        }
+
+        if (marketResult.error || !marketResult.data) {
+            console.error("Market Lookup Failed for ID:", marketId, "Error:", marketResult.error?.message);
+            return NextResponse.json({ error: 'Market not found in Supabase' }, { status: 404 });
+        }
 
         // Checks
         const currentBalance = Number(balanceResult.data.balance_usdc);
