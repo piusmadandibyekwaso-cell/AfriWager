@@ -16,7 +16,7 @@ export async function POST(request: Request) {
             cookies: {
                 get(name: string) {
                     const cookie = cookieStore.get(name);
-                    // console.log(`Cookie Get: ${name}=${cookie?.value ? 'PRESENT' : 'MISSING'}`);
+                    console.log(`Supabase looking for: ${name} | Found: ${cookie?.value ? 'YES' : 'NO'}`);
                     return cookie?.value;
                 },
             },
