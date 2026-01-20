@@ -32,6 +32,7 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
     const [tradeStep, setTradeStep] = useState<'idle' | 'approving' | 'buying' | 'success' | 'failed'>('idle');
     const [lastTxHash, setLastTxHash] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [chartData, setChartData] = useState<any[]>([]);
 
     // 4. Off-Chain Trade Execution (AfriVault Ledger)
     const handleExecuteTrade = async () => {
@@ -149,56 +150,7 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
     }, [investmentAmount, market, selectedOutcome]);
 
 
-    // 4. Off-Chain Trade Execution (AfriVault Ledger)
-    const handleExecuteTrade = async () => {
-        if (!market || selectedOutcome === null || !investmentAmount || !authUser) return;
 
-        try {
-            const amountUSD = parseFloat(investmentAmount);
-            if (authUser.balance !== undefined && authUser.balance < amountUSD) {
-                // UI check only, API enforces this too
-                alert("Insufficient AfriVault Balance. Please Deposit funds.");
-                return;
-            }
-
-            setTradeStep('buying');
-
-            // Call AfriVault API
-            const response = await fetch('/api/trade', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    marketId: market.id,
-                    outcomeIndex: selectedOutcome,
-                    amountUSD: amountUSD,
-                    type: 'EXECUTE'
-                })
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.error || 'Trade Failed');
-            }
-
-            // Success Execution
-            setLastTxHash(null); // No on-chain hash
-            setTradeStep('success');
-
-            // Refresh Market Data to update prices immediately
-            marketService.getMarketById(market.id).then((updatedMarket) => {
-                if (updatedMarket) setMarket(updatedMarket);
-            });
-
-            sendNotification('Position Opened!', {
-                body: `You successfully invested $${investmentAmount} on ${market.outcome_tokens[selectedOutcome]}.`,
-            });
-
-        } catch (error) {
-            console.error('Trade Failed:', error);
-            setTradeStep('failed');
-        }
-    };
 
     return (
         <div className="min-h-screen bg-[#060709] text-white">
