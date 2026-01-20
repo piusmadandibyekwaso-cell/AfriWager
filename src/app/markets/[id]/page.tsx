@@ -19,7 +19,7 @@ export default async function MarketPage({ params }: PageProps) {
         notFound();
     }
 
-    const tradeHistory = await marketService.getTradeHistory(params.id);
+    const tradeHistory = await marketService.getTradeHistory(id);
 
     // Pass server-fetched data to the client component
     return <MarketDetailClient initialMarket={market} initialTradeHistory={tradeHistory} />;
