@@ -4,14 +4,16 @@ import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
+// Next.js 15+ Params are Promises
 interface PageProps {
-    params: {
+    params: Promise<{
         id: string;
-    }
+    }>
 }
 
 export default async function MarketPage({ params }: PageProps) {
-    const market = await marketService.getMarketById(params.id);
+    const { id } = await params;
+    const market = await marketService.getMarketById(id);
 
     if (!market) {
         notFound();
