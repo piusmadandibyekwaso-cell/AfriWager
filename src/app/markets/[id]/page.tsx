@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
-import { useAccount } from 'wagmi'; // Removed unused hooks
+// useAccount removed
 import Navbar from '@/components/Navbar';
 import { marketService, Market } from '@/services/marketService';
 import { useAuth } from '@/context/AuthContext';
