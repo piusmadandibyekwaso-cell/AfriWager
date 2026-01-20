@@ -4,7 +4,9 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
+    console.log("Trade route hit. Path:", request.url);
     const cookieStore = await cookies();
+    console.log("Cookies Present:", cookieStore.getAll().length > 0);
 
     // Server-side Supabase client for Session verification
     const supabase = createServerClient(
@@ -13,7 +15,9 @@ export async function POST(request: Request) {
         {
             cookies: {
                 get(name: string) {
-                    return cookieStore.get(name)?.value;
+                    const cookie = cookieStore.get(name);
+                    // console.log(`Cookie Get: ${name}=${cookie?.value ? 'PRESENT' : 'MISSING'}`);
+                    return cookie?.value;
                 },
             },
         }
@@ -21,13 +25,17 @@ export async function POST(request: Request) {
 
     // 1. Verify Session
     const { data: { user }, error: authError } = await supabase.auth.getUser();
+
     if (authError || !user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        console.error("Auth Failed. User:", user?.email || 'NULL', "Error:", authError?.message || 'NONE');
+        return NextResponse.json({ error: 'Unauthorized: Please sign in again' }, { status: 401 });
     }
+
+    console.log("Auth Success. User:", user.email);
 
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!serviceRoleKey) {
-        console.error("Missing SUPABASE_SERVICE_ROLE_KEY env var");
+        console.error("CRITICAL: Missing SUPABASE_SERVICE_ROLE_KEY");
         return NextResponse.json({ error: 'Server Misconfiguration: Missing Admin Key' }, { status: 500 });
     }
 

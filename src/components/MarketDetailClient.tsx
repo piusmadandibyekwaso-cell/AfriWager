@@ -453,7 +453,9 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
                                 <div className="py-12 flex flex-col items-center text-center">
                                     <AlertCircle className="w-16 h-16 text-rose-500 mb-8" />
                                     <h4 className="text-xl font-black uppercase tracking-tighter mb-4">Trade Failed</h4>
-                                    <p className="text-zinc-500 text-xs font-bold mb-10 max-w-[240px]">The transaction could not be processed. Please check your AfriVault balance.</p>
+                                    <p className="text-rose-400 text-xs font-bold mb-10 max-w-[240px] border border-rose-500/20 bg-rose-500/10 p-4 rounded-xl">
+                                        {errorMessage || "The transaction could not be processed. Please check your AfriVault balance."}
+                                    </p>
                                     <button onClick={() => setTradeStep('idle')} className="w-full py-5 bg-zinc-800 text-white font-black rounded-2xl uppercase tracking-widest text-[10px]">
                                         Back to Review
                                     </button>
