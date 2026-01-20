@@ -133,8 +133,8 @@ export async function POST(request: Request) {
             avgPrice: pricePerShare
         });
 
-    } catch (e: any) {
-        console.error('Trade execution error:', e);
-        const msg = e.message || 'Internal Server Error';
-        return NextResponse.json({ error: msg }, { status: 500 });
+    } catch (error) {
+        console.error('Trade Failed:', error);
+        return NextResponse.json({ error: 'Trade Failed' }, { status: 500 });
     }
+}
