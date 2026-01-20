@@ -27,6 +27,8 @@ create table public.markets (
   
   -- Stats (Derived/Cached for performance)
   total_volume_usdc numeric default 0,
+  yes_pool numeric(20, 6) default 1000, -- CPMM Pool for YES
+  no_pool numeric(20, 6) default 1000, -- CPMM Pool for NO
   created_by uuid references public.users(id),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

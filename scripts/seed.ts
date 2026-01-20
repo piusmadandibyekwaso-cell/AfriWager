@@ -33,7 +33,9 @@ async function seed() {
             outcome_tokens: ["Yes", "No"],
             image_url: "https://images.unsplash.com/photo-1526304640152-d4619684e484?auto=format&fit=crop&q=80&w=1000",
             status: "OPEN",
-            total_volume_usdc: 0
+            total_volume_usdc: 0,
+            yes_pool: 1000,
+            no_pool: 1000
         },
         {
             id: "550e8400-e29b-41d4-a716-446655440004",
@@ -92,7 +94,9 @@ async function seed() {
             outcome_tokens: ["Yes", "No"],
             image_url: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?auto=format&fit=crop&q=80&w=1000",
             status: "OPEN",
-            total_volume_usdc: 0
+            total_volume_usdc: 0,
+            yes_pool: 1000,
+            no_pool: 1000
         }
     ];
 
