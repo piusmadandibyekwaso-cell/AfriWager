@@ -15,6 +15,8 @@ export interface Market {
     total_volume_usdc: number;
     today_volume_usdc?: number; // Optional daily volume
     outcomes?: { name: string; current_probability: number }[];
+    yes_pool?: number;
+    no_pool?: number;
 }
 
 export const marketService = {
@@ -34,7 +36,30 @@ export const marketService = {
             return [];
         }
 
-        return data as Market[];
+        // Calculate CPMM Probabilities if pools exist
+        const markets = data.map((m: any) => {
+            if (m.yes_pool && m.no_pool) {
+                const yes = Number(m.yes_pool);
+                const no = Number(m.no_pool);
+                const total = yes + no;
+                if (total > 0) {
+                    // Price = Other / Total (Opposite ratio)
+                    // Price(YES) = NO / (YES + NO)
+                    // Price(NO) = YES / (YES + NO)
+                    const probYes = no / total;
+                    const probNo = yes / total;
+
+                    // Override outcomes if they exist, or create them
+                    m.outcomes = [
+                        { name: m.outcome_tokens[0] || 'Yes', current_probability: probYes },
+                        { name: m.outcome_tokens[1] || 'No', current_probability: probNo }
+                    ];
+                }
+            }
+            return m;
+        });
+
+        return markets as Market[];
     },
 
     // Fetch a single market by ID
@@ -48,6 +73,24 @@ export const marketService = {
         if (error) {
             console.error('Error fetching market:', error);
             return null;
+        }
+
+        // Calculate CPMM Probabilities locally for consistency
+        if (data.yes_pool && data.no_pool) {
+            const yes = Number(data.yes_pool);
+            const no = Number(data.no_pool);
+            const total = yes + no;
+            if (total > 0) {
+                // Price(YES) = NO / Total
+                // Price(NO) = YES / Total
+                const probYes = no / total;
+                const probNo = yes / total;
+
+                data.outcomes = [
+                    { name: data.outcome_tokens[0] || 'Yes', current_probability: probYes },
+                    { name: data.outcome_tokens[1] || 'No', current_probability: probNo }
+                ];
+            }
         }
 
         return data as Market;

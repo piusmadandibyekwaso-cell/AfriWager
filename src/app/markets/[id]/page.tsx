@@ -2,13 +2,9 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
-import { useReadContract, useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
-import { parseUnits, formatUnits } from 'viem';
+import { useAccount } from 'wagmi'; // Removed unused hooks
 import Navbar from '@/components/Navbar';
 import { marketService, Market } from '@/services/marketService';
-import { CONTRACT_ADDRESSES } from '@/constants/contracts';
-import FPMMABI from '@/abis/FixedProductMarketMaker.json';
-import USDCABI from '@/abis/MockERC20.json';
 import { useAuth } from '@/context/AuthContext';
 import { ArrowRight, BarChart3, Info, ShieldCheck, AlertCircle, Droplets, Activity, Wallet, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { getCandidateImage } from '@/constants/candidateImages';
@@ -24,8 +20,7 @@ function cn(...inputs: ClassValue[]) {
 export default function MarketPage() {
     const params = useParams();
     const id = params?.id as string;
-    const { address } = useAccount();
-    const { user: authUser, openAuthModal } = useAuth();
+    const { user: authUser, openAuthModal } = useAuth(); // Removed useAuth for wallet modal state since it's used inline
     const { sendNotification } = useNotifications();
 
     const [market, setMarket] = useState<Market | null>(null);
@@ -55,54 +50,60 @@ export default function MarketPage() {
         }
     }, [id]);
 
-    // 2. Fetch Real-time Pool Balances (Legacy / Reference Only)
-    // In Full AfriVault, we would fetch pool state from DB. 
-    // For V1 Hybrid, we can keep reading on-chain for "Oracle" price if the contract updates, 
-    // OR just mock it. Let's keep reading but note it's reference.
-    const { data: poolBalances, refetch: refetchPool } = useReadContract({
-        address: market?.contract_address as `0x${string}`,
-        abi: FPMMABI.abi,
-        functionName: 'getPoolBalances',
-        query: { enabled: !!market?.contract_address }
-    });
-
-    // 3. Calculate Real-time Prices (Generalized for N outcomes)
+    // 2. Real-time Prices from DB Pools (CPMM)
     const prices = useMemo(() => {
-        const outcomeCount = market?.outcome_tokens?.length || 2;
-        if (!poolBalances) return Array(outcomeCount).fill(1 / outcomeCount);
+        if (!market || !market.yes_pool || !market.no_pool) return [0.5, 0.5];
 
-        const balances = poolBalances as bigint[];
-        if (balances.length === 0) return Array(outcomeCount).fill(1 / outcomeCount);
+        const yes = Number(market.yes_pool);
+        const no = Number(market.no_pool);
+        const total = yes + no;
 
-        const total = balances.reduce((acc, b) => acc + Number(b), 0);
-        if (total === 0) return Array(outcomeCount).fill(1 / outcomeCount);
+        if (total === 0) return [0.5, 0.5];
 
-        // Price of Outcome i = (Constant / Balance[i]) / Sum(Constant / Balance[j])
-        // Simplified for FPMM: Price is proportional to shares in pool
-        // However, for display, we often use the simplified reciprocal or direct balance ratio:
-        return balances.map(b => (1 - (Number(b) / total)) / (outcomeCount - 1));
-    }, [poolBalances, market?.outcome_tokens]);
+        // Price = Ratio of OPPOSITE pool / Total
+        // Price(YES) = NO / (YES + NO)
+        const priceYes = no / total;
+        const priceNo = yes / total;
 
-    // 4. Estimate Shares to Receive
+        return [priceYes, priceNo];
+    }, [market]);
+
+    // 3. Estimate Shares to Receive
     const estimatedShares = useMemo(() => {
-        if (!investmentAmount || isNaN(parseFloat(investmentAmount)) || !poolBalances || selectedOutcome === null) return 0;
+        if (!investmentAmount || isNaN(parseFloat(investmentAmount)) || selectedOutcome === null || !market?.yes_pool) return 0;
 
         const amount = parseFloat(investmentAmount);
-        const outcomePrice = prices[selectedOutcome];
-        if (outcomePrice === 0) return 0;
+        // CPMM Calculation with Price Impact
+        // k = x * y
+        // Buy YES: Add amount to NO pool (dy), Find new Yes Pool (x') = k / (y + dy)
+        // Shares Out = x - x'
 
-        // Simple linear estimate (ignoring slippage for simplicity in UI preview)
-        return amount / outcomePrice;
-    }, [investmentAmount, poolBalances, selectedOutcome, prices]);
+        const yesPool = Number(market.yes_pool);
+        const noPool = Number(market.no_pool);
+        const k = yesPool * noPool;
+        const fee = amount * 0.02; // 2% fee estimate
+        const invest = amount - fee;
 
-    // 5. Off-Chain Trade Execution (AfriVault Ledger)
+        if (selectedOutcome === 0) { // YES
+            const newNoPool = noPool + invest;
+            const newYesPool = k / newNoPool;
+            return yesPool - newYesPool;
+        } else { // NO
+            const newYesPool = yesPool + invest;
+            const newNoPool = k / newYesPool;
+            return noPool - newNoPool;
+        }
+    }, [investmentAmount, market, selectedOutcome]);
+
+    // 4. Off-Chain Trade Execution (AfriVault Ledger)
     const handleExecuteTrade = async () => {
         if (!market || selectedOutcome === null || !investmentAmount || !authUser) return;
 
         try {
             const amountUSD = parseFloat(investmentAmount);
             if (authUser.balance !== undefined && authUser.balance < amountUSD) {
-                alert("Insufficient AfriVault Balance. Please Deposit funds."); // Replace with better UI later
+                // UI check only, API enforces this too
+                alert("Insufficient AfriVault Balance. Please Deposit funds.");
                 return;
             }
 
@@ -130,11 +131,13 @@ export default function MarketPage() {
             setLastTxHash(null); // No on-chain hash
             setTradeStep('success');
 
+            // Refresh Market Data to update prices immediately
+            marketService.getMarketById(market.id).then(setMarket);
+
             sendNotification('Position Opened!', {
                 body: `You successfully invested $${investmentAmount} on ${market.outcome_tokens[selectedOutcome]}.`,
             });
-            // trigger balance update? AuthContext usually polls or we can trigger re-fetch manually if exposed.
-            // For now, simple success state.
+
         } catch (error) {
             console.error('Trade Failed:', error);
             setTradeStep('failed');
@@ -163,7 +166,7 @@ export default function MarketPage() {
                             <div className="absolute bottom-0 left-0 p-12 w-full">
                                 <div className="flex gap-3 mb-6">
                                     <span className="px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-black uppercase tracking-widest rounded-full">{market.category}</span>
-                                    <span className="px-4 py-1.5 bg-white/5 border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-widest rounded-full backdrop-blur-md">Ends Dec 2024</span>
+                                    <span className="px-4 py-1.5 bg-white/5 border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-widest rounded-full backdrop-blur-md">Ends {new Date(market.end_date).toLocaleDateString()}</span>
                                 </div>
                                 <h1 className="text-3xl md:text-6xl font-black tracking-tighter leading-none mb-4 max-w-3xl">{market.question}</h1>
                                 <p className="text-white/40 text-sm md:text-lg font-medium max-w-2xl leading-relaxed">{market.description}</p>
@@ -176,6 +179,7 @@ export default function MarketPage() {
 
                         {/* Market Metadata Tabs */}
                         <div className="bg-zinc-900/20 border border-zinc-800/50 rounded-3xl p-8 backdrop-blur-xl">
+                            {/* ... Existing Charts Code (Unchanged) ... */}
                             <div className="flex items-center gap-6 mb-8 border-b border-zinc-800/50 pb-6 text-xs font-black tracking-widest uppercase text-zinc-500">
                                 <button className="text-emerald-500 border-b-2 border-emerald-500 pb-6 -mb-[26px]">Market Prices</button>
                                 <button className="hover:text-white transition-colors">Order Book</button>
@@ -210,7 +214,8 @@ export default function MarketPage() {
                                             <Droplets className="w-3.5 h-3.5" />
                                             <span className="text-[9px] font-black uppercase tracking-widest">Liquidity</span>
                                         </div>
-                                        <p className="text-xl font-black text-white italic tracking-tighter">$124.5K</p>
+                                        {/* Dynamic Liquidity based on Pools */}
+                                        <p className="text-xl font-black text-white italic tracking-tighter">${((market.yes_pool || 0) + (market.no_pool || 0)).toLocaleString()}</p>
                                     </div>
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2 text-zinc-600">
@@ -251,13 +256,13 @@ export default function MarketPage() {
                             </div>
 
                             {/* Outcome Buttons */}
-                            {/* Outcome Buttons / Campaign Posters */}
                             <div className={cn(
                                 "grid gap-4 mb-10",
                                 market.category === 'Politics' ? "grid-cols-2" : "grid-cols-2"
                             )}>
                                 {market.outcome_tokens.map((outcome, index) => {
                                     const candidateImage = market.category === 'Politics' ? getCandidateImage(outcome) : null;
+                                    const currentPrice = prices[index] || 0.5;
 
                                     return (
                                         <button
@@ -266,8 +271,8 @@ export default function MarketPage() {
                                             className={cn(
                                                 "relative overflow-hidden group transition-all duration-300 ease-out active:scale-95",
                                                 market.category === 'Politics'
-                                                    ? "h-64 rounded-[2rem] border-0" // Politics Card Style
-                                                    : "p-8 rounded-3xl border-2 flex flex-col items-center justify-center", // Default Style
+                                                    ? "h-64 rounded-[2rem] border-0"
+                                                    : "p-8 rounded-3xl border-2 flex flex-col items-center justify-center",
                                                 selectedOutcome === index
                                                     ? (index === 0 ? "ring-4 ring-emerald-500/50" : "ring-4 ring-rose-500/50")
                                                     : "hover:opacity-90",
@@ -307,7 +312,7 @@ export default function MarketPage() {
                                                     market.category === 'Politics' ? "text-4xl text-white" : "text-5xl",
                                                     market.category !== 'Politics' && (index === 0 ? "text-emerald-500" : "text-amber-500")
                                                 )}>
-                                                    {(prices[index] * 100).toFixed(0)}¢
+                                                    {(currentPrice * 100).toFixed(0)}¢
                                                 </div>
                                                 <span className={cn(
                                                     "text-[10px] font-black uppercase tracking-widest transition-colors",
@@ -330,6 +335,13 @@ export default function MarketPage() {
                                         <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Max Payout</span>
                                         <span className="text-lg font-black text-emerald-500">${estimatedShares.toFixed(2)}</span>
                                     </div>
+                                    {/* CPMM Slippage Warning if Impact > 5% */}
+                                    {estimatedShares > 0 && Math.abs((Number(investmentAmount) / estimatedShares) - prices[selectedOutcome]) > 0.05 && (
+                                        <div className="mt-4 flex items-center gap-2 text-amber-500 text-[10px] font-bold uppercase tracking-widest border border-amber-500/20 bg-amber-500/5 p-2 rounded-lg">
+                                            <AlertCircle className="w-3 h-3" />
+                                            High Price Impact (Whale Trade)
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -378,13 +390,24 @@ export default function MarketPage() {
                                             <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">AfriVault Fee</span>
                                             <span className="text-xs font-black text-emerald-500">$0.00 (Free)</span>
                                         </div>
+                                        {/* Added Balance Display */}
+                                        <div className="flex justify-between p-4 bg-zinc-900/50 rounded-2xl border border-white/5">
+                                            <div className="flex items-center gap-2">
+                                                <Wallet className="w-3 h-3 text-zinc-500" />
+                                                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Balance</span>
+                                            </div>
+                                            <span className={cn("text-xs font-black", (authUser?.balance || 0) < Number(investmentAmount) ? "text-rose-500" : "text-white")}>
+                                                ${authUser?.balance?.toFixed(2) || '0.00'}
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <button
                                         onClick={handleExecuteTrade}
-                                        className="w-full py-6 bg-emerald-500 hover:bg-emerald-400 text-black font-black rounded-3xl transition-all shadow-2xl shadow-emerald-500/20 uppercase tracking-widest text-[10px]"
+                                        disabled={(authUser?.balance || 0) < Number(investmentAmount)}
+                                        className="w-full py-6 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-500 text-black font-black rounded-3xl transition-all shadow-2xl shadow-emerald-500/20 uppercase tracking-widest text-[10px]"
                                     >
-                                        Execute Contract
+                                        {(authUser?.balance || 0) < Number(investmentAmount) ? "Insufficient Balance" : "Execute Contract"}
                                     </button>
                                 </div>
                             )}
