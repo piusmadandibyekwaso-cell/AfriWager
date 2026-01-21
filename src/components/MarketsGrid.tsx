@@ -24,7 +24,7 @@ export default function MarketsGrid({ initialMarkets }: MarketsGridProps) {
                 <MarketsNavBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             </div>
 
-            <main className="py-8 container mx-auto px-4 md:px-6">
+            <main className="py-8 mx-auto max-w-7xl px-6">
                 {/* Polymarket Grid Layout */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {filteredMarkets.length > 0 ? (
