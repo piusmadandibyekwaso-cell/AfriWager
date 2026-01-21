@@ -24,30 +24,37 @@ export default function MarketCard({ market }: MarketCardProps) {
     const yesProb = Math.round((yesOutcome?.current_probability || 0.5) * 100);
     const noProb = Math.round((noOutcome?.current_probability || 0.5) * 100);
 
+    // Fallback Images (Reliable Wikimedia/Public URLs)
+    const FALLBACK_IMAGES: Record<string, string> = {
+        'Politics': "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Flag_of_the_African_Union.svg/1200px-Flag_of_the_African_Union.svg.png",
+        'Economics': "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Africa_satellite_orthographic_runin.jpg/1024px-Africa_satellite_orthographic_runin.jpg",
+        'Sports': "https://www.cafonline.com/media/ylplke4l/itri-hd.jpg",
+        'Crypto': "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png",
+        'Technology': "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Starlink_Logo.svg/2560px-Starlink_Logo.svg.png",
+        'Default': "/app_icon_512.png"
+    };
+
     return (
         <Link href={`/markets/${market.id}`} className="group block h-full">
             <div className="flex flex-col h-full bg-[#1C1C1E] hover:bg-[#2C2C2E] transition-colors rounded-lg overflow-hidden border border-zinc-800 hover:border-zinc-700">
 
                 {/* Header: Icon + Question */}
                 <div className="p-4 pb-2 flex gap-3">
-                    {/* Compact Image/Icon (44x44) with Fallback */}
-                    <div className="w-11 h-11 relative rounded-md overflow-hidden border border-zinc-700 bg-zinc-800 flex items-center justify-center">
-                        <img
-                            src={market.image_url}
-                            alt={market.category}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                                // Fallback to Category Icon
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none'; // Hide broken image
-                                target.nextElementSibling?.classList.remove('hidden'); // Show fallback
-                            }}
-                        />
-                        {/* Fallback Icon (Hidden by default, shown on error) */}
-                        <div className="hidden absolute inset-0 flex items-center justify-center bg-zinc-800 text-zinc-500">
-                            <span className="text-[10px] font-black uppercase tracking-widest">
-                                {market.category.slice(0, 3)}
-                            </span>
+                    <div className="flex-shrink-0">
+                        {/* Compact Image/Icon (44x44) with Image-to-Image Fallback */}
+                        <div className="w-11 h-11 relative rounded-md overflow-hidden border border-zinc-700 bg-zinc-800">
+                            <img
+                                src={market.image_url || FALLBACK_IMAGES[market.category] || FALLBACK_IMAGES.Default}
+                                alt={market.category}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    const fallback = FALLBACK_IMAGES[market.category] || FALLBACK_IMAGES.Default;
+                                    if (target.src !== fallback) {
+                                        target.src = fallback;
+                                    }
+                                }}
+                            />
                         </div>
                     </div>
                     <div>
