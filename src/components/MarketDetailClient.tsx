@@ -382,16 +382,24 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
                                         <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">on {selectedOutcome === 0 ? "YES" : "NO"} Outcome</div>
                                     </div>
 
+                                    {/* Guardian Protocol: Slipper & ROI Display */}
                                     <div className="space-y-3">
-                                        <div className="flex justify-between p-4 bg-zinc-900/50 rounded-2xl">
-                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Price / Share</span>
-                                            <span className="text-xs font-black text-white">{prices[selectedOutcome!].toFixed(2)} USDC</span>
+                                        <div className="flex justify-between p-4 bg-zinc-900/50 rounded-2xl border border-white/5">
+                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Est. Shares</span>
+                                            <span className="text-xs font-black text-white">{estimatedShares.toFixed(2)}</span>
                                         </div>
-                                        <div className="flex justify-between p-4 bg-zinc-900/50 rounded-2xl">
-                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">AfriVault Fee</span>
-                                            <span className="text-xs font-black text-emerald-500">$0.00 (Free)</span>
+
+                                        <div className="flex justify-between p-4 bg-zinc-900/50 rounded-2xl border border-white/5">
+                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Price Impact</span>
+                                            <span className={cn(
+                                                "text-xs font-black",
+                                                (Math.abs((Number(investmentAmount) / estimatedShares) - prices[selectedOutcome!]) / prices[selectedOutcome!]) > 0.10 ? "text-rose-500" :
+                                                    (Math.abs((Number(investmentAmount) / estimatedShares) - prices[selectedOutcome!]) / prices[selectedOutcome!]) > 0.05 ? "text-amber-500" : "text-emerald-500"
+                                            )}>
+                                                {((Math.abs((Number(investmentAmount) / estimatedShares) - prices[selectedOutcome!]) / prices[selectedOutcome!]) * 100).toFixed(2)}%
+                                            </span>
                                         </div>
-                                        {/* Added Balance Display */}
+
                                         <div className="flex justify-between p-4 bg-zinc-900/50 rounded-2xl border border-white/5">
                                             <div className="flex items-center gap-2">
                                                 <Wallet className="w-3 h-3 text-zinc-500" />
@@ -401,14 +409,37 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
                                                 ${authUser?.balance?.toFixed(2) || '0.00'}
                                             </span>
                                         </div>
+
+                                        {/* ROI WARNING */}
+                                        {estimatedShares < Number(investmentAmount) && (
+                                            <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-3">
+                                                <AlertCircle className="w-4 h-4 text-rose-500" />
+                                                <span className="text-[10px] font-bold text-rose-500 uppercase tracking-widest leading-tight">Negative Return: Payout &lt; Cost</span>
+                                            </div>
+                                        )}
+
+                                        {/* SLIPPAGE WARNING */}
+                                        {(Math.abs((Number(investmentAmount) / estimatedShares) - prices[selectedOutcome!]) / prices[selectedOutcome!]) > 0.10 && (
+                                            <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-3">
+                                                <AlertCircle className="w-4 h-4 text-rose-500" />
+                                                <span className="text-[10px] font-bold text-rose-500 uppercase tracking-widest leading-tight">High Slippage: &gt;10% Impact</span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <button
                                         onClick={handleExecuteTrade}
-                                        disabled={(authUser?.balance || 0) < Number(investmentAmount)}
-                                        className="w-full py-6 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-500 text-black font-black rounded-3xl transition-all shadow-2xl shadow-emerald-500/20 uppercase tracking-widest text-[10px]"
+                                        disabled={
+                                            (authUser?.balance || 0) < Number(investmentAmount) ||
+                                            estimatedShares < Number(investmentAmount) ||
+                                            ((Math.abs((Number(investmentAmount) / estimatedShares) - prices[selectedOutcome!]) / prices[selectedOutcome!]) > 0.10)
+                                        }
+                                        className="w-full py-6 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed text-black font-black rounded-3xl transition-all shadow-2xl shadow-emerald-500/20 uppercase tracking-widest text-[10px]"
                                     >
-                                        {(authUser?.balance || 0) < Number(investmentAmount) ? "Insufficient Balance" : "Execute Contract"}
+                                        {(authUser?.balance || 0) < Number(investmentAmount) ? "Insufficient Balance" :
+                                            estimatedShares < Number(investmentAmount) ? "Negative ROI: Trade Blocked" :
+                                                ((Math.abs((Number(investmentAmount) / estimatedShares) - prices[selectedOutcome!]) / prices[selectedOutcome!]) > 0.10) ? "Reduce Size (High Slippage)" :
+                                                    "Execute Contract"}
                                     </button>
                                 </div>
                             )}

@@ -18,103 +18,65 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function simulateTraffic() {
-    console.log('🤖 Starting Traffic Simulation...');
+    console.log('🤖 Starting Guardian Protocol Risk Test...');
 
     // 1. Create Bot User
-    const email = `bot_${Date.now()}@afriwager.test`;
+    const email = `riskbot_${Date.now()}@test.com`;
     const password = 'TestBotPassword123!';
-
-    console.log(`\n👤 Creating Bot: ${email}`);
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: email,
-        password: password,
-        email_confirm: true,
-        user_metadata: {
-            username: 'SimBot_01',
-            full_name: 'Simulation Bot'
-        }
+        email, password, email_confirm: true
     });
 
-    if (authError) {
-        console.error('Auth Error:', authError.message);
-        return;
-    }
-
+    if (authError) { console.error('Auth Error:', authError.message); return; }
     const userId = authData.user.id;
-    console.log(`   ✅ User Created: ${userId}`);
+    console.log(`✅ Risk Bot Created: ${userId}`);
 
-    // 2. Deposit Funds (Mock Wallet API Logic)
-    console.log(`\n💰 Simulating Deposit: $500.00`);
-    const depositAmount = 500;
+    // 2. Fund Wallet ($10,000 for Whale Tests)
+    // Note: Trigger creates row on signup, so we update instead of insert.
+    await supabase.from('user_balances').update({ balance_usdc: 10000 }).eq('user_id', userId);
+    console.log(`💰 Funded Wallet: $10,000`);
 
-    // Simulate API: Update Balance & Log Tx
-    const { error: depError } = await supabase.from('user_balances').update({ balance_usdc: depositAmount }).eq('user_id', userId);
-    if (depError) console.error('Deposit Balance Error:', depError);
+    // 3. Find Market
+    const { data: market } = await supabase.from('markets').select('id, yes_pool, no_pool').limit(1).single();
+    if (!market) { console.error('No Market Found!'); return; }
+    console.log(`🎯 Target Market: ${market.id}`);
 
-    const { error: txError } = await supabase.from('transactions').insert({
-        user_id: userId,
-        type: 'deposit',
-        amount_usdc: depositAmount,
-        status: 'completed',
-        reference_id: `SIM_DEP_${Date.now()}`,
-        metadata: { provider: 'SIMULATION' }
+    // TEST 1: Valid Trade ($10)
+    console.log(`\n🧪 TEST 1: Normal Trade ($10)`);
+    const { data: validTrade, error: validError } = await supabase.rpc('execute_trade', {
+        p_user_id: userId,
+        p_market_id: market.id,
+        p_outcome_index: 0,
+        p_amount_usd: 10,
+        p_min_shares_out: 0 // Loose slippage for basic test
     });
 
-    // 3. Execute Trade 1 (Nigeria GDP - YES)
-    // Market Logic: Price $0.50. Fee 2%.
-    console.log(`\n📈 Executing Trade: Buy $100 of YES (Nigeria GDP)`);
-    const tradeAmount = 100;
-    const fee = tradeAmount * 0.02; // $2
-    const netInvested = tradeAmount - fee; // $98
-    const price = 0.50;
-    const shares = netInvested / price; // 196 Shares
+    if (validError) console.error('❌ VALID TRADE FAILED:', validError.message);
+    else console.log(`✅ VALID TRADE SUCCESS: Shares=${validTrade.shares}, Balance=${validTrade.new_balance}`);
 
-    const traceId = crypto.randomUUID();
 
-    // A. Debit Balance ($400 remain)
-    await supabase.from('user_balances').update({ balance_usdc: depositAmount - tradeAmount }).eq('user_id', userId);
+    // TEST 2: WHALE TRADE (Slippage Hard Stop)
+    // Try to move pool by investing $5000 (likely >10% impact if pools are small)
+    console.log(`\n🧪 TEST 2: Whale Trade ($5,000) - Expect SLIPPAGE BLOCK`);
 
-    // B. Upsert Position
-    // Need a market ID. Fetch one.
-    const { data: market } = await supabase.from('markets').select('id').ilike('category', 'Economics').limit(1).single();
-    if (!market) {
-        console.error('No Market Found!');
-        return;
+    const { data: whaleTrade, error: whaleError } = await supabase.rpc('execute_trade', {
+        p_user_id: userId,
+        p_market_id: market.id,
+        p_outcome_index: 0,
+        p_amount_usd: 5000,
+        p_min_shares_out: 10000000 // Impossible amount -> Trigger "High Slippage" or "Negative ROI"
+    });
+
+    if (whaleError) {
+        console.log(`✅ BLOCKED AS EXPECTED: ${whaleError.message}`);
+        // Verify Log
+        const { data: logs } = await supabase.from('compliance_logs').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(1);
+        if (logs && logs.length > 0) console.log(`   📜 Compliance Logged: ${logs[0].block_reason} (Amount: $${logs[0].attempted_amount})`);
+    } else {
+        console.error('❌ WHALE TRADE SLIPPED THROUGH!');
     }
 
-    await supabase.from('positions').upsert({
-        user_id: userId,
-        market_id: market.id,
-        outcome_index: 0, // YES
-        shares_owned: shares,
-        average_price: price
-    }, { onConflict: 'user_id, market_id, outcome_index' });
-
-    // C. Log Transaction (Audit)
-    const { data: txTrade } = await supabase.from('transactions').insert({
-        user_id: userId,
-        type: 'trade_buy',
-        amount_usdc: -tradeAmount,
-        fee_usdc: fee,
-        trace_id: traceId,
-        metadata: { marketId: market.id, shares, price },
-        status: 'completed'
-    }).select().single();
-
-    // D. Revenue Vault
-    if (txTrade) {
-        await supabase.from('revenue_ledger').insert({
-            amount_usdc: fee,
-            source_transaction_id: txTrade.id,
-            market_category: 'ECONOMICS'
-        });
-    }
-
-    console.log(`   ✅ Trade Complete.`);
-    console.log(`   Trace ID: ${traceId}`);
-    console.log(`   Revenue Generated: $${fee.toFixed(2)}`);
-
-    console.log(`\n🏁 Simulation Finished SUCCESSFULLY.`);
+    console.log(`\n🏁 Risk Simulation Complete.`);
 }
 
 simulateTraffic();
