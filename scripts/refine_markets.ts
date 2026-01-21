@@ -35,7 +35,9 @@ async function migrate() {
             end_date: "2026-07-01T00:00:00Z",
             condition_id: "0xABC...DEF",
             total_volume_usdc: 0,
-            outcome_tokens: ["Yes", "No"]
+            outcome_tokens: ["Yes", "No"],
+            yes_pool: 500, // LIQUIDITY FLOOR
+            no_pool: 500   // LIQUIDITY FLOOR
         });
 
     if (barakaError) console.error('Error inserting new Joshua Baraka:', barakaError);
@@ -56,7 +58,9 @@ async function migrate() {
             condition_id: "0x456...def_v2", // Updated to avoid unique constraint collision
             total_volume_usdc: 85000,
             outcome_tokens: ["Morocco", "Senegal", "Nigeria", "Other"],
-            image_url: "https://www.cafonline.com/media/ylplke4l/itri-hd.jpg"
+            image_url: "https://www.cafonline.com/media/ylplke4l/itri-hd.jpg",
+            yes_pool: 500, // LIQUIDITY FLOOR
+            no_pool: 500   // LIQUIDITY FLOOR
         });
 
     if (afconUpdateError) console.error('Error inserting new AFCON:', afconUpdateError);

@@ -141,11 +141,13 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
         if (selectedOutcome === 0) { // YES
             const newNoPool = noPool + invest;
             const newYesPool = k / newNoPool;
-            return yesPool - newYesPool;
+            // Split + Swap Logic: Shares = Invest + (YesPool - NewYesPool)
+            return invest + (yesPool - newYesPool);
         } else { // NO
             const newYesPool = yesPool + invest;
             const newNoPool = k / newYesPool;
-            return noPool - newNoPool;
+            // Split + Swap Logic: Shares = Invest + (NoPool - NewNoPool)
+            return invest + (noPool - newNoPool);
         }
     }, [investmentAmount, market, selectedOutcome]);
 
