@@ -30,13 +30,25 @@ export default function MarketCard({ market }: MarketCardProps) {
 
                 {/* Header: Icon + Question */}
                 <div className="p-4 pb-2 flex gap-3">
-                    <div className="flex-shrink-0">
-                        {/* Compact Image/Icon (44x44) */}
+                    {/* Compact Image/Icon (44x44) with Fallback */}
+                    <div className="w-11 h-11 relative rounded-md overflow-hidden border border-zinc-700 bg-zinc-800 flex items-center justify-center">
                         <img
                             src={market.image_url}
                             alt={market.category}
-                            className="w-11 h-11 object-cover rounded-md border border-zinc-700"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                                // Fallback to Category Icon
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none'; // Hide broken image
+                                target.nextElementSibling?.classList.remove('hidden'); // Show fallback
+                            }}
                         />
+                        {/* Fallback Icon (Hidden by default, shown on error) */}
+                        <div className="hidden absolute inset-0 flex items-center justify-center bg-zinc-800 text-zinc-500">
+                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                {market.category.slice(0, 3)}
+                            </span>
+                        </div>
                     </div>
                     <div>
                         <h3 className="text-[15px] font-medium text-white leading-snug line-clamp-2 md:line-clamp-3">
