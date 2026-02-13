@@ -1,8 +1,22 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Bar 1 -->
-    <path d="M120 400 L120 250" stroke="#10b981" stroke-width="60" stroke-linecap="round" />
-    <!-- Bar 2 -->
-    <path d="M256 400 L256 150" stroke="#10b981" stroke-width="60" stroke-linecap="round" />
-    <!-- Bar 3 -->
-    <path d="M392 400 L392 50" stroke="#10b981" stroke-width="60" stroke-linecap="round" />
+    <!-- Transparent Background -->
+
+    <!-- 
+      3 Neon Green Bars, Curved/Bent to the Right.
+      Rounded Edges (Stroke Linecap Round).
+      Bottoms aligned (approx).
+    -->
+
+    <!-- Bar 1 (Left, Short) -->
+    <!-- Starts at 130,400. Curves to 160,240 -->
+    <path d="M130 400 Q 140 320 180 240" stroke="#10b981" stroke-width="50" stroke-linecap="round" />
+
+    <!-- Bar 2 (Middle, Medium) -->
+    <!-- Starts at 230,400. Curves to 280,150 -->
+    <path d="M230 400 Q 240 280 290 150" stroke="#10b981" stroke-width="50" stroke-linecap="round" />
+
+    <!-- Bar 3 (Right, Tall) -->
+    <!-- Starts at 330,400. Curves to 400,60 -->
+    <path d="M330 400 Q 340 230 410 60" stroke="#10b981" stroke-width="50" stroke-linecap="round" />
+
 </svg>
