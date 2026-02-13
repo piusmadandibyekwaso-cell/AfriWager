@@ -1,15 +1,8 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Transparent Background -->
-    
-    <!-- Bent Green Bars (Stylized Growth/Wager) -->
-    <!-- Bar 1 (Short) -->
-    <path d="M110 380 L110 250 Q110 220 140 210 L190 195" stroke="#10b981" stroke-width="40" stroke-linecap="round" />
-    
-    <!-- Bar 2 (Medium) -->
-    <path d="M230 380 L230 180 Q230 150 260 140 L310 125" stroke="#10b981" stroke-width="40" stroke-linecap="round" />
-    
-    <!-- Bar 3 (Tall/Long) -->
-    <path d="M350 380 L350 110 Q350 80 380 70 L430 55" stroke="#10b981" stroke-width="40" stroke-linecap="round" />
-    
-    <!-- Ground Line (Optional, removed for cleaner look) -->
+    <!-- Bar 1 -->
+    <path d="M120 400 L120 250" stroke="#10b981" stroke-width="60" stroke-linecap="round" />
+    <!-- Bar 2 -->
+    <path d="M256 400 L256 150" stroke="#10b981" stroke-width="60" stroke-linecap="round" />
+    <!-- Bar 3 -->
+    <path d="M392 400 L392 50" stroke="#10b981" stroke-width="60" stroke-linecap="round" />
 </svg>
