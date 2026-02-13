@@ -34,10 +34,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/logo.svg', type: 'image/svg+xml' },
+      { url: '/logo_final.svg', type: 'image/svg+xml' },
       { url: '/favicon.ico', sizes: 'any' } // Fallback
     ],
-    apple: '/logo.svg', // SVGs work on modern iOS PWA but backup png is safer. We'll try SVG.
+    apple: '/logo_final.svg',
   },
 };
 
