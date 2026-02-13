@@ -91,4 +91,29 @@ describe("Afrisights Core", function () {
         expect(balance).to.be.gt(0);
         console.log("User YES Token Balance:", ethers.formatUnits(balance, 18));
     });
+
+    it("Should allow removing liquidity from AMM", async function () {
+        const { usdc, amm, owner } = await loadFixture(deployFixture);
+        const amount = ethers.parseUnits("100", 18);
+
+        // 1. Add Liquidity
+        await usdc.approve(await amm.getAddress(), amount);
+        await amm.addFunding(amount);
+
+        const initialUsdcBalance = await usdc.balanceOf(owner.address);
+        const lpShares = await amm.liquidityProviderShares(owner.address);
+        expect(lpShares).to.equal(amount);
+
+        // 2. Remove Liquidity
+        // Note: In binary balanced pool, 100 shares = 100 YES + 100 NO. 
+        // Merge(100) returns 100 USDC.
+        await amm.removeFunding(amount);
+
+        // 3. Verify
+        const finalUsdcBalance = await usdc.balanceOf(owner.address);
+        expect(finalUsdcBalance).to.equal(initialUsdcBalance + amount);
+
+        expect(await amm.liquidityProviderShares(owner.address)).to.equal(0);
+        expect(await amm.totalLiquidityShares()).to.equal(0);
+    });
 });

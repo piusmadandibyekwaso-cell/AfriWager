@@ -36,6 +36,8 @@ export interface FixedProductMarketMakerInterface extends Interface {
       | "onERC1155BatchReceived"
       | "onERC1155Received"
       | "poolBalances"
+      | "removeFunding"
+      | "sell"
       | "supportsInterface"
       | "totalLiquidityShares"
   ): FunctionFragment;
@@ -91,6 +93,14 @@ export interface FixedProductMarketMakerInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "removeFunding",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "sell",
+    values: [BigNumberish, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "supportsInterface",
     values: [BytesLike]
   ): string;
@@ -133,6 +143,11 @@ export interface FixedProductMarketMakerInterface extends Interface {
     functionFragment: "poolBalances",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "removeFunding",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "sell", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
@@ -289,6 +304,22 @@ export interface FixedProductMarketMaker extends BaseContract {
 
   poolBalances: TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
 
+  removeFunding: TypedContractMethod<
+    [shareAmount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  sell: TypedContractMethod<
+    [
+      outcomeIndex: BigNumberish,
+      returnAmount: BigNumberish,
+      minCollateralOut: BigNumberish
+    ],
+    [void],
+    "nonpayable"
+  >;
+
   supportsInterface: TypedContractMethod<
     [interfaceId: BytesLike],
     [boolean],
@@ -359,6 +390,20 @@ export interface FixedProductMarketMaker extends BaseContract {
   getFunction(
     nameOrSignature: "poolBalances"
   ): TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "removeFunding"
+  ): TypedContractMethod<[shareAmount: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "sell"
+  ): TypedContractMethod<
+    [
+      outcomeIndex: BigNumberish,
+      returnAmount: BigNumberish,
+      minCollateralOut: BigNumberish
+    ],
+    [void],
+    "nonpayable"
+  >;
   getFunction(
     nameOrSignature: "supportsInterface"
   ): TypedContractMethod<[interfaceId: BytesLike], [boolean], "view">;

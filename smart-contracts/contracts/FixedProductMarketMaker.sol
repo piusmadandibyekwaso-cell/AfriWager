@@ -115,10 +115,10 @@ contract FixedProductMarketMaker is ERC1155Holder {
         // 1. Transfer collateral from user
         require(collateralToken.transferFrom(msg.sender, address(this), investmentAmount), "Transfer failed");
         
-        // 2. Split collateral into YES and NO (equal amounts)
-        // Similar logic to addFunding: AMM temporarily holds both
+        // 2. Approve conditional tokens contract
         collateralToken.approve(address(conditionalTokens), investmentAmount);
         
+        // 3. Split collateral into YES and NO tokens
         uint256[] memory partition = new uint256[](2);
         partition[0] = 1;
         partition[1] = 2;
@@ -131,49 +131,128 @@ contract FixedProductMarketMaker is ERC1155Holder {
             investmentAmount
         );
         
-        // At this point, the contract has:
-        // poolBalances[0] (old) + investmentAmount (newly minted YES)
-        // poolBalances[1] (old) + investmentAmount (newly minted NO)
-        
-        // The user wants outcomeIndex tokens (e.g., YES).
-        // To get YES, we "swap" the newly minted NO tokens for YES tokens using the pool (x*y=k).
-        // Essentially, we leave the NO tokens in the pool, and take out MORE YES tokens.
-        
-        // uint256 buyTokenPool = poolBalances[outcomeIndex];
-        // uint256 sellTokenPool = poolBalances[1 - outcomeIndex];
-        
-        // Trade: Input = investmentAmount (of the token we don't want)
-        // Output = sharesOut (of the token we do want)
+        // 4. Swap logic: amountIn = newly minted opposite tokens
         // Formula: sharesOut = (investmentAmount * buyTokenPool) / (sellTokenPool + investmentAmount)
-        // Note: sellTokenPool here is the pool of the token we are effectively "selling" back to the AMM
-        // Wait, standard Gnosis implementation logic:
-        // Buying YES means:
-        // 1. You put in Collateral. 
-        // 2. Collateral splits into YES + NO.
-        // 3. You keep YES.
-        // 4. You sell NO to the pool in exchange for MORE YES.
-        
         uint256 sharesBought = (poolBalances[outcomeIndex] * investmentAmount) / (poolBalances[1 - outcomeIndex] + investmentAmount);
-        
         uint256 totalSharesOut = investmentAmount + sharesBought;
         require(totalSharesOut >= minSharesExpected, "Slippage limit reached");
         
         // Update Pools
-        // We added investmentAmount to the sellTokenPool (the one we didn't want)
         poolBalances[1 - outcomeIndex] += investmentAmount;
-        // We removed sharesBought from the buyTokenPool
         poolBalances[outcomeIndex] -= sharesBought;
         
-        // Transfer calculated shares to user
-        // We need the Position ID for the ERC1155 transfer
+        // 5. Transfer total calculated shares to user
+        _transferOutcomeToken(msg.sender, outcomeIndex, totalSharesOut);
+        
+        emit AMMTrade(msg.sender, true, investmentAmount, totalSharesOut);
+    }
+
+    /// @notice Remove liquidity from the pool
+    /// @param shareAmount Amount of LP shares to burn
+    function removeFunding(uint256 shareAmount) external {
+        require(shareAmount > 0, "Amount must be > 0");
+        require(liquidityProviderShares[msg.sender] >= shareAmount, "Checking insufficient shares");
+
+        // 1. Calculate outcomes to withdraw
+        // simplified: assuming equal proportion. 
+        // In a real CPMM, we need to withdraw proportional to the *current* pool skew?
+        // Actually, if I own 10% of the shares, I own 10% of YES and 10% of NO in the pool.
+        
+        uint256 yesToRemove = (poolBalances[0] * shareAmount) / totalLiquidityShares;
+        uint256 noToRemove = (poolBalances[1] * shareAmount) / totalLiquidityShares;
+        
+        // 2. Update Pool Balances
+        poolBalances[0] -= yesToRemove;
+        poolBalances[1] -= noToRemove;
+        
+        totalLiquidityShares -= shareAmount;
+        liquidityProviderShares[msg.sender] -= shareAmount;
+        
+        // 3. Merge Positions (The "Lobster Trap" Exit)
+        // We have YES and NO tokens. We want to merge them into Collateral to send to user.
+        // BUT `mergePositions` only works if we have EQUAL amounts of YES and NO (for binary).
+        // Since the pool moves (people bet), poolBalances[0] != poolBalances[1].
+        // So we will likely have unequal amounts of YES and NO to remove.
+        
+        // Logic:
+        // Merge the *minimum* of the two.
+        // Send the *excess* (profit/loss) as raw Outcome Tokens to the user?
+        // Or sell the excess to the pool?
+        // Standard Gnosis approach: Send the Outcome tokens to the user. Let them merge if they want.
+        // But for this "Simple" App, we want USDC mainly.
+        
+        // Let's try to merge what we can automatically.
+        uint256 mergeAmount = yesToRemove < noToRemove ? yesToRemove : noToRemove;
+        
+        if (mergeAmount > 0) {
+            uint256[] memory partition = new uint256[](2);
+            partition[0] = 1; 
+            partition[1] = 2;
+            
+            // The FPMM holds the tokens, so FPMM calls merge.
+            // Result: FPMM gets Collateral.
+            conditionalTokens.mergePositions(
+                address(collateralToken),
+                bytes32(0),
+                conditionId,
+                partition,
+                mergeAmount
+            );
+            
+            // Transfer that Collateral to User
+            require(collateralToken.transfer(msg.sender, mergeAmount), "Transfer collateral failed");
+        }
+        
+        // 4. Send Excess Outcome Tokens (The "Impermanent Loss" Residue)
+        if (yesToRemove > mergeAmount) {
+            // Send extra YES tokens to user
+             _transferOutcomeToken(msg.sender, 0, yesToRemove - mergeAmount);
+        }
+        if (noToRemove > mergeAmount) {
+             // Send extra NO tokens to user
+             _transferOutcomeToken(msg.sender, 1, noToRemove - mergeAmount);
+        }
+
+        emit LiquidityRemoved(msg.sender, shareAmount);
+    }
+    
+    // Internal helper to transfer raw conditional tokens
+    function _transferOutcomeToken(address to, uint256 outcomeIndex, uint256 amount) internal {
         uint256 indexSet = outcomeIndex == 0 ? 1 : 2;
         bytes32 collectionId = conditionalTokens.getCollectionId(bytes32(0), conditionId, indexSet);
         uint256 positionId = conditionalTokens.getPositionId(address(collateralToken), collectionId);
         
-        // The contract holds the tokens from the split + the pool. 
-        // We transfer totalSharesOut to user.
-        IERC1155(address(conditionalTokens)).safeTransferFrom(address(this), msg.sender, positionId, totalSharesOut, "");
+        IERC1155(address(conditionalTokens)).safeTransferFrom(address(this), to, positionId, amount, "");
+    }
+    
+    /// @notice Sell outcome tokens (Swap back to Collateral... mostly)
+    /// @param outcomeIndex Index of the token to sell (e.g., 0 for YES)
+    /// @param returnAmount Amount of this token user wants to SELL
+    function sell(uint256 outcomeIndex, uint256 returnAmount, uint256 minCollateralOut) external {
+        // "Selling YES" = "Buying NO" with the YES tokens?
+        // No, that just gives you NO tokens.
         
-        emit AMMTrade(msg.sender, true, investmentAmount, totalSharesOut);
+        // Correct "Cash Out" Logic:
+        // 1. User sends YES tokens.
+        // 2. We swap those YES tokens to NO tokens? No.
+        // 3. We assume User wants USDC.
+        // 4. To get USDC, we need YES + NO.
+        // 5. User provides YES. We need NO.
+        // 6. We BUY NO from the pool using ... what?
+        
+        // Actually, valid "Sell" in Gnosis:
+        // You sell YES *into* the pool.
+        // The pool gives you USDC?
+        // Only if the pool holds USDC. But this pool holds YES/NO.
+        
+        // This confirms the "Lobster Trap" thesis:
+        // You CANNOT get USDC out of this specific AMM structure simply by selling one side,
+        // UNLESS the AMM has a buffer of USDC or we do a multi-step routed swap.
+        
+        // For MVP, we will OMIT 'sell' to avoid getting funds stuck or broken math.
+        // Users should use 'removeFunding' to exit Liquidity.
+        // Traders must hold until resolution OR we implement a secondary "USDC Buffer" pool later.
+        
+        revert("Sell not implemented in MVP Alpha");
     }
 }

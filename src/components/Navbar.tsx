@@ -26,9 +26,9 @@ export default function Navbar() {
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative h-10 w-10 overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all group-hover:scale-110 group-active:scale-95">
                 <img
-                  src="/app_icon_512.png"
+                  src="/logo.svg"
                   alt="AfriWager Logo"
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain p-1"
                 />
               </div>
               <span className="text-2xl font-bold tracking-tight text-white font-sans group-hover:text-emerald-400 transition-colors">

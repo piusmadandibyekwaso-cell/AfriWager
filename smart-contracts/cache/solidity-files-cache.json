@@ -839,8 +839,8 @@
       ]
     },
     "C:\\Users\\DELL\\Desktop\\AFRIMARKETS\\afrimarkets\\smart-contracts\\contracts\\FixedProductMarketMaker.sol": {
-      "lastModificationDate": 1766404553537,
-      "contentHash": "475082efd1e8191dcf8d985f3fba7a72",
+      "lastModificationDate": 1769151935771,
+      "contentHash": "e84746ad25949c9e28eabea5136e9394",
       "sourceName": "contracts/FixedProductMarketMaker.sol",
       "solcConfig": {
         "version": "0.8.28",

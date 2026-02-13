@@ -416,7 +416,7 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
                                         {estimatedShares < Number(investmentAmount) && (
                                             <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-3">
                                                 <AlertCircle className="w-4 h-4 text-rose-500" />
-                                                <span className="text-[10px] font-bold text-rose-500 uppercase tracking-widest leading-tight">Negative Return: Payout &lt; Cost</span>
+                                                <span className="text-[10px] font-bold text-rose-500 uppercase tracking-widest leading-tight">NEGATIVE RETURN: PAYOUT &lt; COST</span>
                                             </div>
                                         )}
 
@@ -438,10 +438,10 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
                                         }
                                         className="w-full py-6 bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed text-black font-black rounded-3xl transition-all shadow-2xl shadow-emerald-500/20 uppercase tracking-widest text-[10px]"
                                     >
-                                        {(authUser?.balance || 0) < Number(investmentAmount) ? "Insufficient Balance" :
-                                            estimatedShares < Number(investmentAmount) ? "Negative ROI: Trade Blocked" :
-                                                ((Math.abs((Number(investmentAmount) / estimatedShares) - prices[selectedOutcome!]) / prices[selectedOutcome!]) > 0.10) ? "Reduce Size (High Slippage)" :
-                                                    "Execute Contract"}
+                                        {(authUser?.balance || 0) < Number(investmentAmount) ? "INSUFFICIENT BALANCE" :
+                                            estimatedShares < Number(investmentAmount) ? "NEGATIVE ROI: TRADE BLOCKED" :
+                                                ((Math.abs((Number(investmentAmount) / estimatedShares) - prices[selectedOutcome!]) / prices[selectedOutcome!]) > 0.10) ? "GUARDIAN BLOCK: HIGH SLIPPAGE" :
+                                                    "EXECUTE CONTRACT"}
                                     </button>
                                 </div>
                             )}
