@@ -20,7 +20,7 @@ export default function Home() {
       {/* Pulsing Logo - Transparent Bent Green Bars */}
       <div className="relative h-32 w-32 animate-pulse">
         <img
-          src="/logo_final.svg"
+          src="/logo_v3.png"
           alt="AfriWager Logo"
           className="h-full w-full object-contain"
         />

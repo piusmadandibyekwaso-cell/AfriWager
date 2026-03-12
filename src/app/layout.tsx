@@ -34,10 +34,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/logo_final.svg', type: 'image/svg+xml' },
+      { url: '/logo_v3.png', type: 'image/png' },
       { url: '/favicon.ico', sizes: 'any' } // Fallback
     ],
-    apple: '/logo_final.svg',
+    apple: '/icon.png',
   },
 };
 
