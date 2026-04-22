@@ -7,15 +7,13 @@ const Footer = () => {
             <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 md:px-8">
                 <div className="flex flex-col justify-between gap-6 md:flex-row">
                     <div className="flex max-w-md flex-col gap-4">
-                        <h3 className="font-semibold text-white/80">AfriWager Regulatory Sandbox</h3>
+                        <h3 className="font-semibold text-white/80">AfriWager Prediction Market</h3>
                         <p>
-                            AfriWager is currently optimizing for the CMA Regulatory Sandbox
-                            (Uganda). Our platform operates as a peer-to-peer marketplace for
-                            event-contingent contracts.
+                            AfriWager is Africa's premier peer-to-peer marketplace for
+                            event-contingent contracts. Trade on the outcome of real-world events.
                         </p>
                         <p>
-                            AfriWager is not a licensed bookmaker and does not accept wagers
-                            against the house. All trades are peer-to-peer.
+                            All trades are peer-to-peer and settled transparently on the blockchain.
                         </p>
                     </div>
 

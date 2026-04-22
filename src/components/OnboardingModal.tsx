@@ -150,7 +150,7 @@ export default function OnboardingModal() {
                         {error && <p className="text-red-500 text-sm">{error}</p>}
 
                         <div className="space-y-4 pt-4 border-t border-white/10">
-                            <h3 className="text-sm font-bold text-white">KYC Verification (Sandbox)</h3>
+                            <h3 className="text-sm font-bold text-white">KYC Verification</h3>
                             <input
                                 type="text"
                                 value={nin}
