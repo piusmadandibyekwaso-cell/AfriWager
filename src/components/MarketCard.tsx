@@ -42,11 +42,12 @@ export default function MarketCard({ market }: MarketCardProps) {
                 {/* Main Content */}
                 <div className="p-5 flex gap-4">
                     <div className="flex-shrink-0">
-                        <div className="w-12 h-12 relative rounded-xl overflow-hidden border border-white/10 bg-black">
+                        <div className="w-12 h-12 relative rounded-xl overflow-hidden border border-white/10 bg-zinc-900 shadow-inner">
                             <img
                                 src={displayImage}
                                 alt={market.category}
-                                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                loading="eager"
+                                className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-300"
                             />
                         </div>
                     </div>
