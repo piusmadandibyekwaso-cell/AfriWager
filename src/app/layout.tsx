@@ -33,18 +33,18 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://www.afriwager.com/app_icon_512.png',
-        width: 512,
-        height: 512,
-        alt: 'AfriWager - Africa\'s Largest Prediction Market',
+        url: 'https://www.afriwager.com/api/og',
+        width: 1200,
+        height: 630,
+        alt: "AfriWager - Africa's Largest Prediction Market",
       },
     ],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: "AfriWager - Africa's Largest Prediction Market",
     description: "Trade on the outcome of real-world African events. Politics, economics, sports, culture.",
-    images: ['https://www.afriwager.com/app_icon_512.png'],
+    images: ['https://www.afriwager.com/api/og'],
     site: '@AfriWager',
   },
   icons: {
