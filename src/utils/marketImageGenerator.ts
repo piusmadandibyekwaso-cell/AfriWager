@@ -6,10 +6,10 @@ const IMAGE_MAP: Record<string, string> = {
     'Tinubu': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Bola_Tinubu_portrait.jpg/640px-Bola_Tinubu_portrait.jpg',
     'Seyi Tinubu': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Lagos_State_flag.png/640px-Lagos_State_flag.png', // Fallback for Seyi if no clear pic
     'Joshua Baraka': 'https://softpower.ug/wp-content/uploads/2024/05/Joshua-Baraka.jpg',
-    'Parliament of Uganda': '/markets/parliament.jpg',
-    'Anita Among': '/markets/parliament.jpg',
-    'Osimhen': '/markets/osimhen.jpg',
-    'Muhoozi': '/markets/muhoozi.jpg',
+    'Parliament of Uganda': '/markets/parliament.png',
+    'Anita Among': '/markets/parliament.png',
+    'Osimhen': '/markets/osimhen.png',
+    'Muhoozi': '/markets/muhoozi.png',
 
     // --- 2. BRANDS & SPECIFIC ENTITIES ---
     'Starlink': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Starlink_Logo.svg/2560px-Starlink_Logo.svg.png',
