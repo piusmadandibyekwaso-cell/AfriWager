@@ -26,18 +26,33 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "AfriWager - Africa's Largest Prediction Market",
-    description: "AfriWager is Africa's premier prediction market where you can trade on the outcome of real-world events.",
+    description: "AfriWager is Africa's premier prediction market where you can trade on the outcome of real-world events. Buy and sell Event Contracts on politics, economics, and culture.",
     url: 'https://www.afriwager.com',
     siteName: 'AfriWager',
     locale: 'en_US',
     type: 'website',
+    images: [
+      {
+        url: 'https://www.afriwager.com/app_icon_512.png',
+        width: 512,
+        height: 512,
+        alt: 'AfriWager - Africa\'s Largest Prediction Market',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: "AfriWager - Africa's Largest Prediction Market",
+    description: "Trade on the outcome of real-world African events. Politics, economics, sports, culture.",
+    images: ['https://www.afriwager.com/app_icon_512.png'],
+    site: '@AfriWager',
   },
   icons: {
     icon: [
       { url: '/logo_v3.png', type: 'image/png' },
-      { url: '/favicon.ico', sizes: 'any' } // Fallback
+      { url: '/favicon.ico', sizes: 'any' },
     ],
-    apple: '/icon.png',
+    apple: '/app_icon_512.png',
   },
 };
 
