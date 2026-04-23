@@ -11,7 +11,7 @@ export default function AccuracyPage() {
                         <Target className="w-4 h-4" />
                         <span className="text-xs font-black uppercase tracking-widest">Market Accuracy</span>
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-[1.1] mb-6 uppercase italic">
+                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-6">
                         Unmatched Predictive Precision
                     </h1>
                     <p className="text-zinc-400 text-lg leading-relaxed">

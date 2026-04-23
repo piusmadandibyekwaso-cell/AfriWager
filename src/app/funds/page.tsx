@@ -244,7 +244,7 @@ export default function FundsPage() {
                 <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-8 border border-emerald-500/20 shadow-2xl shadow-emerald-500/10">
                     <Wallet className="w-10 h-10 text-emerald-500" />
                 </div>
-                <h1 className="text-4xl font-black text-white mb-4 italic tracking-tighter uppercase">Capital Secure</h1>
+                <h1 className="text-4xl font-bold text-white mb-4 tracking-tight">Capital Secure</h1>
                 <p className="text-slate-500 max-w-sm mb-10 font-medium leading-relaxed">Please authenticate via your secure gateway to view your portfolio.</p>
                 <button onClick={openAuthModal} className="px-12 py-5 bg-emerald-500 text-black font-black rounded-3xl transition-all shadow-3xl uppercase tracking-widest text-xs">Authenticate Session</button>
             </div>
@@ -255,7 +255,7 @@ export default function FundsPage() {
         <div className="max-w-6xl mx-auto px-6 py-16 relative min-h-screen">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-16">
                 <div>
-                    <h1 className="text-5xl font-black text-white italic tracking-tighter">Financial Center</h1>
+                    <h1 className="text-4xl font-bold text-white tracking-tight">Financial Center</h1>
                 </div>
                 <div className="flex bg-slate-900/50 p-2 rounded-2xl border border-slate-800/50">
                     <button onClick={() => setActiveTab('positions')} className={cn("px-6 py-3 rounded-xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all", activeTab === 'positions' ? "bg-emerald-500 text-black" : "text-slate-500 hover:text-white")}><PieChart className="w-3.5 h-3.5" /> Positions</button>
@@ -316,7 +316,7 @@ export default function FundsPage() {
                                         <div className="relative z-10">
                                             <div className="flex justify-between items-start mb-6">
                                                 <div className="max-w-[70%]">
-                                                    <h4 className="text-lg font-black text-white leading-tight mb-2 uppercase italic tracking-tighter">{pos.market_question}</h4>
+                                                    <h4 className="text-sm font-semibold text-zinc-100 leading-snug mb-2">{pos.market_question}</h4>
                                                     <span className="px-3 py-1 bg-white/5 text-[9px] font-black text-slate-500 uppercase rounded-lg">{pos.outcome_name}</span>
                                                 </div>
                                                 <div className="text-right">
@@ -356,7 +356,7 @@ export default function FundsPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-3xl">
                     <div className="bg-[#0c0e14] border border-white/5 w-full max-w-sm rounded-[4rem] overflow-hidden">
                         <div className="p-10 pb-4 flex items-center justify-between border-b border-white/5">
-                            <h3 className="text-xl font-black tracking-tighter uppercase italic">Secure Fund</h3>
+                            <h3 className="text-lg font-bold tracking-tight">Add Funds</h3>
                             <button onClick={resetDeposit} className="p-3 text-slate-600 hover:text-white"><AlertCircle /></button>
                         </div>
                         <div className="p-12">
@@ -398,7 +398,7 @@ export default function FundsPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-3xl">
                     <div className="bg-[#0c0e14] border border-white/5 w-full max-w-md rounded-[4rem] overflow-hidden">
                         <div className="p-10 pb-4 flex items-center justify-between border-b border-white/5">
-                            <h3 className="text-xl font-black tracking-tighter uppercase italic">Secure Withdrawal</h3>
+                            <h3 className="text-lg font-bold tracking-tight">Withdraw</h3>
                             <button onClick={() => setIsWithdrawModalOpen(false)} className="p-3 text-slate-600 hover:text-white"><AlertCircle /></button>
                         </div>
                         <div className="p-12 space-y-8">

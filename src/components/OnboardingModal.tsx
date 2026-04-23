@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { userService } from '@/services/userService';
+import { namingEngine } from '@/utils/namingEngine';
 import UserAvatar from './Avatar';
-import { Loader2, CheckCircle2, XCircle, User } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, User, RefreshCw, Shield } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useAuth } from '@/context/AuthContext';
@@ -36,36 +37,29 @@ export default function OnboardingModal() {
 
     // Check if user has a profile when they log in
     useEffect(() => {
-        // Only determine if we should open the modal once loading is done
-        if (ready && authenticated && !isLoading) {
-            if (!profile) {
-                setIsOpen(true);
-            } else {
-                setIsOpen(false);
-            }
+        if (ready && authenticated && !isLoading && !profile) {
+            setIsOpen(true);
+            generateIdentity();
+        } else if (ready && authenticated && !isLoading && profile) {
+            setIsOpen(false);
         }
     }, [ready, authenticated, isLoading, profile]);
 
-    // Debounced username check
-    useEffect(() => {
-        const timer = setTimeout(async () => {
-            if (username.length >= 3) {
-                setIsChecking(true);
-                try {
-                    const available = await userService.checkUsernameAvailability(username);
-                    setIsAvailable(available);
-                } catch (err) {
-                    console.error(err);
-                } finally {
-                    setIsChecking(false);
-                }
-            } else {
-                setIsAvailable(null);
-            }
-        }, 500);
-
-        return () => clearTimeout(timer);
-    }, [username]);
+    const generateIdentity = async () => {
+        setIsChecking(true);
+        try {
+            const name = await namingEngine.generateUniqueSovereignName(
+                (n) => userService.checkUsernameAvailability(n)
+            );
+            setUsername(name);
+            setIsAvailable(true);
+        } catch (err) {
+            console.error('Generation error:', err);
+            setError('Failed to generate identity.');
+        } finally {
+            setIsChecking(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -102,8 +96,14 @@ export default function OnboardingModal() {
                 <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl"></div>
 
                 <div className="relative text-center">
-                    <h2 className="text-2xl font-bold text-white mb-2">Welcome to AfriSights</h2>
-                    <p className="text-zinc-400 text-sm mb-6">Choose a unique username to establish your digital identity.</p>
+                    <div className="flex justify-center mb-2">
+                        <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-1.5">
+                            <Shield className="w-3 h-3 text-emerald-500" />
+                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Bit 4 Enabled</span>
+                        </div>
+                    </div>
+                    <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">Sovereign Identity</h2>
+                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-8">Establish your institutional presence</p>
 
                     <div className="flex justify-center mb-8">
                         <div className="relative">
@@ -119,31 +119,27 @@ export default function OnboardingModal() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="relative">
+                        <div className="relative group">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <span className="text-zinc-500 font-bold">@</span>
+                                <Shield className="h-4 w-4 text-emerald-500/50" />
                             </div>
-                            <input
-                                type="text"
-                                value={username}
-                                onChange={(e) => {
-                                    const val = e.target.value.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
-                                    setUsername(val);
-                                }}
-                                placeholder="username"
-                                className="w-full bg-zinc-900/50 border border-white/10 rounded-xl py-3 pl-8 pr-12 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-medium"
-                                minLength={3}
-                                maxLength={20}
-                                required
-                            />
-                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                            <div className="w-full bg-zinc-900/80 border border-white/10 rounded-xl py-4 pl-10 pr-12 text-white font-black tracking-tight text-lg shadow-inner">
                                 {isChecking ? (
-                                    <Loader2 className="h-5 w-5 text-zinc-500 animate-spin" />
-                                ) : isAvailable === true ? (
-                                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                                ) : isAvailable === false && username.length >= 3 ? (
-                                    <XCircle className="h-5 w-5 text-red-500" />
-                                ) : null}
+                                    <span className="text-zinc-700 animate-pulse">GENERATING...</span>
+                                ) : (
+                                    username
+                                )}
+                            </div>
+                            <div className="absolute inset-y-0 right-0 pr-2 flex items-center">
+                                <button
+                                    type="button"
+                                    onClick={generateIdentity}
+                                    disabled={isChecking || isSubmitting}
+                                    className="p-2 hover:bg-white/5 rounded-lg transition-colors group/btn disabled:opacity-30"
+                                    title="Regenerate Identity"
+                                >
+                                    <RefreshCw className={`h-5 w-5 text-zinc-500 group-hover/btn:text-emerald-500 transition-colors ${isChecking ? 'animate-spin' : ''}`} />
+                                </button>
                             </div>
                         </div>
 

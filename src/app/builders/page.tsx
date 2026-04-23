@@ -11,7 +11,7 @@ export default function BuildersPage() {
                         <Hammer className="w-4 h-4" />
                         <span className="text-xs font-black uppercase tracking-widest">AfriWager Builders</span>
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-[1.1] mb-6 uppercase italic">
+                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-6">
                         Build the Future of African Prediction Markets
                     </h1>
                     <p className="text-zinc-400 text-lg leading-relaxed">
