@@ -103,6 +103,7 @@ export async function POST(request: Request) {
             const iface = new ethers.Interface(transferAbi);
             let depositAmountUSD = 0;
             let isValidTransfer = false;
+            let fundingAddress = '';
 
             for (const log of receipt.logs) {
                 if (log.address.toLowerCase() === CONTRACT_ADDRESSES.usdc.toLowerCase()) {
@@ -115,6 +116,7 @@ export async function POST(request: Request) {
                                 // USDC has 6 decimals
                                 depositAmountUSD = Number(ethers.formatUnits(value, 6));
                                 isValidTransfer = true;
+                                fundingAddress = from;
                                 break;
                             }
                         }
@@ -136,6 +138,20 @@ export async function POST(request: Request) {
                 .eq('user_id', user.id);
 
             if (updateError) throw updateError;
+            
+            // 4b. Update Profile Wallet Address (if empty)
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('last_funding_address')
+                .eq('id', user.id)
+                .single();
+
+            if (profile && (!profile.last_funding_address || profile.last_funding_address === '')) {
+                 await supabase
+                    .from('profiles')
+                    .update({ last_funding_address: fundingAddress })
+                    .eq('id', user.id);
+            }
 
             // 5. Record Transaction
             const { error: txError } = await supabase
@@ -146,7 +162,7 @@ export async function POST(request: Request) {
                     amount_usdc: depositAmountUSD,
                     status: 'completed',
                     reference_id: `DEP_${Date.now()}`,
-                    metadata: { txHash, provider: 'POLYGON', status: 'completed' }
+                    metadata: { txHash, provider: 'POLYGON', status: 'completed', fundingAddress }
                 });
 
             if (txError) {

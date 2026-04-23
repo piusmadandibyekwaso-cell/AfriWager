@@ -283,7 +283,7 @@ export default function FundsPage() {
                                 <p className="text-3xl font-black text-emerald-500 tracking-tighter">${totalEquityValue.toFixed(2)}</p>
                             </div>
                             <div className="lg:col-span-2 flex justify-end items-center gap-4">
-                                <button onClick={() => setIsWithdrawModalOpen(true)} className="px-8 py-5 bg-slate-800 hover:bg-slate-700 text-white font-black rounded-3xl transition-all uppercase tracking-widest text-[11px]">Withdraw</button>
+                                <button onClick={() => { setWithdrawAddress(profile?.last_funding_address || ''); setIsWithdrawModalOpen(true); }} className="px-8 py-5 bg-slate-800 hover:bg-slate-700 text-white font-black rounded-3xl transition-all uppercase tracking-widest text-[11px]">Withdraw</button>
                                 <button onClick={() => setIsDepositModalOpen(true)} className="px-10 py-5 bg-amber-600 hover:bg-amber-500 text-black font-black rounded-3xl transition-all uppercase tracking-widest text-[11px]">Add Funds</button>
                             </div>
                         </div>
@@ -403,8 +403,9 @@ export default function FundsPage() {
                         </div>
                         <div className="p-12 space-y-8">
                             <div className="space-y-6">
-                                <input type="number" placeholder="Amount" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} className="w-full bg-black border border-white/5 p-6 rounded-2xl text-white font-black text-2xl" />
-                                <input type="text" placeholder="Address" value={withdrawAddress} onChange={e => setWithdrawAddress(e.target.value)} className="w-full bg-black border border-white/5 p-5 rounded-2xl text-white font-mono text-xs" />
+                                <p className="text-[11px] font-medium text-slate-400">If using Binance, ensure this is your exact <strong>Polygon USDC Deposit Address</strong>. Your initial funding source has been pre-filled.</p>
+                                <input type="number" placeholder="Amount (USDC)" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} className="w-full bg-black border border-white/5 p-6 rounded-2xl text-white font-black text-2xl" />
+                                <input type="text" placeholder="Binance Deposit Address (0x...)" value={withdrawAddress} onChange={e => setWithdrawAddress(e.target.value)} className="w-full bg-black border border-white/5 p-5 rounded-2xl text-amber-500 font-mono text-xs" />
                                 <button onClick={launchTransakOffRamp} className="w-full py-7 bg-indigo-600 text-white font-black rounded-3xl uppercase tracking-widest text-[10px]">Initialize Transfer</button>
                             </div>
                         </div>
