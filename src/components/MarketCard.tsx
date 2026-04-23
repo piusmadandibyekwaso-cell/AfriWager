@@ -62,26 +62,22 @@ export default function MarketCard({ market }: MarketCardProps) {
                 <div className="px-5 pb-5 mt-auto">
                     <div className="grid grid-cols-2 gap-2">
                         <div className={cn(
-                            "flex flex-col items-center justify-center py-4 rounded-xl border transition-all",
-                            yesProb >= noProb ? "bg-emerald-500/5 border-emerald-500/10" : "bg-black/20 border-white/5"
+                            "flex flex-col items-center justify-center py-4 rounded-xl border transition-all relative overflow-hidden group/btn",
+                            "bg-gradient-to-b from-emerald-500/20 to-emerald-900/40 border-emerald-500/30 shadow-[inset_0_1px_0_0_rgba(16,185,129,0.2)] hover:from-emerald-500/30 hover:to-emerald-900/50"
                         )}>
-                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-500/40 mb-1">Yes</span>
-                            <span className={cn(
-                                "text-2xl font-black tracking-tighter tabular-nums",
-                                yesProb >= noProb ? "text-emerald-400" : "text-zinc-600"
-                            )}>
+                            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+                            <span className="relative text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400/80 mb-1 z-10">Yes</span>
+                            <span className="relative text-2xl font-black tracking-tighter tabular-nums text-emerald-400 z-10">
                                 {yesProb}%
                             </span>
                         </div>
                         <div className={cn(
-                            "flex flex-col items-center justify-center py-4 rounded-xl border transition-all",
-                            noProb > yesProb ? "bg-rose-500/5 border-rose-500/10" : "bg-black/20 border-white/5"
+                            "flex flex-col items-center justify-center py-4 rounded-xl border transition-all relative overflow-hidden group/btn",
+                            "bg-gradient-to-b from-rose-500/20 to-rose-900/40 border-rose-500/30 shadow-[inset_0_1px_0_0_rgba(244,63,94,0.2)] hover:from-rose-500/30 hover:to-rose-900/50"
                         )}>
-                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-rose-500/40 mb-1">No</span>
-                            <span className={cn(
-                                "text-2xl font-black tracking-tighter tabular-nums",
-                                noProb > yesProb ? "text-rose-400" : "text-zinc-600"
-                            )}>
+                            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+                            <span className="relative text-[9px] font-black uppercase tracking-[0.2em] text-rose-400/80 mb-1 z-10">No</span>
+                            <span className="relative text-2xl font-black tracking-tighter tabular-nums text-rose-400 z-10">
                                 {noProb}%
                             </span>
                         </div>
