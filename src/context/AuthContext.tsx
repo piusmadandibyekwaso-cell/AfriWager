@@ -80,6 +80,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 if (!createError) {
                     profileData = newProfile;
+                } else {
+                    console.error("Profile creation error:", createError);
                 }
             }
 

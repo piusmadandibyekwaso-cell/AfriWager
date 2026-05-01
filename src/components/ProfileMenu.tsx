@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useAccount } from 'wagmi';
 import { useUserProfile } from '@/hooks/useUserProfile';
-import UserAvatar from './Avatar';
+// import UserAvatar from './Avatar';
 import {
     Settings,
     Copy,
@@ -20,9 +20,9 @@ import {
 } from 'lucide-react';
 
 export default function ProfileMenu() {
-    const { signOut } = useAuth();
+    const { user, signOut } = useAuth();
     const { address } = useAccount();
-    const { profile } = useUserProfile();
+    const profile = user?.profile;
     const [isOpen, setIsOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -54,13 +54,11 @@ export default function ProfileMenu() {
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center gap-3 px-3 py-1.5 rounded-full bg-[#1C1C1E] border border-white/5 hover:bg-[#2C2C2E] transition-all group"
             >
-                <UserAvatar
-                    name={profile?.avatar_seed || address || 'user'}
-                    size={28}
-                    className="ring-2 ring-[#1C1C1E]"
-                />
+                <div className="w-7 h-7 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                    <User className="w-4 h-4 text-emerald-500" />
+                </div>
                 <div className="flex flex-col text-right mr-1">
-                    <span className="text-sm font-semibold text-white leading-none group-hover:text-emerald-400 transition-colors">
+                    <span className="text-sm font-medium text-white leading-none group-hover:text-emerald-400 transition-colors">
                         {username}
                     </span>
                     <span className="text-[10px] text-zinc-500 leading-none mt-1 font-mono">
@@ -76,16 +74,15 @@ export default function ProfileMenu() {
                     {/* Header */}
                     <div className="p-4 border-b border-white/5">
                         <div className="flex items-center justify-between mb-3">
-                            <UserAvatar
-                                name={profile?.avatar_seed || address || 'user'}
-                                size={48}
-                            />
+                            <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                                <User className="w-6 h-6 text-emerald-500" />
+                            </div>
                             <Link href="/settings" className="p-2 text-zinc-400 hover:text-white hover:bg-white/5 rounded-full transition-colors">
                                 <Settings className="w-5 h-5" />
                             </Link>
                         </div>
                         <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-bold text-white">{username}</h3>
+                            <h3 className="text-lg font-semibold text-white">{username}</h3>
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs text-zinc-500 font-mono">{address?.slice(0, 6)}...{address?.slice(-6)}</span>
