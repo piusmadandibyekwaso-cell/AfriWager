@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useAccount } from 'wagmi';
-import { useUserProfile } from '@/hooks/useUserProfile';
+// import { useUserProfile } from '@/hooks/useUserProfile';
 // import UserAvatar from './Avatar';
 import {
     Settings,
@@ -13,9 +13,6 @@ import {
     Coins,
     Hammer,
     LogOut,
-    Moon,
-    ExternalLink,
-    ChevronRight,
     User
 } from 'lucide-react';
 

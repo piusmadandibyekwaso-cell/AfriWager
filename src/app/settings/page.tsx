@@ -17,8 +17,9 @@ import {
     ShieldCheck
 } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
-import { useAccount, useBalance } from 'wagmi';
-import { formatUnits } from 'viem';
+import { useAccount } from 'wagmi';
+// import { formatUnits } from 'viem'; // Unused
+
 
 type SettingsTab = 'Profile' | 'Account' | 'Trading' | 'Notifications' | 'Builder Codes' | 'Export Private Key';
 
@@ -28,7 +29,8 @@ export default function SettingsPage() {
     const { wallets } = useWallets();
     const { sendNotification } = useNotifications();
     const { address } = useAccount();
-    const { data: ethBalance } = useBalance({ address });
+    // const { data: ethBalance } = useBalance({ address }); // Unused
+
 
     const [activeTab, setActiveTab] = useState<SettingsTab>('Profile');
     
@@ -46,7 +48,8 @@ export default function SettingsPage() {
     const displayEmail = authUser?.email || 'Not connected';
 
     // Sidebar Config
-    const sidebarItems: { name: SettingsTab; icon: any }[] = [
+    const sidebarItems: { name: SettingsTab; icon: React.ElementType }[] = [
+
         { name: 'Profile', icon: User },
         { name: 'Account', icon: Wallet },
         { name: 'Trading', icon: BarChart2 },
@@ -302,7 +305,7 @@ export default function SettingsPage() {
                         <div className="space-y-8 animate-in fade-in duration-300 max-w-2xl">
                             <div className="p-10 bg-[#0c0e14] border border-white/5 rounded-3xl space-y-8">
                                 <p className="text-sm text-zinc-400 leading-relaxed">
-                                    Exporting your private key gives you direct control and security over your funds. This is applicable if you've signed up via email.
+                                    Exporting your private key gives you direct control and security over your funds. This is applicable if you&apos;ve signed up via email.
                                 </p>
                                 
                                 <div className="p-5 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-4">

@@ -23,7 +23,7 @@ export interface ExtendedUser {
 interface AuthContextType {
     user: ExtendedUser | null;
     loading: boolean;
-    signInWithEmail: (email: string) => Promise<{ error: any }>;
+    signInWithEmail: (email: string) => Promise<{ error: Error | null }>;
     signOut: () => Promise<void>;
     isAuthModalOpen: boolean;
     openAuthModal: () => void;
@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true);
 
     // Get the embedded smart wallet
-    const smartWallet = wallets.find((wallet: any) => wallet.walletClientType === 'privy');
+    const smartWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
 
     const fetchUserData = async (walletAddress: string, email?: string) => {
         try {
