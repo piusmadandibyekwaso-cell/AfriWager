@@ -21,18 +21,21 @@ const Footer = () => {
                         <h4 className="font-semibold text-white/80">Resources</h4>
                         <Link
                             href="/financial-literacy" // Placeholder for now
+                            prefetch={false}
                             className="hover:text-emerald-400 hover:underline"
                         >
                             Financial Literacy
                         </Link>
                         <Link
                             href="/terms"
+                            prefetch={false}
                             className="hover:text-emerald-400 hover:underline"
                         >
                             Terms of Use
                         </Link>
                         <Link
                             href="/risks"
+                            prefetch={false}
                             className="hover:text-emerald-400 hover:underline"
                         >
                             Risk Disclosure

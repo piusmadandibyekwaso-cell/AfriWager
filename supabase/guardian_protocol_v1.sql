@@ -75,19 +75,23 @@ BEGIN
         RAISE EXCEPTION 'Insufficient Funds';
     END IF;
 
-    -- C. CPMM MATH (Precision: numeric handles this well)
+    -- C. CPMM MATH (CORRECTED: Split + Swap)
     v_fee := p_amount_usd * 0.02; -- 2% Fee
     v_invest_amount := p_amount_usd - v_fee;
     v_k := v_yes_pool * v_no_pool;
 
     IF p_outcome_index = 0 THEN -- BUY YES
+        -- Split: Users gets InvestAmount YES + InvestAmount NO
+        -- Swap: User swaps InvestAmount NO into pool for YES
         v_new_no_pool := v_no_pool + v_invest_amount;
         v_new_yes_pool := v_k / v_new_no_pool;
-        v_shares_out := v_yes_pool - v_new_yes_pool;
+        -- Total Shares = Shares from Split (InvestAmount) + Shares from Swap (Delta Yes)
+        v_shares_out := v_invest_amount + (v_yes_pool - v_new_yes_pool);
     ELSE -- BUY NO
         v_new_yes_pool := v_yes_pool + v_invest_amount;
         v_new_no_pool := v_k / v_new_yes_pool;
-        v_shares_out := v_no_pool - v_new_no_pool;
+        -- Total Shares = Shares from Split (InvestAmount) + Shares from Swap (Delta No)
+        v_shares_out := v_invest_amount + (v_no_pool - v_new_no_pool);
     END IF;
 
     -- D. GUARDIAN PROTOCOL CHECKS
@@ -96,7 +100,7 @@ BEGIN
     -- If Payout (Shares * $1.00) < Investment (Amount USD), block.
     IF v_shares_out < p_amount_usd THEN
         INSERT INTO public.compliance_logs (user_id, market_id, attempted_amount, block_reason, metadata)
-        VALUES (p_user_id, p_market_id::text, p_amount_usd, 'NEGATIVE_ROI', jsonb_build_object('shares', v_shares_out));
+        VALUES (p_user_id, p_market_id::text, p_amount_usd, 'NEGATIVE_ROI', jsonb_build_object('shares', v_shares_out, 'invest', p_amount_usd));
         RAISE EXCEPTION 'Guardian Protocol: Negative ROI Trade Blocked';
     END IF;
 

@@ -16,7 +16,8 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
     const { sendNotification } = useNotifications();
     const [activeTab, setActiveTab] = useState<'deposit' | 'withdraw'>('deposit');
     const [amount, setAmount] = useState('');
-    const [phone, setPhone] = useState(user?.profile?.phone_number || '');
+    const [txHash, setTxHash] = useState('');
+    const [withdrawAddress, setWithdrawAddress] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [currency, setCurrency] = useState<'USD' | 'UGX'>('USD');
     const exchangeRate = 3850; // 1 USD = 3850 UGX
@@ -29,16 +30,16 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
 
         try {
             // Convert UGX back to USD for API
-            const amountUSD = currency === 'USD' ? parseFloat(amount) : parseFloat(amount) / exchangeRate;
+            const amountUSD = currency === 'USD' ? parseFloat(amount || '0') : parseFloat(amount || '0') / exchangeRate;
+
+            const payload = activeTab === 'deposit'
+                ? { type: 'DEPOSIT', txHash: txHash.trim() }
+                : { type: 'WITHDRAW', amountUSD, withdrawAddress: withdrawAddress.trim() };
 
             const response = await fetch('/api/wallet', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: activeTab === 'deposit' ? 'DEPOSIT' : 'WITHDRAW',
-                    amountUSD: amountUSD,
-                    phoneNumber: phone
-                })
+                body: JSON.stringify(payload)
             });
 
             const result = await response.json();
@@ -46,9 +47,12 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
             if (!response.ok) throw new Error(result.error);
 
             sendNotification(activeTab === 'deposit' ? 'Deposit Successful' : 'Withdrawal Processed', {
-                body: `${activeTab === 'deposit' ? 'Credited' : 'Sent'} ${currency === 'USD' ? '$' : 'USh '}${amount} to ${phone}`,
+                body: activeTab === 'deposit' 
+                    ? `Credited ${result.depositedAmount ? '$'+result.depositedAmount : 'funds'} to your account` 
+                    : `Sent ${currency === 'USD' ? '$' : 'USh '}${amount} to ${withdrawAddress.slice(0, 6)}...`,
             });
             onClose();
+            window.location.reload(); // Refresh balance
         } catch (error: any) {
             console.error('Wallet error:', error);
             alert(error.message);
@@ -130,63 +134,74 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Amount ({currency})</label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white font-bold">{currency === 'USD' ? '$' : 'USh'}</span>
-                                <input
-                                    type="number"
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                    className="w-full bg-black/50 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 font-bold"
-                                    placeholder="0.00"
-                                    required
-                                    min="1"
-                                />
-                            </div>
-                        </div>
+                        {activeTab === 'deposit' ? (
+                            <div className="space-y-4">
+                                <div className="p-4 bg-zinc-900/50 rounded-xl border border-dashed border-zinc-800 text-xs text-zinc-400">
+                                    <p className="mb-2 font-bold text-white uppercase tracking-widest">1. Send USDC to Treasury</p>
+                                    <p className="mb-4">Send USDC on the <strong className="text-emerald-400">Polygon Network</strong> from your Binance account to the AfriWager Treasury address below:</p>
+                                    <div className="flex items-center gap-2 p-3 bg-black rounded-lg border border-white/10 mb-2 font-mono text-[10px] sm:text-xs break-all text-white select-all">
+                                        0xEBFD81Ef583E1Cb61b397Ef3B2f30e024a3c8a90
+                                    </div>
+                                    <p className="text-[10px] text-zinc-500">Only send Polygon USDC. Other networks will result in permanent loss.</p>
+                                </div>
 
-                        <div>
-                            <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Mobile Money Number</label>
-                            <input
-                                type="tel"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                className="w-full bg-black/50 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 font-bold"
-                                placeholder="+256..."
-                                required
-                            />
-                        </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">2. Enter Transaction Hash (TxID)</label>
+                                    <input
+                                        type="text"
+                                        value={txHash}
+                                        onChange={(e) => setTxHash(e.target.value)}
+                                        className="w-full bg-black/50 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 font-mono text-xs"
+                                        placeholder="0x..."
+                                        required={activeTab === 'deposit'}
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Amount ({currency})</label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white font-bold">{currency === 'USD' ? '$' : 'USh'}</span>
+                                        <input
+                                            type="number"
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            className="w-full bg-black/50 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 font-bold"
+                                            placeholder="0.00"
+                                            required={activeTab === 'withdraw'}
+                                            min="1"
+                                            step="0.01"
+                                            max={currency === 'USD' ? user?.balance : (user?.balance || 0) * exchangeRate}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">Binance / Polygon USDC Address</label>
+                                    <input
+                                        type="text"
+                                        value={withdrawAddress}
+                                        onChange={(e) => setWithdrawAddress(e.target.value)}
+                                        className="w-full bg-black/50 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 font-mono text-xs"
+                                        placeholder="0x..."
+                                        required={activeTab === 'withdraw'}
+                                    />
+                                    <p className="mt-2 text-[10px] text-zinc-500">Funds will be sent automatically to this address on the Polygon Network.</p>
+                                </div>
+                            </div>
+                        )}
 
                         <button
                             type="submit"
                             disabled={isSubmitting}
                             className={`w-full py-4 font-black rounded-xl uppercase tracking-widest text-xs transition-all shadow-lg flex items-center justify-center gap-2 ${activeTab === 'deposit'
-                                ? 'bg-[#F7C325] hover:bg-[#E5B214] text-black shadow-amber-500/20'
+                                ? 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-emerald-500/20'
                                 : 'bg-white hover:bg-zinc-200 text-black'
                                 }`}
                         >
-                            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (activeTab === 'deposit' ? 'Pay with Yellow Card' : 'Withdraw via Yellow Card')}
+                            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (activeTab === 'deposit' ? 'Verify Deposit' : 'Withdraw Funds')}
                         </button>
-
-                        <div className="text-center space-y-4">
-                            <div className="flex items-center justify-center gap-2 text-[10px] text-zinc-500 font-medium">
-                                <span className="w-2 h-2 rounded-full bg-[#F7C325]"></span>
-                                Powered by <strong>Yellow Card</strong> Sandbox
-                            </div>
-
-                            <div className="p-3 bg-zinc-900/50 rounded-xl border border-dashed border-zinc-800 text-[10px] text-zinc-600 text-left">
-                                <p className="font-bold text-zinc-500 mb-2 uppercase tracking-widest">🧪 Sandbox Test Credentials:</p>
-                                <div className="space-y-1 font-mono">
-                                    <div className="flex justify-between">
-                                        <span>Success:</span> <span className="text-emerald-500">+256 111 111 1111</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Failure:</span> <span className="text-rose-500">+256 000 000 0000</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </form>
                 </div>
             </div>

@@ -26,11 +26,12 @@ interface PriceChartProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-[#0c0e12] border border-zinc-800 p-4 rounded-2xl shadow-2xl backdrop-blur-xl">
-                <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">{label}</p>
-                <p className="text-xl font-black text-white tracking-tighter">
-                    {(payload[0].value * 100).toFixed(1)}¢
+            <div className="bg-black border border-white/10 p-4 rounded-xl shadow-2xl backdrop-blur-3xl">
+                <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-1">{label}</p>
+                <p className="text-lg font-black text-white tracking-tighter">
+                    {(payload[0].value * 100).toFixed(1)}%
                 </p>
+                <p className="text-[8px] font-bold text-emerald-500 uppercase tracking-widest mt-1 italic">Market Consensus</p>
             </div>
         );
     }
@@ -40,23 +41,23 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export default function PriceChart({ data, color = "#10b981" }: PriceChartProps) {
     if (!data || data.length === 0) {
         return (
-            <div className="w-full h-[300px] mt-8 flex items-center justify-center bg-zinc-900/30 rounded-xl animate-pulse">
-                <span className="text-zinc-700 text-xs font-bold uppercase tracking-widest">Loading Chart Data...</span>
+            <div className="w-full h-[250px] mt-4 flex items-center justify-center bg-black/20 rounded-2xl border border-white/5 animate-pulse">
+                <span className="text-zinc-800 text-[10px] font-black uppercase tracking-[0.3em]">Analyzing Market Trends...</span>
             </div>
         );
     }
 
     return (
-        <div className="w-full h-[300px] mt-8">
+        <div className="w-full h-[250px] mt-4">
             <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data}>
+                <AreaChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                     <defs>
                         <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor={color} stopOpacity={0.3} />
-                            <stop offset="95%" stopColor={color} stopOpacity={0} />
+                            <stop offset="0%" stopColor={color} stopOpacity={0.15} />
+                            <stop offset="100%" stopColor={color} stopOpacity={0} />
                         </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} opacity={0.2} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff" vertical={false} opacity={0.03} />
                     <XAxis
                         dataKey="time"
                         hide={true}
@@ -65,15 +66,17 @@ export default function PriceChart({ data, color = "#10b981" }: PriceChartProps)
                         domain={['auto', 'auto']}
                         hide={true}
                     />
-                    <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#374151', strokeDasharray: '4 4' }} />
+                    <Tooltip 
+                        content={<CustomTooltip />} 
+                        cursor={{ stroke: color, strokeWidth: 1, strokeDasharray: '4 4', opacity: 0.3 }} 
+                    />
                     <Area
                         type="monotone"
                         dataKey="price"
                         stroke={color}
-                        strokeWidth={3}
+                        strokeWidth={2}
                         fillOpacity={1}
                         fill="url(#colorPrice)"
-                        animationDuration={1500}
                     />
                 </AreaChart>
             </ResponsiveContainer>

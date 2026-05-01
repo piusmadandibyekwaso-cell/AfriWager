@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { X, Loader2, Check, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -24,7 +25,16 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     // Derived State
     const showPasswordInput = email.length > 0;
 
-    const { signInWithEmail } = useAuth();
+    const { signInWithEmail, user } = useAuth();
+    const router = useRouter();
+
+    // Auto-close if user is somehow logged in
+    useEffect(() => {
+        if (user && isOpen) {
+            onClose();
+            router.refresh();
+        }
+    }, [user, isOpen, onClose, router]);
 
     // Reset state when closing or switching modes
     useEffect(() => {
@@ -91,9 +101,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 });
                 if (error) throw error;
                 onClose();
+                window.location.reload(); // Force reload to ensure fresh state
             } else {
                 // Sign Up with Password
-                const { error } = await supabase.auth.signUp({
+                const { error, data } = await supabase.auth.signUp({
                     email,
                     password,
                     options: {
@@ -101,7 +112,18 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     },
                 });
                 if (error) throw error;
-                setMessage('Check your email for the confirmation link!');
+                
+                if (data?.session) {
+                    // Auto logged in (email confirmation disabled)
+                    onClose();
+                    window.location.reload();
+                } else {
+                    setMessage('Check your email for the confirmation link!');
+                    // Optionally close after a few seconds
+                    setTimeout(() => {
+                        onClose();
+                    }, 3000);
+                }
             }
         } catch (err: any) {
             setError(err.message);

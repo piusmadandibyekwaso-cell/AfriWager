@@ -6,8 +6,9 @@ import { CONTRACT_ADDRESSES } from '@/constants/contracts';
 
 const POLYGON_RPC_URL = process.env.POLYGON_RPC_URL || 'https://polygon-rpc.com';
 
-// ABI to decode USDC Transfer events
-const transferAbi = [
+// ABI to decode USDC Transfer events and send USDC
+const erc20Abi = [
+    "function transfer(address to, uint256 amount) returns (bool)",
     "event Transfer(address indexed from, address indexed to, uint256 value)"
 ];
 
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { type, amountUSD, txHash } = body;
+        const { type, amountUSD, txHash, withdrawAddress } = body;
 
         if (!['DEPOSIT', 'WITHDRAW'].includes(type)) {
             return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
@@ -48,14 +49,22 @@ export async function POST(request: Request) {
         const currentBalance = Number(balanceData?.balance_usdc || 0);
 
         if (type === 'WITHDRAW') {
-            if (!amountUSD || currentBalance < amountUSD) {
+            if (!amountUSD || currentBalance < amountUSD || amountUSD <= 0) {
                 return NextResponse.json({ error: 'Insufficient funds or invalid amount' }, { status: 402 });
             }
-            // Standard withdrawal logic here (e.g. queueing payout)
-            // For now, simply deduct balance and record transaction.
 
+            if (!withdrawAddress || !ethers.isAddress(withdrawAddress)) {
+                return NextResponse.json({ error: 'Invalid Polygon withdrawal address' }, { status: 400 });
+            }
+
+            const privateKey = process.env.PRIVATE_KEY;
+            if (!privateKey) {
+                console.error("Missing PRIVATE_KEY for withdrawals");
+                return NextResponse.json({ error: 'Withdrawal system is temporarily offline' }, { status: 503 });
+            }
+
+            // 1. Deduct balance FIRST (to prevent race conditions / double spends)
             const newBalance = currentBalance - amountUSD;
-
             const { error: updateError } = await supabase
                 .from('user_balances')
                 .update({ balance_usdc: newBalance })
@@ -63,16 +72,45 @@ export async function POST(request: Request) {
 
             if (updateError) throw updateError;
 
-            await supabase.from('transactions').insert({
-                user_id: user.id,
-                type: 'withdrawal',
-                amount_usdc: -amountUSD,
-                status: 'pending', // withdrawals usually pend admin approval/processing
-                reference_id: `WD_${Date.now()}`,
-                metadata: { status: 'pending' }
-            });
+            // 2. Perform Blockchain Transfer
+            try {
+                const provider = new ethers.JsonRpcProvider(POLYGON_RPC_URL);
+                const wallet = new ethers.Wallet(privateKey, provider);
+                const usdcContract = new ethers.Contract(CONTRACT_ADDRESSES.usdc, erc20Abi, wallet);
 
-            return NextResponse.json({ success: true, newBalance });
+                // USDC has 6 decimals
+                const amountToSend = ethers.parseUnits(amountUSD.toString(), 6);
+
+                const tx = await usdcContract.transfer(withdrawAddress, amountToSend);
+                const receipt = await tx.wait();
+
+                if (receipt.status !== 1) {
+                    throw new Error("Blockchain transaction failed");
+                }
+
+                // 3. Record Successful Transaction
+                await supabase.from('transactions').insert({
+                    user_id: user.id,
+                    type: 'withdrawal',
+                    amount_usdc: -amountUSD,
+                    status: 'completed',
+                    reference_id: `WD_${Date.now()}`,
+                    metadata: { txHash: receipt.hash, toAddress: withdrawAddress, status: 'completed' }
+                });
+
+                return NextResponse.json({ success: true, newBalance, txHash: receipt.hash });
+
+            } catch (err: any) {
+                console.error("Blockchain withdrawal failed, reverting balance...", err);
+                
+                // CRITICAL: Revert the balance deduction if the crypto transfer fails!
+                await supabase
+                    .from('user_balances')
+                    .update({ balance_usdc: currentBalance })
+                    .eq('user_id', user.id);
+
+                return NextResponse.json({ error: 'Blockchain transfer failed. Your funds are safe.' }, { status: 500 });
+            }
         }
 
         if (type === 'DEPOSIT') {
@@ -100,7 +138,7 @@ export async function POST(request: Request) {
             }
 
             // 3. Verify it's a USDC transfer to the Treasury
-            const iface = new ethers.Interface(transferAbi);
+            const iface = new ethers.Interface(erc20Abi);
             let depositAmountUSD = 0;
             let isValidTransfer = false;
             let fundingAddress = '';

@@ -37,36 +37,34 @@ export default function Navbar() {
             </Link>
 
             {/* Navigation Links */}
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/markets" className="text-slate-300 hover:text-white transition-colors font-medium">Markets</Link>
-              <Link href="/activity" className="text-slate-300 hover:text-white transition-colors font-medium">Activity</Link>
-              <Link href="/ranks" className="text-slate-300 hover:text-white transition-colors font-medium">Ranks</Link>
+            <div className="hidden md:flex items-center gap-10">
+              <Link href="/markets" className="text-slate-400 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">Markets</Link>
+              <Link href="/activity" className="text-slate-400 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">Activity</Link>
+              <Link href="/ranks" className="text-slate-400 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest">Ranks</Link>
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               {/* Currency Toggle */}
-              {/* Currency Toggle - Only visible when logged in */}
               {user && (
                 <button
                   onClick={() => setCurrency(currency === 'USD' ? 'UGX' : 'USD')}
-                  className="hidden md:flex items-center gap-2 rounded-lg bg-white/5 py-1.5 px-3 text-xs font-bold text-zinc-400 hover:text-white hover:bg-white/10 transition-all border border-white/5"
+                  className="hidden md:flex items-center gap-2 rounded-xl bg-white/[0.03] py-2 px-4 text-[10px] font-black text-zinc-500 hover:text-white hover:bg-white/10 transition-all border border-white/5 uppercase tracking-widest"
                 >
                   <span className={currency === 'USD' ? 'text-emerald-500' : ''}>USD</span>
-                  <span className="text-zinc-600">/</span>
+                  <span className="text-zinc-800">/</span>
                   <span className={currency === 'UGX' ? 'text-emerald-500' : ''}>UGX</span>
                 </button>
               )}
 
               <div className="hidden md:block">
-                {/* AfriVault Wallet Button - Only visible when logged in */}
                 {user && (
                   <button
                     onClick={() => setIsWalletModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-white/10 rounded-full hover:bg-zinc-800 transition-all group"
+                    className="flex items-center gap-3 px-5 py-2.5 bg-black border border-white/10 rounded-xl hover:border-emerald-500/50 transition-all group"
                   >
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-xs font-black text-white tracking-widest group-hover:text-emerald-400">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[10px] font-black text-white tracking-[0.2em] uppercase group-hover:text-emerald-400">
                       ${user.balance?.toFixed(2) || '0.00'}
                     </span>
                   </button>
@@ -74,14 +72,12 @@ export default function Navbar() {
               </div>
 
               {!user ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={openAuthModal}
-                    className="rounded-full bg-emerald-500 px-6 py-2 text-sm font-bold text-black hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20"
-                  >
-                    Sign In
-                  </button>
-                </div>
+                <button
+                  onClick={openAuthModal}
+                  className="rounded-xl bg-white px-8 py-2.5 text-[10px] font-black text-black hover:bg-emerald-500 transition-all uppercase tracking-widest"
+                >
+                  Sign In
+                </button>
               ) : (
                 <ProfileMenu />
               )}

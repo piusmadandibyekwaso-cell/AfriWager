@@ -1,5 +1,13 @@
+'use client';
+
 import React from 'react';
-import { Search, TrendingUp, SlidersHorizontal, ChevronRight } from 'lucide-react';
+import { Search, TrendingUp, SlidersHorizontal, ChevronRight, Activity } from 'lucide-react';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+function cn(...inputs: ClassValue[]) {
+    return twMerge(clsx(inputs));
+}
 
 interface MarketsNavBarProps {
     searchQuery: string;
@@ -16,7 +24,7 @@ export default function MarketsNavBar({ searchQuery, setSearchQuery }: MarketsNa
     ];
 
     return (
-        <div className="w-full bg-[#1C1C1E] border-b border-zinc-800 text-white sticky top-16 z-40">
+        <div className="w-full bg-[#060709] border-b border-white/5 text-white sticky top-16 z-40 backdrop-blur-3xl">
             <style jsx>{`
                 .no-scrollbar::-webkit-scrollbar {
                     display: none;
@@ -27,92 +35,80 @@ export default function MarketsNavBar({ searchQuery, setSearchQuery }: MarketsNa
                 }
             `}</style>
 
-            <div className="container mx-auto px-4 md:px-6">
-
+            <div className="mx-auto max-w-7xl px-6">
                 {/* Top Row: Categories */}
-                <div className="relative group">
-                    <div className="flex items-center h-12 gap-6 overflow-x-auto no-scrollbar text-sm font-semibold border-b border-zinc-800/50 pr-8">
-                        <div className="flex items-center gap-6 flex-shrink-0 text-zinc-400">
+                <div className="relative">
+                    <div className="flex items-center h-14 gap-8 overflow-x-auto no-scrollbar text-[10px] font-black uppercase tracking-[0.2em] border-b border-white/5">
+                        <div className="flex items-center gap-8 flex-shrink-0">
                             <button
                                 onClick={() => setSearchQuery('')}
-                                className={`flex items-center gap-1.5 transition-colors ${searchQuery === '' ? 'text-emerald-400' : 'text-white hover:text-emerald-400'}`}
+                                className={cn(
+                                    "flex items-center gap-2 transition-all hover:text-white",
+                                    searchQuery === '' ? "text-emerald-500" : "text-zinc-500"
+                                )}
                             >
-                                <TrendingUp className="w-4 h-4" />
+                                <Activity className="w-3.5 h-3.5" />
                                 <span>Trending</span>
                             </button>
-                            <button className="hover:text-white transition-colors">Breaking</button>
-                            <button className="hover:text-white transition-colors">New</button>
+                            <button className="text-zinc-500 hover:text-white transition-all">New</button>
                         </div>
 
-                        <div className="w-px h-4 bg-zinc-700 mx-2 flex-shrink-0" />
+                        <div className="w-px h-4 bg-white/10 flex-shrink-0" />
 
-                        <div className="flex items-center gap-6 flex-shrink-0 text-zinc-400">
+                        <div className="flex items-center gap-8 flex-shrink-0">
                             {categories.map(cat => (
                                 <button
                                     key={cat}
                                     onClick={() => setSearchQuery(cat)}
-                                    className={`transition-colors whitespace-nowrap ${searchQuery === cat ? 'text-emerald-400' : 'hover:text-white'}`}
+                                    className={cn(
+                                        "transition-all whitespace-nowrap hover:text-white",
+                                        searchQuery === cat ? "text-emerald-500" : "text-zinc-500"
+                                    )}
                                 >
                                     {cat}
                                 </button>
                             ))}
                         </div>
                     </div>
-                    {/* Right Fade & Arrow */}
-                    <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#1C1C1E] to-transparent pointer-events-none flex items-center justify-end pr-1">
-                        <ChevronRight className="w-4 h-4 text-zinc-500/70" />
-                    </div>
                 </div>
 
                 {/* Bottom Row: Search & Tags */}
-                <div className="relative group">
-                    <div className="flex items-center h-14 gap-4 overflow-x-auto no-scrollbar py-2 pr-12">
-                        {/* Search Input */}
-                        <div className="relative flex-shrink-0 w-64 md:w-72">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                            <input
-                                type="text"
-                                placeholder="Search markets"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full bg-[#2C2C2E] border border-transparent focus:border-emerald-500/50 rounded-lg pl-9 pr-4 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none transition-colors"
-                            />
-                        </div>
-
-                        <div className="w-px h-5 bg-zinc-700 mx-2 flex-shrink-0 hidden md:block" />
-
-                        {/* Filter Icon */}
-                        <button className="p-2 text-zinc-400 hover:text-white transition-colors flex-shrink-0">
-                            <SlidersHorizontal className="w-4 h-4" />
-                        </button>
-
-                        <div className="w-px h-5 bg-zinc-700 mx-2 flex-shrink-0 hidden md:block" />
-
-                        {/* Tags */}
-                        <div className="flex items-center gap-2 flex-shrink-0 text-sm font-medium">
-                            {tags.map(tag => {
-                                const isActive = tag === "All" ? searchQuery === "" : searchQuery === tag;
-                                return (
-                                    <button
-                                        key={tag}
-                                        onClick={() => setSearchQuery(tag === "All" ? "" : tag)}
-                                        className={`px-3 py-1.5 rounded-md whitespace-nowrap transition-colors ${isActive
-                                                ? 'bg-[#2C2C2E] text-emerald-400'
-                                                : 'text-zinc-400 hover:text-white hover:bg-[#2C2C2E]'
-                                            }`}
-                                    >
-                                        {tag}
-                                    </button>
-                                );
-                            })}
-                        </div>
+                <div className="flex items-center h-16 gap-6 overflow-x-auto no-scrollbar">
+                    {/* Search Input */}
+                    <div className="relative flex-shrink-0 group">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600 group-focus-within:text-emerald-500 transition-colors" />
+                        <input
+                            type="text"
+                            placeholder="Explore markets..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="bg-white/[0.03] border border-white/5 focus:border-emerald-500/50 rounded-xl pl-10 pr-4 py-2 text-[11px] font-black uppercase tracking-widest text-white placeholder:text-zinc-700 focus:outline-none transition-all w-64 md:w-80"
+                        />
                     </div>
-                    {/* Right Fade & Arrow */}
-                    <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#1C1C1E] to-transparent pointer-events-none flex items-center justify-end pr-1">
-                        <ChevronRight className="w-5 h-5 text-zinc-500/70" />
+
+                    <div className="w-px h-5 bg-white/10 flex-shrink-0" />
+
+                    {/* Tags */}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                        {tags.map(tag => {
+                            const isActive = tag === "All" ? searchQuery === "" : searchQuery === tag;
+                            return (
+                                <button
+                                    key={tag}
+                                    onClick={() => setSearchQuery(tag === "All" ? "" : tag)}
+                                    className={cn(
+                                        "px-4 py-1.5 rounded-lg whitespace-nowrap text-[9px] font-black uppercase tracking-[0.15em] transition-all",
+                                        isActive
+                                            ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/10"
+                                            : "text-zinc-500 hover:text-white hover:bg-white/5"
+                                    )}
+                                >
+                                    {tag}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
-
             </div>
         </div>
     );
