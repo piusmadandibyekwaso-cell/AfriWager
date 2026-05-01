@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
     // Get the embedded smart wallet
-    const smartWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
+    const smartWallet = wallets.find((wallet: any) => wallet.walletClientType === 'privy');
 
     const fetchUserData = async (walletAddress: string, email?: string) => {
         try {
