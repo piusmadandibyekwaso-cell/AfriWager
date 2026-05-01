@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Loader2, X, Wallet, ArrowUpRight, ArrowDownLeft, ShieldCheck } from 'lucide-react';
+import { Loader2, X, Wallet, ArrowUpRight, ArrowDownLeft, ShieldCheck, Copy, Check } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
 
 interface WalletModalProps {
@@ -21,6 +21,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [currency, setCurrency] = useState<'USD' | 'UGX'>('USD');
     const exchangeRate = 3850; // 1 USD = 3850 UGX
+    const [copied, setCopied] = useState(false);
 
     if (!isOpen) return null;
 
@@ -146,10 +147,23 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                                 <div className="p-4 bg-zinc-900/50 rounded-xl border border-dashed border-zinc-800 text-xs text-zinc-400">
                                     <p className="mb-2 font-bold text-white uppercase tracking-widest">Your Unique Deposit Address</p>
                                     <p className="mb-4">Send USDC on the <strong className="text-emerald-400">Polygon Network</strong> from Binance to your personal Embedded Smart Wallet address below:</p>
-                                    <div className="flex items-center justify-between p-3 bg-black rounded-lg border border-white/10 mb-2">
+                                    <div className="flex items-center justify-between p-3 bg-black rounded-lg border border-white/10 mb-2 group/addr">
                                         <span className="font-mono text-[10px] sm:text-xs break-all text-white select-all">
                                             {user?.smartWallet?.address || 'Generating wallet...'}
                                         </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (user?.smartWallet?.address) {
+                                                    navigator.clipboard.writeText(user.smartWallet.address);
+                                                    setCopied(true);
+                                                    setTimeout(() => setCopied(false), 2000);
+                                                }
+                                            }}
+                                            className="ml-3 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all text-zinc-400 hover:text-white"
+                                        >
+                                            {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                                        </button>
                                     </div>
                                     <p className="text-[10px] text-zinc-500">Funds sent to your wallet address will reflect immediately after network confirmation.</p>
                                 </div>
