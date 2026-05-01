@@ -35,7 +35,7 @@ export default function MarketCard({ market }: MarketCardProps) {
                 
                 {/* Header: Category & Gauge */}
                 <div className="px-4 pt-4 flex justify-between items-start">
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{market.category}</span>
+                    <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{market.category}</span>
                     
                     {/* Chance Gauge (Polymarket Meter) */}
                     <div className="relative w-10 h-10 flex items-center justify-center">
@@ -63,7 +63,7 @@ export default function MarketCard({ market }: MarketCardProps) {
                             />
                         </svg>
                         <span className="absolute text-[9px] font-bold text-white">{yesProb}%</span>
-                        <span className="absolute -bottom-4 text-[7px] text-zinc-600 font-bold uppercase tracking-tighter">Chance</span>
+                        <span className="absolute -bottom-4 text-[7px] text-zinc-600 font-semibold uppercase tracking-tighter">Chance</span>
                     </div>
                 </div>
 
@@ -80,7 +80,7 @@ export default function MarketCard({ market }: MarketCardProps) {
                         </div>
                     </div>
                     <div className="flex-1">
-                        <h3 className="text-[13px] font-bold text-zinc-100 leading-tight line-clamp-2 mb-2">
+                        <h3 className="text-[13px] font-semibold text-zinc-100 leading-tight line-clamp-2 mb-2">
                             {market.question}
                         </h3>
                     </div>
@@ -91,11 +91,11 @@ export default function MarketCard({ market }: MarketCardProps) {
                     <div className="grid grid-cols-2 gap-2">
                         <div className="flex items-center justify-between px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg hover:bg-emerald-500/20 transition-colors">
                             <span className="text-[10px] font-bold text-emerald-500">Yes</span>
-                            <span className="text-[12px] font-bold text-emerald-400 tabular-nums">{yesProb}%</span>
+                            <span className="text-[12px] font-semibold text-emerald-400 tabular-nums">{yesProb}%</span>
                         </div>
                         <div className="flex items-center justify-between px-3 py-2 bg-rose-500/10 border border-rose-500/20 rounded-lg hover:bg-rose-500/20 transition-colors">
                             <span className="text-[10px] font-bold text-rose-500">No</span>
-                            <span className="text-[12px] font-bold text-rose-400 tabular-nums">{noProb}%</span>
+                            <span className="text-[12px] font-semibold text-rose-400 tabular-nums">{noProb}%</span>
                         </div>
                     </div>
                 </div>

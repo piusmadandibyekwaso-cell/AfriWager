@@ -36,7 +36,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { wallets } = useWallets();
     const [user, setUser] = useState<ExtendedUser | null>(null);
     const [loading, setLoading] = useState(true);
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
     // Get the embedded smart wallet
     const smartWallet = wallets.find((wallet: any) => wallet.walletClientType === 'privy');
@@ -114,8 +113,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
     };
 
-    const openAuthModal = () => setIsAuthModalOpen(true);
-    const closeAuthModal = () => setIsAuthModalOpen(false);
+    const openAuthModal = () => login();
+    const closeAuthModal = () => {}; // No-op since Privy handles its own modal state
 
     return (
         <AuthContext.Provider value={{
@@ -123,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             loading,
             signInWithEmail,
             signOut,
-            isAuthModalOpen,
+            isAuthModalOpen: false, // Default to false
             openAuthModal,
             closeAuthModal
         }}>

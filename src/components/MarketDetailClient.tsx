@@ -144,7 +144,7 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
                     
                     <div className="flex flex-col md:flex-row md:items-start justify-between gap-10">
                         <div className="max-w-4xl">
-                            <h1 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight mb-6 text-white">
+                            <h1 className="text-3xl md:text-4xl font-semibold tracking-tight leading-tight mb-6 text-white">
                                 {market.question}
                             </h1>
                             <div className="flex flex-wrap items-center gap-6 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
@@ -218,7 +218,7 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
                                                     {outcome[0]}
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold text-zinc-100">{outcome}</p>
+                                                    <p className="text-sm font-semibold text-zinc-100">{outcome}</p>
                                                     <p className="text-[10px] font-medium text-zinc-600 uppercase tracking-tight">{market.category} Market</p>
                                                 </div>
                                             </div>
@@ -283,7 +283,7 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
                             
                             <div className="relative z-10">
                                 <div className="flex items-center justify-between mb-8">
-                                    <h2 className="text-xl font-bold tracking-tight uppercase">Order</h2>
+                                    <h2 className="text-xl font-semibold tracking-tight uppercase">Order</h2>
                                     <div className="flex items-center gap-2 p-1.5 bg-black rounded-lg border border-white/5">
                                         <span className="w-1.2 h-1.2 bg-emerald-500 rounded-full animate-pulse" />
                                         <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-widest">AfriVault Live</span>
@@ -294,12 +294,12 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
                                  <div className="mb-8">
                                      <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3 block ml-1">Investment (USDC)</label>
                                      <div className="relative">
-                                         <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-bold text-zinc-800">$</span>
+                                         <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-semibold text-zinc-800">$</span>
                                          <input
                                              type="number"
                                              value={investmentAmount}
                                              onChange={(e) => setInvestmentAmount(e.target.value)}
-                                             className="w-full bg-black border border-white/5 rounded-xl py-4 pl-10 pr-5 text-xl font-bold text-white focus:outline-none focus:border-white/20 transition-all"
+                                             className="w-full bg-black border border-white/5 rounded-xl py-4 pl-10 pr-5 text-xl font-semibold text-white focus:outline-none focus:border-white/20 transition-all"
                                              placeholder="0.00"
                                          />
                                      </div>
@@ -322,7 +322,7 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
                                  <button
                                      onClick={() => authUser ? setIsConfirmModalOpen(true) : openAuthModal()}
                                      disabled={selectedOutcome === null || !investmentAmount}
-                                     className="w-full py-5 bg-white hover:bg-zinc-200 text-black font-bold rounded-xl transition-all uppercase tracking-wider text-[10px] flex items-center justify-center gap-2 disabled:opacity-20"
+                                     className="w-full py-5 bg-white hover:bg-zinc-200 text-black font-semibold rounded-xl transition-all uppercase tracking-wider text-[10px] flex items-center justify-center gap-2 disabled:opacity-20"
                                  >
                                      {authUser ? "Place Order" : "Sign in to Trade"}
                                      <ArrowRight className="w-3.5 h-3.5" />
