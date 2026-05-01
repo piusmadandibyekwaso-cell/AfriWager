@@ -61,7 +61,7 @@ export default function ProfileMenu() {
                 />
                 <div className="flex flex-col text-right mr-1">
                     <span className="text-sm font-semibold text-white leading-none group-hover:text-emerald-400 transition-colors">
-                        @{username}
+                        {username}
                     </span>
                     <span className="text-[10px] text-zinc-500 leading-none mt-1 font-mono">
                         {shortAddress}
@@ -85,7 +85,7 @@ export default function ProfileMenu() {
                             </Link>
                         </div>
                         <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-bold text-white">@{username}</h3>
+                            <h3 className="text-lg font-bold text-white">{username}</h3>
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs text-zinc-500 font-mono">{address?.slice(0, 6)}...{address?.slice(-6)}</span>

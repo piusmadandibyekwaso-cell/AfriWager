@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { usePrivy, useWallets, WalletWithMetadata } from '@privy-io/react-auth';
+import { namingEngine } from '@/utils/namingEngine';
 
 export interface ExtendedUser {
     id: string; // Privy user ID or Wallet Address
@@ -47,11 +48,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // 1. Fetch Profile
             const { data: profile, error: profileError } = await supabase
                 .from('profiles')
-                .select('username, kyc_status, phone_number, nin, district, country_code')
+                .select('*')
                 .eq('wallet_address', walletAddress)
                 .maybeSingle();
 
             if (profileError) console.error("Profile fetch error:", profileError);
+
+            let profileData = profile;
+
+            // If profile doesn't exist, create it with a Sovereign Name
+            if (!profile && !profileError) {
+                const uniqueName = await namingEngine.generateUniqueSovereignName(async (name) => {
+                    const { data } = await supabase
+                        .from('profiles')
+                        .select('username')
+                        .eq('username', name)
+                        .maybeSingle();
+                    return !data;
+                });
+
+                const { data: newProfile, error: createError } = await supabase
+                    .from('profiles')
+                    .insert({
+                        wallet_address: walletAddress,
+                        username: uniqueName,
+                        kyc_status: 'unverified',
+                        avatar_seed: uniqueName
+                    })
+                    .select()
+                    .single();
+
+                if (!createError) {
+                    profileData = newProfile;
+                }
+            }
 
             // 2. Fetch Balance (AfriVault Ledger)
             const { data: balanceData, error: balanceError } = await supabase
@@ -68,13 +98,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                      user_id: walletAddress,
                      balance_usdc: 0
                  });
-                 // Optional: insert profile stub here as well if needed
             }
 
             return {
                 id: walletAddress,
                 email: email,
-                profile: profile || undefined,
+                profile: profileData || undefined,
                 balance: balanceData?.balance_usdc || 0,
                 smartWallet
             };

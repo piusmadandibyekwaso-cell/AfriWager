@@ -1,50 +1,41 @@
 
 const ADJECTIVES = [
-    'Sovereign', 'Imperial', 'Strategic', 'Quantitative', 'Absolute', 
-    'Elite', 'Noble', 'Royal', 'Prime', 'Stellar', 
-    'Apex', 'Zenith', 'Vanguard', 'Institutional', 'Global', 
-    'Infinite', 'Master', 'Supreme', 'Radiant', 'Ethereal',
-    'Alpha', 'Sigma', 'Prime', 'Grand', 'Majestic'
+    'Strategic', 'Silent', 'Absolute', 'Elite', 'Sovereign', 
+    'Rapid', 'Muted', 'Vanguard', 'Loyal', 'Bold'
 ];
 
 const ELEMENTS = [
-    'Obsidian', 'Platinum', 'Gold', 'Silver', 'Titanium', 
-    'Diamond', 'Emerald', 'Sapphire', 'Ruby', 'Onyx', 
-    'Cobalt', 'Amber', 'Jade', 'Pearl', 'Quartz', 
-    'Mercury', 'Silicon', 'Carbon', 'Neon', 'Argon'
+    'Emerald', 'Obsidian', 'Steel', 'Cobalt', 'Carbon', 
+    'Gold', 'Amber', 'Onyx', 'Ruby', 'Silver'
 ];
 
 const NOUNS = [
-    'Capital', 'Markets', 'Assets', 'Equity', 'Wealth', 
-    'Reserve', 'Treasury', 'Ledger', 'Index', 'Portfolio', 
-    'Matrix', 'Network', 'Trust', 'Partners', 'Core', 
-    'Vault', 'Bridge', 'Protocol', 'Alliance', 'Venture',
-    'Fund', 'Guild', 'Institute', 'Nexus', 'Horizon'
+    'Oracle', 'Sentry', 'Vault', 'Horizon', 'Peak', 
+    'Pillar', 'Delta', 'Catalyst', 'Matrix', 'Scepter'
 ];
 
 /**
  * Sovereign Naming Engine (Bit 4)
- * Generates elite, high-finance identities without numbers.
+ * Generates elite, institutional identities without numbers.
  */
 export const namingEngine = {
     /**
-     * Randomly selects a structure and generates a name
+     * Randomly selects one of four structures and generates a name
      */
     generateSovereignName(): string {
-        const structures = [
-            'ADJ_NOUN',
-            'ELEM_NOUN',
-            'ADJ_ELEM',
-            'NOUN_ELEM'
+        const paths = [
+            'ADJ_NOUN',  // Path 1
+            'ELEM_NOUN', // Path 2
+            'ADJ_ELEM',  // Path 3
+            'NOUN_ELEM'  // Path 4
         ];
         
-        const structure = structures[Math.floor(Math.random() * structures.length)];
-        
+        const path = paths[Math.floor(Math.random() * paths.length)];
         const getRandom = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
         
         let pair: [string, string];
         
-        switch (structure) {
+        switch (path) {
             case 'ADJ_NOUN':
                 pair = [getRandom(ADJECTIVES), getRandom(NOUNS)];
                 break;
@@ -61,24 +52,21 @@ export const namingEngine = {
                 pair = [getRandom(ADJECTIVES), getRandom(NOUNS)];
         }
         
-        // Return Space Separated (User Preference)
+        // Return Title Cased with a single space between words
         return pair.join(' ');
     },
 
     /**
-     * Generates a unique name by checking against a provided availability function
+     * Generates a unique name by checking against the database
      */
     async generateUniqueSovereignName(checkAvailability: (name: string) => Promise<boolean>): Promise<string> {
         let name = this.generateSovereignName();
         let isAvailable = await checkAvailability(name);
         
-        let attempts = 0;
-        const maxAttempts = 50; // Safety break
-        
-        while (!isAvailable && attempts < maxAttempts) {
+        // Loop instantly until a unique identity is confirmed
+        while (!isAvailable) {
             name = this.generateSovereignName();
             isAvailable = await checkAvailability(name);
-            attempts++;
         }
         
         return name;
