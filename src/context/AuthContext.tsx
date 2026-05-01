@@ -118,20 +118,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const syncPrivyState = async () => {
             if (privyReady) {
-                if (authenticated && privyUser && smartWallet) {
-                    const email = privyUser.email?.address;
-                    const walletAddress = smartWallet.address;
-                    const extended = await fetchUserData(walletAddress, email);
-                    setUser(extended);
+                if (authenticated && privyUser) {
+                    const embeddedWallet = wallets.find(w => w.walletClientType === 'privy');
+                    if (embeddedWallet) {
+                        const email = privyUser.email?.address;
+                        const walletAddress = embeddedWallet.address;
+                        const extended = await fetchUserData(walletAddress, email);
+                        if (extended) {
+                            setUser(extended);
+                            setLoading(false);
+                        }
+                    }
                 } else {
                     setUser(null);
+                    setLoading(false);
                 }
-                setLoading(false);
             }
         };
 
         syncPrivyState();
-    }, [privyReady, authenticated, privyUser, smartWallet]);
+    }, [privyReady, authenticated, privyUser, wallets]);
 
     const signInWithEmail = async (email: string) => {
         // We defer to Privy's login modal. Custom email login flow can be configured via Privy SDK if needed.

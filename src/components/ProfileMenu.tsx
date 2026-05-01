@@ -27,7 +27,7 @@ export default function ProfileMenu() {
     const menuRef = useRef<HTMLDivElement>(null);
 
     const shortAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : '';
-    const username = profile?.username || 'User';
+    const username = profile?.username || (user ? 'Loading...' : 'Guest');
 
     // Close on click outside
     useEffect(() => {

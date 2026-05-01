@@ -1,22 +1,32 @@
 
 const ADJECTIVES = [
     'Strategic', 'Silent', 'Absolute', 'Elite', 'Sovereign', 
-    'Rapid', 'Muted', 'Vanguard', 'Loyal', 'Bold'
+    'Rapid', 'Muted', 'Vanguard', 'Loyal', 'Bold',
+    'Necessary', 'Urgent', 'Calm', 'Fierce', 'Radiant', 
+    'Global', 'Prime', 'Alpha', 'Sigma', 'Grand',
+    'Infinite', 'Golden', 'Dark', 'Bright', 'Ancient',
+    'Modern', 'Stealth', 'Noble', 'Stellar', 'Deep'
 ];
 
 const ELEMENTS = [
     'Emerald', 'Obsidian', 'Steel', 'Cobalt', 'Carbon', 
-    'Gold', 'Amber', 'Onyx', 'Ruby', 'Silver'
+    'Gold', 'Amber', 'Onyx', 'Ruby', 'Silver',
+    'Quartz', 'Platinum', 'Jade', 'Pearl', 'Silicon',
+    'Copper', 'Bronze', 'Marble', 'Crystal', 'Diamond'
 ];
 
 const NOUNS = [
     'Oracle', 'Sentry', 'Vault', 'Horizon', 'Peak', 
-    'Pillar', 'Delta', 'Catalyst', 'Matrix', 'Scepter'
+    'Pillar', 'Delta', 'Catalyst', 'Matrix', 'Scepter',
+    'Cliff', 'Bridge', 'Ledger', 'Protocol', 'Alliance', 
+    'Core', 'Nexus', 'Trust', 'Venture', 'Summit',
+    'Relay', 'Signal', 'Vector', 'Orbit', 'Pulse'
 ];
 
 /**
  * Sovereign Naming Engine (Bit 4)
  * Generates elite, institutional identities without numbers.
+ * Inspired by Polymarket (e.g., necessary-cliff) but optimized for institutional branding.
  */
 export const namingEngine = {
     /**
