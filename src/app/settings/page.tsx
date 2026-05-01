@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// import { usePrivy, useFundWallet } from '@privy-io/react-auth';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
 import { useAuth } from '@/context/AuthContext';
-import { useUserProfile } from '@/hooks/useUserProfile';
-import UserAvatar from '@/components/Avatar';
+// import { useUserProfile } from '@/hooks/useUserProfile'; // Syncing via AuthContext
+// import UserAvatar from '@/components/Avatar'; // Removed as per user request
 import {
     User,
     Wallet,
@@ -39,14 +39,24 @@ type SettingsTab = 'Profile' | 'Account' | 'Trading' | 'Notifications' | 'Builde
 type DepositStep = 'selection' | 'processing_chain' | 'success' | 'failed' | 'confirm';
 
 export default function SettingsPage() {
-    // Auth & Profile
     const { user: authUser } = useAuth();
-    const { profile, refreshProfile } = useUserProfile();
-    // const { fundWallet } = useFundWallet(); // Removed
+    const { exportWallet } = usePrivy();
+    const { wallets } = useWallets();
     const { sendNotification } = useNotifications();
     const { address } = useAccount();
 
     const [activeTab, setActiveTab] = useState<SettingsTab>('Profile');
+    
+    // Trading Settings State
+    const [tradingSettings, setTradingSettings] = useState({
+        marketOrderType: 'FAK',
+        showMaxButton: true,
+        showLosingPositions: false,
+        autoRedeem: false
+    });
+
+    const profile = authUser?.profile;
+    const smartWallet = wallets.find(w => w.walletClientType === 'privy');
 
     // --- ACCOUNT TAB STATE ---
     const [withdrawAddress, setWithdrawAddress] = useState('');
@@ -201,35 +211,165 @@ export default function SettingsPage() {
 
                     {/* PROFILE TAB */}
                     {activeTab === 'Profile' && (
-                        <div className="space-y-8 animate-in fade-in duration-300">
-                            <div className="flex items-center gap-6">
-                                <UserAvatar
-                                    name={profile?.avatar_seed || address || 'user'}
-                                    size={80}
-                                    className="ring-4 ring-[#1C1C1E]"
-                                />
-                                <button className="flex items-center gap-2 px-4 py-2 bg-[#1C1C1E] border border-white/10 rounded-lg text-sm font-medium hover:bg-[#2C2C2E] transition-colors">
-                                    <Upload className="w-4 h-4 text-zinc-400" />
-                                    Upload
+                        <div className="space-y-10 animate-in fade-in duration-300 max-w-2xl">
+                            <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                <User className="w-10 h-10 text-emerald-500" />
+                            </div>
+                            
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Username</label>
+                                    <input 
+                                        type="text" 
+                                        value={profile?.username || 'Loading...'} 
+                                        readOnly
+                                        className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Email</label>
+                                    <input 
+                                        type="email" 
+                                        value={authUser?.email || 'Not connected'} 
+                                        readOnly
+                                        className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-3.5 text-white text-sm focus:outline-none" 
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Wallet Address</label>
+                                    <div className="relative">
+                                        <input 
+                                            type="text" 
+                                            value={smartWallet?.address || 'Not available'} 
+                                            readOnly
+                                            className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-3.5 text-white text-sm font-mono focus:outline-none pr-12" 
+                                        />
+                                        <button 
+                                            onClick={() => { if (smartWallet?.address) { navigator.clipboard.writeText(smartWallet.address); sendNotification('Address Copied', { body: 'Copied to clipboard.' }); } }}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                                        >
+                                            <Copy className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    <p className="mt-3 text-[10px] text-zinc-600 font-medium">Do not send funds directly to this address. Use the deposit modal instead.</p>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Bio</label>
+                                    <textarea 
+                                        rows={4} 
+                                        placeholder="Tell us about yourself" 
+                                        className="w-full bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-3.5 text-white text-sm resize-none focus:outline-none focus:border-white/10 transition-colors" 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* TRADING TAB */}
+                    {activeTab === 'Trading' && (
+                        <div className="space-y-8 animate-in fade-in duration-300 max-w-2xl">
+                            <div className="p-6 bg-zinc-900/30 border border-white/5 rounded-2xl space-y-6">
+                                <div>
+                                    <h4 className="text-sm font-semibold text-white mb-1">Market Order Type</h4>
+                                    <p className="text-xs text-zinc-500 mb-4">Choose how your market orders are executed</p>
+                                    <div className="space-y-3">
+                                        <label className="flex items-center gap-3 cursor-pointer group">
+                                            <input 
+                                                type="radio" 
+                                                name="orderType" 
+                                                checked={tradingSettings.marketOrderType === 'FAK'}
+                                                onChange={() => setTradingSettings(s => ({ ...s, marketOrderType: 'FAK' }))}
+                                                className="w-4 h-4 accent-emerald-500" 
+                                            />
+                                            <div>
+                                                <p className="text-xs font-medium text-white group-hover:text-emerald-400 transition-colors">Fill and Kill (FAK)</p>
+                                                <p className="text-[10px] text-zinc-600">Fills as much as possible and cancels the rest</p>
+                                            </div>
+                                        </label>
+                                        <label className="flex items-center gap-3 cursor-pointer group">
+                                            <input 
+                                                type="radio" 
+                                                name="orderType" 
+                                                checked={tradingSettings.marketOrderType === 'FOK'}
+                                                onChange={() => setTradingSettings(s => ({ ...s, marketOrderType: 'FOK' }))}
+                                                className="w-4 h-4 accent-emerald-500" 
+                                            />
+                                            <div>
+                                                <p className="text-xs font-medium text-white group-hover:text-emerald-400 transition-colors">Fill or Kill (FOK)</p>
+                                                <p className="text-[10px] text-zinc-600">Executes the entire order immediately or cancels it</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-6 bg-zinc-900/30 border border-white/5 rounded-2xl flex items-center justify-between">
+                                <div>
+                                    <h4 className="text-sm font-semibold text-white mb-1">Max Button</h4>
+                                    <p className="text-xs text-zinc-500">Show a Max button on market buy quick actions</p>
+                                </div>
+                                <button 
+                                    onClick={() => setTradingSettings(s => ({ ...s, showMaxButton: !s.showMaxButton }))}
+                                    className={`w-10 h-5 rounded-full transition-all relative ${tradingSettings.showMaxButton ? 'bg-emerald-500' : 'bg-zinc-700'}`}
+                                >
+                                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${tradingSettings.showMaxButton ? 'left-6' : 'left-1'}`} />
                                 </button>
                             </div>
-                            <div className="space-y-6 max-w-xl">
+
+                            <div className="p-6 bg-zinc-900/30 border border-white/5 rounded-2xl flex items-center justify-between">
                                 <div>
-                                    <label className="block text-sm font-medium text-zinc-400 mb-2">Email</label>
-                                    <input type="email" value={displayEmail} disabled className="w-full bg-[#1C1C1E] border border-white/10 rounded-lg px-4 py-3 text-white text-sm disabled:opacity-50 disabled:cursor-not-allowed" />
+                                    <h4 className="text-sm font-semibold text-white mb-1">Losing Positions</h4>
+                                    <p className="text-xs text-zinc-500">Show resolved positions where you lost in the tables</p>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-zinc-400 mb-2">Username</label>
-                                    <input type="text" defaultValue={displayUsername} className="w-full bg-[#1C1C1E] border border-white/10 rounded-lg px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50" />
-                                    <p className="mt-2 text-xs text-zinc-500 font-mono">{address}</p>
+                                <button 
+                                    onClick={() => setTradingSettings(s => ({ ...s, showLosingPositions: !s.showLosingPositions }))}
+                                    className={`w-10 h-5 rounded-full transition-all relative ${tradingSettings.showLosingPositions ? 'bg-emerald-500' : 'bg-zinc-700'}`}
+                                >
+                                    <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${tradingSettings.showLosingPositions ? 'left-6' : 'left-1'}`} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* PRIVATE KEY TAB */}
+                    {activeTab === 'Export Private Key' && (
+                        <div className="space-y-6 animate-in fade-in duration-300 max-w-2xl">
+                            <div className="p-8 bg-zinc-900/30 border border-white/5 rounded-2xl space-y-6">
+                                <p className="text-xs text-zinc-400 leading-relaxed">
+                                    Exporting your private key gives you direct control and security over your funds. This is applicable because you signed up via email/social login.
+                                </p>
+                                
+                                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
+                                    <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                                    <p className="text-[11px] text-red-400 font-medium">
+                                        DO NOT share your private key with anyone. We will never ask for your private key. Anyone with this key can steal your funds.
+                                    </p>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-zinc-400 mb-2">Bio</label>
-                                    <textarea rows={4} placeholder="Tell us about yourself" defaultValue="Bio" className="w-full bg-[#1C1C1E] border border-white/10 rounded-lg px-4 py-3 text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50" />
+
+                                <div className="space-y-4 pt-4">
+                                    <h4 className="text-sm font-semibold text-white">Basic Steps</h4>
+                                    <div className="space-y-4">
+                                        {[
+                                            'Start the process below to initiate secure export.',
+                                            'Export your private key and securely store it offline.',
+                                            'Never enter this key into untrusted applications.'
+                                        ].map((step, i) => (
+                                            <div key={i} className="flex items-center gap-4">
+                                                <div className="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-400">
+                                                    {i + 1}
+                                                </div>
+                                                <p className="text-xs text-zinc-300">{step}</p>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="pt-4">
-                                    <button className="px-6 py-2.5 bg-emerald-500 text-black font-bold rounded-lg hover:bg-emerald-400 transition-colors">Save Changes</button>
-                                </div>
+
+                                <button 
+                                    onClick={() => exportWallet()}
+                                    className="mt-8 px-8 py-3.5 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-red-600/10"
+                                >
+                                    Start Export
+                                </button>
                             </div>
                         </div>
                     )}
