@@ -34,7 +34,7 @@ const Footer = () => {
                             Terms of Use
                         </Link>
                         <Link
-                            href="/risks"
+                            href="/risk-disclosure"
                             prefetch={false}
                             className="hover:text-emerald-400 hover:underline"
                         >
