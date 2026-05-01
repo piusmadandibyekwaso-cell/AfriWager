@@ -80,94 +80,91 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                 </button>
 
                 <div className="p-8">
-                    <div className="flex items-center justify-between mb-2">
-                        <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase flex items-center gap-2">
-                            <Wallet className="w-6 h-6 text-emerald-500" /> AfriVault
+                    <div className="flex items-center justify-center mb-8">
+                        <h2 className="text-xl font-semibold text-white tracking-tight">
+                            Wallet
                         </h2>
-                        {/* Institutional Badge */}
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
-                            <ShieldCheck className="w-3 h-3 text-white" />
-                            <span className="text-[9px] font-bold text-white uppercase tracking-widest">Safe{'{Core}'} SDK</span>
-                        </div>
                     </div>
-                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-6 ml-1">Institutional-Grade Custody</p>
 
                     {/* Balance Display */}
-                    <div className="bg-zinc-900/50 rounded-2xl p-6 mb-8 text-center border border-white/5 relative group">
-                        <div className="absolute top-4 right-4 flex bg-black rounded-lg p-1 border border-zinc-800">
-                            <button
-                                onClick={() => setCurrency('USD')}
-                                className={`px-3 py-1 text-[10px] font-black rounded transition-all ${currency === 'USD' ? 'bg-emerald-500 text-black' : 'text-zinc-500 hover:text-white'}`}
-                            >
-                                USD
-                            </button>
-                            <button
-                                onClick={() => setCurrency('UGX')}
-                                className={`px-3 py-1 text-[10px] font-black rounded transition-all ${currency === 'UGX' ? 'bg-emerald-500 text-black' : 'text-zinc-500 hover:text-white'}`}
-                            >
-                                UGX
-                            </button>
-                        </div>
-
-                        <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Available Balance</p>
-                        <h3 className="text-4xl font-black text-white tracking-tighter">
+                    <div className="text-center mb-10">
+                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-3">Total Balance</p>
+                        <h3 className="text-5xl font-semibold text-white tracking-tight">
                             {currency === 'USD'
                                 ? `$${user?.balance?.toFixed(2) || '0.00'}`
                                 : `USh ${((user?.balance || 0) * exchangeRate).toLocaleString()}`
                             }
                         </h3>
+                        
+                        <div className="flex justify-center mt-4">
+                            <div className="flex bg-white/5 rounded-full p-1 border border-white/5">
+                                <button
+                                    onClick={() => setCurrency('USD')}
+                                    className={`px-4 py-1.5 text-[9px] font-bold rounded-full transition-all ${currency === 'USD' ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}
+                                >
+                                    USD
+                                </button>
+                                <button
+                                    onClick={() => setCurrency('UGX')}
+                                    className={`px-4 py-1.5 text-[9px] font-bold rounded-full transition-all ${currency === 'UGX' ? 'bg-white text-black' : 'text-zinc-500 hover:text-white'}`}
+                                >
+                                    UGX
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex p-1 bg-zinc-900 rounded-xl mb-8">
+                    <div className="flex gap-2 mb-8">
                         <button
                             onClick={() => setActiveTab('deposit')}
-                            className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 ${activeTab === 'deposit'
-                                ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20'
-                                : 'text-zinc-500 hover:text-white'
+                            className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all border ${activeTab === 'deposit'
+                                ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500'
+                                : 'bg-transparent border-white/5 text-zinc-500 hover:text-white hover:border-white/10'
                                 }`}
                         >
-                            <ArrowDownLeft className="w-4 h-4" /> Deposit
+                            Deposit
                         </button>
                         <button
                             onClick={() => setActiveTab('withdraw')}
-                            className={`flex-1 py-3 text-xs font-black uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2 ${activeTab === 'withdraw'
-                                ? 'bg-white text-black'
-                                : 'text-zinc-500 hover:text-white'
+                            className={`flex-1 py-3 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all border ${activeTab === 'withdraw'
+                                ? 'bg-white/10 border-white/20 text-white'
+                                : 'bg-transparent border-white/5 text-zinc-500 hover:text-white hover:border-white/10'
                                 }`}
                         >
-                            <ArrowUpRight className="w-4 h-4" /> Withdraw
+                            Withdraw
                         </button>
                     </div>
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {activeTab === 'deposit' ? (
-                            <div className="space-y-4">
-                                <div className="p-4 bg-zinc-900/50 rounded-xl border border-dashed border-zinc-800 text-xs text-zinc-400">
-                                    <p className="mb-2 font-bold text-white uppercase tracking-widest">Your Unique Deposit Address</p>
-                                    <p className="mb-4">Send USDC on the <strong className="text-emerald-400">Polygon Network</strong> from Binance to your personal Embedded Smart Wallet address below:</p>
-                                    <div className="flex items-center justify-between p-3 bg-black rounded-lg border border-white/10 mb-2 group/addr">
-                                        <span className="font-mono text-[10px] sm:text-xs break-all text-white select-all">
-                                            {user?.smartWallet?.address || 'Generating wallet...'}
-                                        </span>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                if (user?.smartWallet?.address) {
-                                                    navigator.clipboard.writeText(user.smartWallet.address);
-                                                    setCopied(true);
-                                                    setTimeout(() => setCopied(false), 2000);
-                                                }
-                                            }}
-                                            className="ml-3 p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-all text-zinc-400 hover:text-white"
-                                        >
-                                            {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                                        </button>
+                                <div className="space-y-4">
+                                    <div className="p-6 bg-white/[0.02] rounded-2xl border border-white/5">
+                                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Deposit via Polygon (Binance)</p>
+                                        <div className="flex items-center justify-between p-4 bg-black rounded-xl border border-white/10 mb-4 group/addr">
+                                            <span className="font-mono text-[11px] text-zinc-300 break-all select-all">
+                                                {user?.smartWallet?.address || 'Generating...'}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (user?.smartWallet?.address) {
+                                                        navigator.clipboard.writeText(user.smartWallet.address);
+                                                        setCopied(true);
+                                                        setTimeout(() => setCopied(false), 2000);
+                                                    }
+                                                }}
+                                                className="ml-3 p-2 text-zinc-500 hover:text-white transition-colors"
+                                            >
+                                                {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                        <p className="text-[10px] text-zinc-500 leading-relaxed text-center">
+                                            Your unique address. Funds reflect after 1 confirmation.
+                                        </p>
                                     </div>
-                                    <p className="text-[10px] text-zinc-500">Funds sent to your wallet address will reflect immediately after network confirmation.</p>
                                 </div>
-                            </div>
                         ) : (
                             <div className="space-y-4">
                                 <div>
@@ -206,9 +203,9 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                         <button
                             type="submit"
                             disabled={isSubmitting || (activeTab === 'deposit' && !user?.smartWallet?.address)}
-                            className={`w-full py-4 font-black rounded-xl uppercase tracking-widest text-xs transition-all shadow-lg flex items-center justify-center gap-2 ${activeTab === 'deposit'
-                                ? 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-emerald-500/20'
-                                : 'bg-white hover:bg-zinc-200 text-black'
+                            className={`w-full py-4 font-bold rounded-xl uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 ${activeTab === 'deposit'
+                                ? 'bg-emerald-500 text-black hover:bg-emerald-400'
+                                : 'bg-white text-black hover:bg-zinc-200'
                                 }`}
                         >
                             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (activeTab === 'deposit' ? 'I Have Deposited' : 'Withdraw Funds')}
