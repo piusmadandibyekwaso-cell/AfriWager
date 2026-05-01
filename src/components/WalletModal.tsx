@@ -26,15 +26,23 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (activeTab === 'deposit') {
+            // Deposits are now handled automatically via blockchain indexer
+            sendNotification('Listening for Deposits', {
+                body: `We are monitoring your unique address on the Polygon network. Your balance will update automatically when funds arrive.`
+            });
+            onClose();
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
             // Convert UGX back to USD for API
             const amountUSD = currency === 'USD' ? parseFloat(amount || '0') : parseFloat(amount || '0') / exchangeRate;
 
-            const payload = activeTab === 'deposit'
-                ? { type: 'DEPOSIT', txHash: txHash.trim() }
-                : { type: 'WITHDRAW', amountUSD, withdrawAddress: withdrawAddress.trim() };
+            const payload = { type: 'WITHDRAW', amountUSD, withdrawAddress: withdrawAddress.trim() };
 
             const response = await fetch('/api/wallet', {
                 method: 'POST',
@@ -46,10 +54,8 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
 
             if (!response.ok) throw new Error(result.error);
 
-            sendNotification(activeTab === 'deposit' ? 'Deposit Successful' : 'Withdrawal Processed', {
-                body: activeTab === 'deposit' 
-                    ? `Credited ${result.depositedAmount ? '$'+result.depositedAmount : 'funds'} to your account` 
-                    : `Sent ${currency === 'USD' ? '$' : 'USh '}${amount} to ${withdrawAddress.slice(0, 6)}...`,
+            sendNotification('Withdrawal Processed', {
+                body: `Sent ${currency === 'USD' ? '$' : 'USh '}${amount} to ${withdrawAddress.slice(0, 6)}...`,
             });
             onClose();
             window.location.reload(); // Refresh balance
@@ -137,24 +143,14 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                         {activeTab === 'deposit' ? (
                             <div className="space-y-4">
                                 <div className="p-4 bg-zinc-900/50 rounded-xl border border-dashed border-zinc-800 text-xs text-zinc-400">
-                                    <p className="mb-2 font-bold text-white uppercase tracking-widest">1. Send USDC to Treasury</p>
-                                    <p className="mb-4">Send USDC on the <strong className="text-emerald-400">Polygon Network</strong> from your Binance account to the AfriWager Treasury address below:</p>
-                                    <div className="flex items-center gap-2 p-3 bg-black rounded-lg border border-white/10 mb-2 font-mono text-[10px] sm:text-xs break-all text-white select-all">
-                                        0xEBFD81Ef583E1Cb61b397Ef3B2f30e024a3c8a90
+                                    <p className="mb-2 font-bold text-white uppercase tracking-widest">Your Unique Deposit Address</p>
+                                    <p className="mb-4">Send USDC on the <strong className="text-emerald-400">Polygon Network</strong> from Binance to your personal Embedded Smart Wallet address below:</p>
+                                    <div className="flex items-center justify-between p-3 bg-black rounded-lg border border-white/10 mb-2">
+                                        <span className="font-mono text-[10px] sm:text-xs break-all text-white select-all">
+                                            {user?.smartWallet?.address || 'Generating wallet...'}
+                                        </span>
                                     </div>
-                                    <p className="text-[10px] text-zinc-500">Only send Polygon USDC. Other networks will result in permanent loss.</p>
-                                </div>
-
-                                <div>
-                                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">2. Enter Transaction Hash (TxID)</label>
-                                    <input
-                                        type="text"
-                                        value={txHash}
-                                        onChange={(e) => setTxHash(e.target.value)}
-                                        className="w-full bg-black/50 border border-white/10 rounded-xl py-4 px-4 text-white placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 font-mono text-xs"
-                                        placeholder="0x..."
-                                        required={activeTab === 'deposit'}
-                                    />
+                                    <p className="text-[10px] text-zinc-500">Funds sent here will automatically reflect in your AfriVault balance. No TxHash needed.</p>
                                 </div>
                             </div>
                         ) : (
@@ -194,13 +190,13 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
 
                         <button
                             type="submit"
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || (activeTab === 'deposit' && !user?.smartWallet?.address)}
                             className={`w-full py-4 font-black rounded-xl uppercase tracking-widest text-xs transition-all shadow-lg flex items-center justify-center gap-2 ${activeTab === 'deposit'
                                 ? 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-emerald-500/20'
                                 : 'bg-white hover:bg-zinc-200 text-black'
                                 }`}
                         >
-                            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (activeTab === 'deposit' ? 'Verify Deposit' : 'Withdraw Funds')}
+                            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (activeTab === 'deposit' ? 'I Have Deposited' : 'Withdraw Funds')}
                         </button>
                     </form>
                 </div>

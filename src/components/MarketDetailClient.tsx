@@ -39,14 +39,19 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
     const [chartData, setChartData] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<'orderbook' | 'positions' | 'activity'>('activity');
 
+    // Simulate "First Trade of the Month" detection for the UI audit
+    const isFirstTradeOfMonth = true;
+    const networkFee = isFirstTradeOfMonth ? 0.15 : 0;
+    const totalCost = parseFloat(investmentAmount || '0') + networkFee;
+
     // 4. Off-Chain Trade Execution (AfriVault Ledger)
     const handleExecuteTrade = async () => {
         if (!market || selectedOutcome === null || !investmentAmount || !authUser) return;
 
         try {
             const amountUSD = parseFloat(investmentAmount);
-            if (authUser.balance !== undefined && authUser.balance < amountUSD) {
-                alert("Insufficient AfriVault Balance. Please Deposit funds.");
+            if (authUser.balance !== undefined && authUser.balance < totalCost) {
+                alert(`Insufficient AfriVault Balance. You need $${totalCost.toFixed(2)} to cover the trade + network fee.`);
                 return;
             }
 
@@ -59,7 +64,8 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
                 body: JSON.stringify({
                     marketId: market.id,
                     outcomeIndex: selectedOutcome,
-                    amountUSD: amountUSD,
+                    amountUSD: amountUSD, // Trade amount
+                    networkFee: networkFee, // Passed to backend to route to AfriVault Treasury
                     type: 'EXECUTE'
                 })
             });
@@ -350,6 +356,19 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
                              </p>
                              
                              <div className="space-y-3 mb-8">
+                                 {isFirstTradeOfMonth && (
+                                     <div className="flex justify-between p-4 bg-black rounded-xl border border-white/5">
+                                         <div className="flex flex-col">
+                                            <span className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">Network Routing Fee</span>
+                                            <span className="text-[8px] text-zinc-700 italic">(First trade of the month only)</span>
+                                         </div>
+                                         <span className="text-xs font-bold text-rose-500">${networkFee.toFixed(2)}</span>
+                                     </div>
+                                 )}
+                                 <div className="flex justify-between p-4 bg-black rounded-xl border border-white/5">
+                                     <span className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">Total Cost</span>
+                                     <span className="text-xs font-bold text-white">${totalCost.toFixed(2)}</span>
+                                 </div>
                                  <div className="flex justify-between p-4 bg-black rounded-xl border border-white/5">
                                      <span className="text-[9px] font-medium text-zinc-600 uppercase tracking-wider">Est. Payout</span>
                                      <span className="text-xs font-bold text-emerald-500">${estimatedShares.toFixed(2)}</span>

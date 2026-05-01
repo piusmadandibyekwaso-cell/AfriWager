@@ -12,6 +12,7 @@ import { getDefaultConfig, RainbowKitProvider, darkTheme } from '@rainbow-me/rai
 import '@rainbow-me/rainbowkit/styles.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { CurrencyProvider } from '@/context/CurrencyContext';
+import { PrivyProvider } from '@privy-io/react-auth';
 
 const config = getDefaultConfig({
     appName: 'AfriWager',
@@ -23,21 +24,41 @@ const config = getDefaultConfig({
 const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: React.ReactNode }) {
+    const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || '';
+
     return (
-        <WagmiProvider config={config}>
-            <QueryClientProvider client={queryClient}>
-                <RainbowKitProvider theme={darkTheme({
+        <PrivyProvider
+            appId={privyAppId}
+            config={{
+                loginMethods: ['email', 'google'],
+                appearance: {
+                    theme: 'dark',
                     accentColor: '#10b981',
-                    accentColorForeground: 'white',
-                    borderRadius: 'medium',
-                })}>
-                    <CurrencyProvider>
-                        <AuthProvider>
-                            {children}
-                        </AuthProvider>
-                    </CurrencyProvider>
-                </RainbowKitProvider>
-            </QueryClientProvider>
-        </WagmiProvider>
+                    logo: 'https://www.afriwager.com/logo.png', // Replace with your actual logo
+                },
+                embeddedWallets: {
+                    createOnLogin: 'users-without-wallets',
+                    noPromptOnSignature: false // To ensure users see the gasless transaction being signed
+                },
+                defaultChain: polygon,
+                supportedChains: [polygon]
+            }}
+        >
+            <WagmiProvider config={config}>
+                <QueryClientProvider client={queryClient}>
+                    <RainbowKitProvider theme={darkTheme({
+                        accentColor: '#10b981',
+                        accentColorForeground: 'white',
+                        borderRadius: 'medium',
+                    })}>
+                        <CurrencyProvider>
+                            <AuthProvider>
+                                {children}
+                            </AuthProvider>
+                        </CurrencyProvider>
+                    </RainbowKitProvider>
+                </QueryClientProvider>
+            </WagmiProvider>
+        </PrivyProvider>
     );
 }

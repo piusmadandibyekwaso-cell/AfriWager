@@ -1,10 +1,12 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
+import { usePrivy, useWallets, WalletWithMetadata } from '@privy-io/react-auth';
 
-export interface ExtendedUser extends User {
+export interface ExtendedUser {
+    id: string; // Privy user ID or Wallet Address
+    email?: string;
     profile?: {
         username: string;
         kyc_status: 'unverified' | 'pending' | 'verified';
@@ -14,11 +16,11 @@ export interface ExtendedUser extends User {
         country_code?: string;
     };
     balance?: number;
+    smartWallet?: WalletWithMetadata;
 }
 
 interface AuthContextType {
     user: ExtendedUser | null;
-    session: Session | null;
     loading: boolean;
     signInWithEmail: (email: string) => Promise<{ error: any }>;
     signOut: () => Promise<void>;
@@ -29,23 +31,25 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+    const { user: privyUser, ready: privyReady, authenticated, login, logout } = usePrivy();
+    const { wallets } = useWallets();
     const [user, setUser] = useState<ExtendedUser | null>(null);
-    const [session, setSession] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-    // Helper to fetch extended profile + balance
-    const fetchUserData = async (currentUser: User) => {
-        try {
-            console.log("Fetching data for user:", currentUser.id);
+    // Get the embedded smart wallet
+    const smartWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
 
-            // 1. Fetch Profile (KYC)
+    const fetchUserData = async (walletAddress: string, email?: string) => {
+        try {
+            console.log("Fetching data for wallet:", walletAddress);
+
+            // 1. Fetch Profile
             const { data: profile, error: profileError } = await supabase
                 .from('profiles')
                 .select('username, kyc_status, phone_number, nin, district, country_code')
-                .eq('wallet_address', currentUser.id) // Migration: Check if this maps correctly
+                .eq('wallet_address', walletAddress)
                 .maybeSingle();
 
             if (profileError) console.error("Profile fetch error:", profileError);
@@ -54,67 +58,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const { data: balanceData, error: balanceError } = await supabase
                 .from('user_balances')
                 .select('balance_usdc')
-                .eq('user_id', currentUser.id)
+                .eq('user_id', walletAddress)
                 .maybeSingle();
 
             if (balanceError) console.error("Balance fetch error:", balanceError);
-            console.log("Balance Data Found:", balanceData);
+            
+            // If balance doesn't exist, create it (Shadow Wallet Initialization)
+            if (!balanceData && !balanceError) {
+                 await supabase.from('user_balances').insert({
+                     user_id: walletAddress,
+                     balance_usdc: 0
+                 });
+                 // Optional: insert profile stub here as well if needed
+            }
 
             return {
-                ...currentUser,
+                id: walletAddress,
+                email: email,
                 profile: profile || undefined,
                 balance: balanceData?.balance_usdc || 0,
+                smartWallet
             };
         } catch (e) {
             console.error("Error fetching user data", e);
-            return currentUser;
+            return null;
         }
     };
 
     useEffect(() => {
-        const initSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            setSession(session);
-            if (session?.user) {
-                const extended = await fetchUserData(session.user);
-                setUser(extended);
-            } else {
-                setUser(null);
+        const syncPrivyState = async () => {
+            if (privyReady) {
+                if (authenticated && privyUser && smartWallet) {
+                    const email = privyUser.email?.address;
+                    const walletAddress = smartWallet.address;
+                    const extended = await fetchUserData(walletAddress, email);
+                    setUser(extended);
+                } else {
+                    setUser(null);
+                }
+                setLoading(false);
             }
-            setLoading(false);
         };
 
-        initSession();
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            setSession(session);
-            if (session?.user) {
-                const extended = await fetchUserData(session.user);
-                setUser(extended);
-
-                // Hack: If NEW login, ensure balance row exists (trigger does this, but good to ensure UI updates)
-            } else {
-                setUser(null);
-            }
-            setLoading(false);
-        });
-
-        return () => subscription.unsubscribe();
-    }, []);
+        syncPrivyState();
+    }, [privyReady, authenticated, privyUser, smartWallet]);
 
     const signInWithEmail = async (email: string) => {
-        // For Magic Link login (Kalshi style)
-        const { error } = await supabase.auth.signInWithOtp({
-            email,
-            options: {
-                emailRedirectTo: `${window.location.origin}/`,
-            },
-        });
-        return { error };
+        // We defer to Privy's login modal. Custom email login flow can be configured via Privy SDK if needed.
+        login();
+        return { error: null };
     };
 
     const signOut = async () => {
-        await supabase.auth.signOut();
+        await logout();
+        setUser(null);
     };
 
     const openAuthModal = () => setIsAuthModalOpen(true);
@@ -123,7 +120,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return (
         <AuthContext.Provider value={{
             user,
-            session,
             loading,
             signInWithEmail,
             signOut,

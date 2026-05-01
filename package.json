@@ -21,6 +21,7 @@
     "framer-motion": "^12.23.24",
     "jimp": "^1.6.0",
     "lucide-react": "^0.554.0",
+    "@privy-io/react-auth": "^1.88.2",
     "next": "^16.1.1",
     "next-pwa": "^5.6.0",
     "pino-pretty": "^13.1.3",
