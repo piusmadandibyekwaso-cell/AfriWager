@@ -28,11 +28,12 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
         e.preventDefault();
         
         if (activeTab === 'deposit') {
-            // Deposits are now handled automatically via blockchain indexer
-            sendNotification('Listening for Deposits', {
-                body: `We are monitoring your unique address on the Polygon network. Your balance will update automatically when funds arrive.`
+            sendNotification('Balance Syncing', {
+                body: `Refreshing your wallet balance. Please wait a few seconds for network confirmation.`
             });
-            onClose();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
             return;
         }
 
@@ -150,7 +151,7 @@ export default function WalletModal({ isOpen, onClose }: WalletModalProps) {
                                             {user?.smartWallet?.address || 'Generating wallet...'}
                                         </span>
                                     </div>
-                                    <p className="text-[10px] text-zinc-500">Funds sent here will automatically reflect in your AfriVault balance. No TxHash needed.</p>
+                                    <p className="text-[10px] text-zinc-500">Funds sent to your wallet address will reflect immediately after network confirmation.</p>
                                 </div>
                             </div>
                         ) : (
