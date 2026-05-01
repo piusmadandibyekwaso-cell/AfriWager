@@ -34,7 +34,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 appearance: {
                     theme: 'dark',
                     accentColor: '#10b981',
-                    logo: 'https://www.afriwager.com/logo.png', // Replace with your actual logo
+                    logo: 'https://www.afriwager.com/logo_v3.png',
                 },
                 embeddedWallets: {
                     createOnLogin: 'users-without-wallets',

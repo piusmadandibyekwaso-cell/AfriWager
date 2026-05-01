@@ -38,7 +38,7 @@ export default function MarketsNavBar({ searchQuery, setSearchQuery }: MarketsNa
             <div className="mx-auto max-w-7xl px-6">
                 {/* Top Row: Categories */}
                 <div className="relative">
-                    <div className="flex items-center h-14 gap-8 overflow-x-auto no-scrollbar text-[10px] font-black uppercase tracking-[0.2em] border-b border-white/5">
+                    <div className="flex items-center h-14 gap-8 overflow-x-auto no-scrollbar text-[10px] font-bold uppercase tracking-widest border-b border-white/5">
                         <div className="flex items-center gap-8 flex-shrink-0">
                             <button
                                 onClick={() => setSearchQuery('')}
@@ -82,7 +82,7 @@ export default function MarketsNavBar({ searchQuery, setSearchQuery }: MarketsNa
                             placeholder="Explore markets..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="bg-white/[0.03] border border-white/5 focus:border-emerald-500/50 rounded-xl pl-10 pr-4 py-2 text-[11px] font-black uppercase tracking-widest text-white placeholder:text-zinc-700 focus:outline-none transition-all w-64 md:w-80"
+                            className="bg-white/[0.03] border border-white/5 focus:border-emerald-500/50 rounded-xl pl-10 pr-4 py-2 text-[11px] font-semibold tracking-widest text-white placeholder:text-zinc-700 focus:outline-none transition-all w-64 md:w-80"
                         />
                     </div>
 
@@ -97,7 +97,7 @@ export default function MarketsNavBar({ searchQuery, setSearchQuery }: MarketsNa
                                     key={tag}
                                     onClick={() => setSearchQuery(tag === "All" ? "" : tag)}
                                     className={cn(
-                                        "px-4 py-1.5 rounded-lg whitespace-nowrap text-[9px] font-black uppercase tracking-[0.15em] transition-all",
+                                        "px-4 py-1.5 rounded-lg whitespace-nowrap text-[9px] font-bold uppercase tracking-widest transition-all",
                                         isActive
                                             ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/10"
                                             : "text-zinc-500 hover:text-white hover:bg-white/5"
