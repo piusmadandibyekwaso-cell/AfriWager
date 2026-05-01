@@ -433,14 +433,12 @@ export default function SettingsPage() {
                         </div>
                     )}
 
-                    {/* Placeholders */}
-                    {['Trading', 'Notifications', 'Builder Codes', 'Export Private Key'].includes(activeTab) && (
+                    {/* Placeholders for remaining tabs */}
+                    {['Notifications', 'Builder Codes'].includes(activeTab) && (
                         <div className="flex flex-col items-center justify-center py-20 bg-[#1C1C1E] border border-white/5 rounded-2xl">
                             <div className="p-4 bg-white/5 rounded-full mb-4">
-                                {activeTab === 'Trading' && <BarChart2 className="w-8 h-8 text-zinc-500" />}
                                 {activeTab === 'Notifications' && <Bell className="w-8 h-8 text-zinc-500" />}
                                 {activeTab === 'Builder Codes' && <Code className="w-8 h-8 text-zinc-500" />}
-                                {activeTab === 'Export Private Key' && <Key className="w-8 h-8 text-zinc-500" />}
                             </div>
                             <h3 className="text-lg font-bold text-white mb-2">{activeTab}</h3>
                             <p className="text-zinc-500 text-sm">This section is coming soon.</p>
