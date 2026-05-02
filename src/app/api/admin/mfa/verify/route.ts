@@ -1,8 +1,8 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import otplib from 'otplib';
-const { authenticator } = otplib;
+
+const { authenticator } = require('otplib');
 
 const ADMIN_EMAIL = 'piusmadandibyekwaso@gmail.com';
 
