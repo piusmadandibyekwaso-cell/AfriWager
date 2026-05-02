@@ -29,6 +29,8 @@ interface AuthContextType {
     isAuthModalOpen: boolean;
     openAuthModal: () => void;
     closeAuthModal: () => void;
+    isMFAVerified: boolean;
+    verifyMFA: (code: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,6 +40,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { wallets } = useWallets();
     const [user, setUser] = useState<ExtendedUser | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [isMFAVerified, setIsMFAVerified] = useState(false);
 
     // Get the embedded smart wallet
     const smartWallet = wallets.find((wallet) => wallet.walletClientType === 'privy');
@@ -154,7 +158,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [privyReady, authenticated, privyUser, wallets]);
 
     const signInWithEmail = async (email: string) => {
-        // We defer to Privy's login modal. Custom email login flow can be configured via Privy SDK if needed.
         login();
         return { error: null };
     };
@@ -162,10 +165,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const signOut = async () => {
         await logout();
         setUser(null);
+        setIsMFAVerified(false);
     };
 
-    const openAuthModal = () => login();
-    const closeAuthModal = () => {}; // No-op since Privy handles its own modal state
+    const openAuthModal = () => {
+        setIsAuthModalOpen(true);
+        login();
+    };
+
+    const closeAuthModal = () => {
+        setIsAuthModalOpen(false);
+        setIsMFAVerified(false);
+    };
+
+    const verifyMFA = async (code: string) => {
+        try {
+            const res = await fetch('/api/admin/mfa/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+            if (res.ok) {
+                setIsMFAVerified(true);
+                return true;
+            }
+            return false;
+        } catch (e) {
+            return false;
+        }
+    };
 
     return (
         <AuthContext.Provider value={{
@@ -173,9 +201,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             loading,
             signInWithEmail,
             signOut,
-            isAuthModalOpen: false, // Default to false
+            isAuthModalOpen,
             openAuthModal,
-            closeAuthModal
+            closeAuthModal,
+            isMFAVerified,
+            verifyMFA
         }}>
             {children}
         </AuthContext.Provider>
