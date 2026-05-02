@@ -121,7 +121,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 if (authenticated && privyUser) {
                     const embeddedWallet = wallets.find(w => w.walletClientType === 'privy');
                     if (embeddedWallet) {
-                        const email = privyUser.email?.address;
+                        let email = privyUser.email?.address;
+                        if (!email && privyUser.linkedAccounts) {
+                            const emailAccount = privyUser.linkedAccounts.find(a => a.type === 'email');
+                            if (emailAccount && 'address' in emailAccount) email = emailAccount.address;
+                            else {
+                                const googleAccount = privyUser.linkedAccounts.find(a => a.type === 'google_oauth');
+                                if (googleAccount && 'email' in googleAccount) email = googleAccount.email;
+                            }
+                        }
                         const walletAddress = embeddedWallet.address;
                         const extended = await fetchUserData(walletAddress, email);
                         if (extended) {

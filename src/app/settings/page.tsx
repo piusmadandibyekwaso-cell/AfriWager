@@ -135,8 +135,8 @@ export default function SettingsPage() {
                                             <Copy className="w-4 h-4" />
                                         </button>
                                     </div>
-                                    <p className="mt-3 text-[10px] text-zinc-600 font-medium leading-relaxed">
-                                        Do not send funds to this address. This address is for API use only.
+                                    <p className="mt-3 text-[10px] text-zinc-500 font-medium leading-relaxed">
+                                        This is your Sovereign Wallet Address. Funds sent here via the Polygon network will be credited to your account.
                                     </p>
                                 </div>
                                 <div>
