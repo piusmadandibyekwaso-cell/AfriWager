@@ -30,11 +30,15 @@ export async function POST(request: Request) {
         const secret = process.env.ADMIN_MFA_SECRET;
 
         if (!secret) {
-            console.error('ADMIN_MFA_SECRET not found in environment');
+            console.error('MFA_ERROR: ADMIN_MFA_SECRET missing');
             return NextResponse.json({ error: 'MFA not configured on server' }, { status: 500 });
         }
 
-        const isValid = authenticator.verify({ token: code, secret });
+        // Set window to 1 (allows 1 step before/after) to handle clock drift
+        authenticator.options = { window: 1 };
+        const isValid = authenticator.verify({ token: code.replace(/\s/g, ''), secret: secret.trim() });
+
+        console.log(`MFA_AUTH_ATTEMPT: email=${user.email} success=${isValid}`);
 
         if (isValid) {
             return NextResponse.json({ success: true });
@@ -42,6 +46,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Invalid authentication code' }, { status: 403 });
         }
     } catch (error: any) {
+        console.error('MFA_EXCEPTION:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
