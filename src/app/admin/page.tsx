@@ -6,7 +6,6 @@ import { Hammer, Coins, Activity, ArrowRight, ShieldCheck, Loader2, CheckCircle2
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import SovereignGate from '@/components/SovereignGate';
 
 type TreasuryData = {
     treasuryBalance: number;
@@ -199,7 +198,6 @@ export default function AdminDashboard() {
     }
 
     return (
-        <SovereignGate>
         <div className="min-h-screen bg-[#060709] text-white selection:bg-emerald-500/30">
             <Navbar />
             <main className="max-w-7xl mx-auto px-6 pt-32 pb-24">
@@ -445,6 +443,5 @@ export default function AdminDashboard() {
                 </div>
             </main>
         </div>
-        </SovereignGate>
     );
 }
