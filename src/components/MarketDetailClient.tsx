@@ -290,43 +290,53 @@ export default function MarketDetailClient({ initialMarket, initialTradeHistory 
                                     </div>
                                 </div>
  
-                                 {/* Investment Input */}
-                                 <div className="mb-8">
-                                     <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3 block ml-1">Investment (USDC)</label>
-                                     <div className="relative">
-                                         <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-semibold text-zinc-800">$</span>
-                                         <input
-                                             type="number"
-                                             value={investmentAmount}
-                                             onChange={(e) => setInvestmentAmount(e.target.value)}
-                                             className="w-full bg-black border border-white/5 rounded-xl py-4 pl-10 pr-5 text-xl font-semibold text-white focus:outline-none focus:border-white/20 transition-all"
-                                             placeholder="0.00"
-                                         />
+                                 {authUser?.isAdmin ? (
+                                     <div className="py-12 text-center border border-emerald-500/10 bg-emerald-500/5 rounded-xl">
+                                         <ShieldCheck className="w-8 h-8 text-emerald-500 mx-auto mb-4" />
+                                         <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Sovereign Admin</p>
+                                         <p className="text-[9px] font-medium text-emerald-500/50 mt-2 px-4 leading-relaxed uppercase tracking-widest">Trading Restricted</p>
                                      </div>
-                                 </div>
- 
-                                 {/* Summary Grid */}
-                                 {selectedOutcome !== null && (
-                                     <div className="mb-8 p-6 bg-black rounded-xl border border-white/5 space-y-4">
-                                         <div className="flex justify-between items-center text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
-                                             <span>Outcome</span>
-                                             <span className="text-white font-bold">{market.outcome_tokens[selectedOutcome]}</span>
+                                 ) : (
+                                     <>
+                                         {/* Investment Input */}
+                                         <div className="mb-8">
+                                             <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3 block ml-1">Investment (USDC)</label>
+                                             <div className="relative">
+                                                 <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xl font-semibold text-zinc-800">$</span>
+                                                 <input
+                                                     type="number"
+                                                     value={investmentAmount}
+                                                     onChange={(e) => setInvestmentAmount(e.target.value)}
+                                                     className="w-full bg-black border border-white/5 rounded-xl py-4 pl-10 pr-5 text-xl font-semibold text-white focus:outline-none focus:border-white/20 transition-all"
+                                                     placeholder="0.00"
+                                                 />
+                                             </div>
                                          </div>
-                                         <div className="flex justify-between items-center text-[10px] font-medium text-zinc-500 uppercase tracking-wider border-t border-white/5 pt-4">
-                                             <span>Est. Payout</span>
-                                             <span className="text-base font-bold text-emerald-500">${estimatedShares.toFixed(2)}</span>
-                                         </div>
-                                     </div>
+         
+                                         {/* Summary Grid */}
+                                         {selectedOutcome !== null && (
+                                             <div className="mb-8 p-6 bg-black rounded-xl border border-white/5 space-y-4">
+                                                 <div className="flex justify-between items-center text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
+                                                     <span>Outcome</span>
+                                                     <span className="text-white font-bold">{market.outcome_tokens[selectedOutcome]}</span>
+                                                 </div>
+                                                 <div className="flex justify-between items-center text-[10px] font-medium text-zinc-500 uppercase tracking-wider border-t border-white/5 pt-4">
+                                                     <span>Est. Payout</span>
+                                                     <span className="text-base font-bold text-emerald-500">${estimatedShares.toFixed(2)}</span>
+                                                 </div>
+                                             </div>
+                                         )}
+         
+                                         <button
+                                             onClick={() => authUser ? setIsConfirmModalOpen(true) : openAuthModal()}
+                                             disabled={selectedOutcome === null || !investmentAmount}
+                                             className="w-full py-5 bg-white hover:bg-zinc-200 text-black font-semibold rounded-xl transition-all uppercase tracking-wider text-[10px] flex items-center justify-center gap-2 disabled:opacity-20"
+                                         >
+                                             {authUser ? "Place Order" : "Sign in to Trade"}
+                                             <ArrowRight className="w-3.5 h-3.5" />
+                                         </button>
+                                     </>
                                  )}
- 
-                                 <button
-                                     onClick={() => authUser ? setIsConfirmModalOpen(true) : openAuthModal()}
-                                     disabled={selectedOutcome === null || !investmentAmount}
-                                     className="w-full py-5 bg-white hover:bg-zinc-200 text-black font-semibold rounded-xl transition-all uppercase tracking-wider text-[10px] flex items-center justify-center gap-2 disabled:opacity-20"
-                                 >
-                                     {authUser ? "Place Order" : "Sign in to Trade"}
-                                     <ArrowRight className="w-3.5 h-3.5" />
-                                 </button>
                                  
                                  <div className="mt-6 flex justify-center gap-4">
                                      <button className="text-[8px] font-bold text-zinc-600 uppercase tracking-wider hover:text-white transition-colors flex items-center gap-1.5">

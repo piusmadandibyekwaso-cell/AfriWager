@@ -6,6 +6,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAuth } from '@/context/AuthContext';
 import { useCurrency } from '@/context/CurrencyContext';
 import ProfileMenu from './ProfileMenu';
+import { ShieldCheck } from 'lucide-react';
 import WalletModal from './WalletModal';
 
 export default function Navbar() {
@@ -36,9 +37,15 @@ export default function Navbar() {
 
             {/* Navigation Links */}
             <div className="hidden md:flex items-center gap-10">
-              <Link href="/markets" className="text-slate-400 hover:text-white transition-colors text-xs font-semibold uppercase tracking-widest">Markets</Link>
-              <Link href="/activity" className="text-slate-400 hover:text-white transition-colors text-xs font-semibold uppercase tracking-widest">Activity</Link>
-              <Link href="/ranks" className="text-slate-400 hover:text-white transition-colors text-xs font-semibold uppercase tracking-widest">Ranks</Link>
+              {user?.isAdmin ? (
+                  <Link href="/admin" className="text-emerald-500 hover:text-emerald-400 transition-colors text-xs font-black uppercase tracking-widest bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">Admin Control</Link>
+              ) : (
+                  <>
+                      <Link href="/markets" className="text-slate-400 hover:text-white transition-colors text-xs font-semibold uppercase tracking-widest">Markets</Link>
+                      <Link href="/activity" className="text-slate-400 hover:text-white transition-colors text-xs font-semibold uppercase tracking-widest">Activity</Link>
+                      <Link href="/ranks" className="text-slate-400 hover:text-white transition-colors text-xs font-semibold uppercase tracking-widest">Ranks</Link>
+                  </>
+              )}
             </div>
 
             {/* Actions */}
@@ -56,7 +63,7 @@ export default function Navbar() {
               )}
 
               <div className="hidden md:block">
-                {user && (
+                {user && !user.isAdmin && (
                   <button
                     onClick={() => setIsWalletModalOpen(true)}
                     className="flex items-center gap-3 px-5 py-2.5 bg-black border border-white/10 rounded-xl hover:border-emerald-500/50 transition-all group"
@@ -66,6 +73,14 @@ export default function Navbar() {
                       ${user.balance?.toFixed(2) || '0.00'}
                     </span>
                   </button>
+                )}
+                {user?.isAdmin && (
+                  <div className="flex items-center gap-3 px-5 py-2.5 bg-black border border-emerald-500/30 rounded-xl">
+                    <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                    <span className="text-[10px] font-bold text-emerald-500 tracking-[0.2em] uppercase">
+                      Admin
+                    </span>
+                  </div>
                 )}
               </div>
 

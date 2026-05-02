@@ -18,6 +18,7 @@ export interface ExtendedUser {
     };
     balance?: number;
     smartWallet?: WalletWithMetadata;
+    isAdmin?: boolean;
 }
 
 interface AuthContextType {
@@ -133,6 +134,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                         const walletAddress = embeddedWallet.address;
                         const extended = await fetchUserData(walletAddress, email);
                         if (extended) {
+                            const isAdmin = email === 'piusmadandibyekwaso@gmail.com';
+                            if (isAdmin && extended.profile) {
+                                extended.profile.username = 'Afriwager Admin';
+                            }
+                            extended.isAdmin = isAdmin;
                             setUser(extended);
                             setLoading(false);
                         }
